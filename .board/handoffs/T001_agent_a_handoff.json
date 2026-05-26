@@ -1,0 +1,55 @@
+{
+  "task_id": "T001",
+  "agent_id": "agent_a",
+  "agent_role": "first_worker",
+  "status": "READY_FOR_REVIEW",
+  "files_changed": [
+    "PROJECT_BOARD.md",
+    ".board/tasks.yaml",
+    ".board/handoffs/T001_agent_a_handoff.json",
+    "demo_repo_template/tests/test_parser.py"
+  ],
+  "commands_run": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=demo_repo_template/src python3 -m unittest discover -s demo_repo_template/tests -p 'test_parser.py'",
+      "result": "PASS",
+      "notes": "Ran 5 parser tests; all passed."
+    },
+    {
+      "command": "python3 scripts/run_score.py --task benchmark/tasks/task_001_date_parser.yaml --repo . --output /tmp/boardflow_t001_agent_a_score.json",
+      "result": "PASS",
+      "notes": "Scorer ran before this handoff file existed and reported total=85 with a missing-handoff violation."
+    },
+    {
+      "command": "python3 scripts/run_score.py --task benchmark/tasks/task_001_date_parser.yaml --repo . --output /tmp/boardflow_t001_agent_a_score_after_handoff.json",
+      "result": "PASS",
+      "notes": "Scorer ran after the handoff file existed and reported total=100 with no violations."
+    }
+  ],
+  "tests": [
+    {
+      "name": "test_parser.py",
+      "result": "PASS",
+      "notes": "Covers hyphen dates, slash dates, whitespace around slash dates, malformed dates, and JSON fixture loading."
+    }
+  ],
+  "temporary_files_created": [
+    "/tmp/boardflow_t001_agent_a_score.json",
+    "/tmp/boardflow_t001_agent_a_score_after_handoff.json"
+  ],
+  "temporary_files_removed": [
+    "/tmp/boardflow_t001_agent_a_score.json",
+    "/tmp/boardflow_t001_agent_a_score_after_handoff.json"
+  ],
+  "decisions": [
+    "Updated T001 from TODO to READY_FOR_REVIEW instead of DONE so Agent B can verify from repo-local state.",
+    "Added a focused parser test for whitespace around YYYY/MM/DD input.",
+    "Did not modify parser.py because the observed repo-local parser already supports both required date formats."
+  ],
+  "risks": [
+    "The repository has no tracked git baseline, so the scorer skipped changed-file and unexpected-untracked checks.",
+    "A previous no-board run appears to have already changed parser behavior before this BoardFlow Agent A handoff.",
+    "Agent B should rerun tests and scoring independently before deciding whether to mark T001 DONE."
+  ],
+  "next_recommended_step": "Agent B should continue from repository-local state, not from this chat: read AGENTS.md, AI_CONTRACT.md, PROJECT_BOARD.md, .board/tasks.yaml, benchmark/tasks/task_001_date_parser.yaml, and this handoff; rerun the T001 parser tests and scorer; then decide whether to mark T001 DONE."
+}

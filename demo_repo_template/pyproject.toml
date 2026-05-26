@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "expense-lite"
+version = "0.0.0"
+description = "Small expense tracker demo repo for BoardFlowBench tasks."
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+expense-lite = "expense_lite.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

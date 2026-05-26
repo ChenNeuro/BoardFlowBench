@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/boardflow/handoff.schema.json",
+  "title": "BoardFlow handoff",
+  "type": "object",
+  "required": [
+    "task_id",
+    "agent_id",
+    "agent_role",
+    "status",
+    "files_changed",
+    "commands_run",
+    "tests",
+    "temporary_files_created",
+    "temporary_files_removed",
+    "decisions",
+    "risks",
+    "next_recommended_step"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "pattern": "^T[0-9]{3}$",
+      "minLength": 1
+    },
+    "agent_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "agent_role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": ["TODO", "IN_PROGRESS", "BLOCKED", "READY_FOR_REVIEW", "DONE"]
+    },
+    "files_changed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "commands_run": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["command", "result", "notes"],
+        "properties": {
+          "command": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string",
+            "enum": ["PASS", "FAIL", "NOT_RUN"]
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "tests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "result", "notes"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string",
+            "enum": ["PASS", "FAIL", "NOT_RUN"]
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "temporary_files_created": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "temporary_files_removed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_recommended_step": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

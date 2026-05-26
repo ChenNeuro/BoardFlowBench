@@ -1,0 +1,16 @@
+id: task_003
+title: Monthly summary
+stage: demo_repo_template
+intent: Summarize imported expenses by month and category.
+depends_on:
+  - task_002
+allowed_paths:
+  - demo_repo_template/src/expense_lite/summary.py
+  - demo_repo_template/tests/test_summary.py
+acceptance_criteria:
+  - Group expenses by YYYY-MM month.
+  - Sum amounts by category within each month.
+  - Keep deterministic ordering for stable reports.
+  - Add focused tests for multiple months and categories.
+handoff_required: true
+validation_hint: Run summary tests from demo_repo_template.
