@@ -19,6 +19,8 @@ This repository is an initial course-project skeleton. It defines the benchmark 
 - `demo_repo_template/`: small synthetic Python repo used by benchmark tasks.
 - `docs/`: research and design notes.
 
+Chinese project guide: `docs/中文说明与扩展指南.md`.
+
 ## Current Status
 
 Initial skeleton only. The next stage should define checker specifications and decide the first runnable pilot path.
