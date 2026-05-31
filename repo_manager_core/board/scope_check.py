@@ -23,6 +23,7 @@ def check_scope(repo: str | Path, task: dict[str, Any]) -> dict[str, Any]:
     score = 0
 
     if changed["baseline_available"]:
+        # Scope checks are based on observable git state, not agent claims.
         outside_allowed = [
             path for path in changed["files"] if not _matches_any(path, allowed_paths)
         ]
@@ -74,6 +75,7 @@ def _matches_any(path: str, patterns: list[str]) -> bool:
 def _matches_path(path: str, pattern: str) -> bool:
     normalized = pattern.rstrip("/")
     if pattern.endswith("/"):
+        # Directory patterns apply to everything below that directory.
         return path == normalized or path.startswith(normalized + "/")
     return path == normalized
 
@@ -107,6 +109,7 @@ def _changed_files(root: Path) -> dict[str, Any]:
             continue
         path = line[3:]
         if " -> " in path:
+            # For renames, score the destination path as the changed file.
             path = path.split(" -> ", 1)[1]
         if path.startswith("benchmark/results/"):
             continue

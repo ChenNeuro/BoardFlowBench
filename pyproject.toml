@@ -16,5 +16,8 @@ benchmark-score = "tools.benchmark_scorer:main"
 [tool.setuptools.packages.find]
 include = ["repo_manager_core*"]
 
+[tool.setuptools.package-data]
+repo_manager_core = ["default_search_rules.json", "default_smell_rules.json"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

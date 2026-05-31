@@ -50,6 +50,7 @@ def load_yaml(path: str | Path) -> Any:
 
         return yaml.safe_load(text)
     except ModuleNotFoundError:
+        # Keep the command-line tools usable in minimal Python environments.
         return _parse_simple_yaml(text)
 
 
@@ -87,6 +88,8 @@ def _dump_yaml(value: Any, indent: int = 0) -> str:
         lines = []
         for item in value:
             if isinstance(item, dict):
+                # The board format uses lists of task mappings, so this dumper
+                # supports that case without pulling in a required dependency.
                 lines.append(f"{prefix}- ")
                 for k, v in item.items():
                     if isinstance(v, (dict, list)):
@@ -109,6 +112,8 @@ def _parse_simple_yaml(text: str) -> Any:
     for raw in text.splitlines():
         if not raw.strip() or raw.lstrip().startswith("#"):
             continue
+        # The fallback parser is indentation-based and intentionally supports
+        # only the subset used by task boards and benchmark task files.
         indent = len(raw) - len(raw.lstrip(" "))
         lines.append((indent, raw.strip()))
 

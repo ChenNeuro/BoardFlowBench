@@ -9,7 +9,7 @@ BoardFlowBench 的核心目标不是做一个 GUI 工具，也不是单纯检查
 本仓库包含三层内容：
 
 - **BoardFlow 协议**：`.board/`、`.repo_manager/` 等仓库内状态文件，用来记录任务、交接、风险、验证证据和 agent 上下文。
-- **Agent skills**：Claude Code / Codex / OpenCode 可使用的 skills，帮助 agent 读取状态、更新看板、写 handoff、做代码健康审查。
+- **Agent skills**：Claude Code 可使用的 skills，帮助 agent 读取状态、更新看板、写 handoff、做代码健康审查。
 - **Benchmark checks**：`tools/benchmark_scorer.py` 和 core checker，用可观察的 repo 状态评估任务完成、交接质量、scope control、hygiene 和 board consistency。
 
 ## 核心 Agent Skills
@@ -35,25 +35,38 @@ BoardFlowBench 的核心目标不是做一个 GUI 工具，也不是单纯检查
 
 ### Code Health Review (`code-health-review`)
 
-检查 AI 生成 Python 代码的结构健康，重点发现 agent 接力开发中常见的 patch/helper 膨胀、重复函数、临时文件和风格漂移。
+检查 AI 生成 Python 代码的结构健康，重点发现 agent 接力开发中常见的 patch/helper 膨胀、重复函数、临时文件和风格漂移。检测规则现在是 **repo-adaptive** 的：默认 smell 规则从 `repo_manager_core/default_smell_rules.json` 读取，默认扫描范围从 `repo_manager_core/default_search_rules.json` 读取；具体仓库会在 `.repo_manager/` 下生成自己的规则文件，后续人工反馈和 agent 调整都只改 repo-local 文件，所有学习结果都可审计、可回滚。
 
-| 检测项 | 严重度 | 说明 |
-|--------|--------|------|
-| patch_name_smell | medium | 函数名含 fix/patch/temp/hack/debug/safe |
-| unused_function | low | 定义但未被其他扫描函数调用 |
-| wrapper_function | low | ≤5 行且只委托给一个函数 |
-| duplicate_function_name | low | 同名函数出现多次 |
-| suspicious_file_name | medium | 文件名含 final/old/backup/temp/fixed/patch/debug |
-| fragmented_helpers | medium | 一个文件 ≥4 个短 helper 函数 |
-| too_many_top_level_python_files | medium | 顶级 .py 文件 >8 |
-| suspicious_directory_name | low | 目录名含 old/temp/backup/final |
-| python_file_inside_output_directory | medium | .py 文件在 output/artifact 目录内 |
+| 检测项 | 严重度 | 说明 | 主要调整入口 |
+|--------|--------|------|--------------|
+| patch_name_smell | medium | 函数名命中 `patch_keywords`，具体策略由规则文件决定 | `.repo_manager/smell_rules.json` |
+| unused_function | low | 定义但未被其他扫描函数调用 | 源码阈值/入口点规则 |
+| wrapper_function | low | ≤5 行且只委托给一个函数 | 源码阈值 |
+| duplicate_function_name | low | 同名函数出现多次 | 源码规则 |
+| suspicious_file_name | medium | 文件名命中 `suspicious_file_keywords` | `.repo_manager/smell_rules.json` |
+| fragmented_helpers | medium | 一个文件 ≥4 个短 helper-like 函数 | `.repo_manager/smell_rules.json` + 源码阈值 |
+| too_many_top_level_python_files | medium | 顶级 .py 文件 >8 | 源码阈值 |
+| suspicious_directory_name | low | 目录名命中 `suspicious_directory_keywords` | `.repo_manager/smell_rules.json` |
+| python_file_inside_output_directory | medium | .py 文件在 output/artifact/result 目录内 | 源码 keyword |
 
 **输出文件：**
-- `outputs/repo_profile.json`
-- `outputs/smell_report.json`
-- `outputs/style_profile.json`
-- `outputs/code_health_report.md`
+- `repo_manager_report/repo_profile.json`
+- `repo_manager_report/smell_report.json`
+- `repo_manager_report/style_profile.json`
+- `repo_manager_report/code_health_report.md`
+
+**规则与反馈文件：**
+- `repo_manager_core/default_smell_rules.json`：包内默认规则
+- `repo_manager_core/default_search_rules.json`：包内默认扫描范围
+- `.repo_manager/smell_rules.json`：当前仓库的 smell keyword 策略
+- `.repo_manager/search_rules.json`：当前仓库的扫描范围策略
+- `.repo_manager/user_feedback.jsonl`：人工反馈事件日志
+
+**优先调整位置：**
+- 改扫描范围：编辑 `.repo_manager/search_rules.json`。
+- 改 keyword 是否可疑：编辑 `.repo_manager/smell_rules.json`，或通过 `--feedback` 写入。
+- 改默认初始规则：编辑 `repo_manager_core/default_smell_rules.json` 或 `repo_manager_core/default_search_rules.json`。
+- 改算法阈值：当前仍在源码中，例如 wrapper 长度、fragmented helper 数量、顶层 Python 文件数量。
 
 ## 目录结构
 
@@ -70,11 +83,7 @@ BoardFlowBench/
 │   └── code-health-review/  # Skill: 代码健康审查
 ├── tools/
 │   └── benchmark_scorer.py  # 评分运行器
-├── template/                # 示例仓库
-│   ├── clean_case/          # 健康代码示例
-│   ├── messy_ai_case/       # 有味道代码示例
-│   └── expense_lite/        # 多 agent 交接演示
-├── install/                 # 安装脚本（Claude Code/Codex/OpenCode）
+├── install/                 # Claude Code 安装脚本
 ├── tests/                   # 测试
 ├── .board/                  # Agent Bridge 状态文件
 ├── .repo_manager/           # 风格 profile 和 agent context
@@ -99,7 +108,7 @@ PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_init_board.py --help
 
 ### 1. 在 Coding Agent 里使用
 
-这个项目里的“agent”不是一个单独启动的后台服务，而是一组给 Claude Code / Codex / OpenCode 读取的 **skills + repo-local 状态协议**。实际用法是：让当前 coding agent 调用对应 skill，skill 再读写 `.board/` 和 `.repo_manager/` 中的共享状态。
+这个项目里的“agent”不是一个单独启动的后台服务，而是一组给 Claude Code 读取的 **skills + repo-local 状态协议**。实际用法是：让当前 coding agent 调用对应 skill，skill 再读写 `.board/` 和 `.repo_manager/` 中的共享状态。
 
 #### 作为 Claude Code 项目使用
 
@@ -112,25 +121,16 @@ PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_init_board.py --help
 
 打开本仓库时，Claude Code 可以直接读取这些项目级 skills。它们是 wrapper，真正实现仍在 `skills/` 和 `repo_manager_core/` 中，避免维护两份逻辑。
 
-#### 作为 Codex / OpenCode / 全局 skill 使用
+#### 安装为 Claude Code 全局 skill
 
 如果希望在其他仓库中也使用这些 skills：
 
 ```bash
 # 安装到 Claude Code
 bash install/install_claude.sh
-
-# 安装到 Codex
-bash install/install_codex.sh
-
-# 安装到 OpenCode
-bash install/install_opencode.sh
-
-# 安装到所有平台
-bash install/install_all.sh
 ```
 
-安装后重启对应 agent 客户端。
+安装后重启 Claude Code。
 
 ### 2. Agent Bridge 怎么用
 
@@ -173,7 +173,7 @@ PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_status.py T002 IN_PROGRE
 PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_handoff.py T002 codex first_worker \
   --repo . \
   --status IN_PROGRESS \
-  --files template/expense_lite/src/expense_lite/parser.py \
+  --files src/parser.py \
   --risks "CSV edge cases still need review" \
   --next-step "Run parser and validator tests"
 
@@ -186,7 +186,23 @@ PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_update_context.py --repo
 
 ### 4. Code Health Review 怎么用
 
-`code-health-review` 用来审查 AI 生成代码是否出现临时 patch/helper 膨胀、重复函数、wrapper 函数、可疑文件名和风格漂移。它只报告问题，不修改源码。
+`code-health-review` 用来审查 AI 生成代码是否出现临时 patch/helper 膨胀、重复函数、wrapper 函数、可疑文件名和风格漂移。它只报告问题，不修改源码。规则加载顺序是：
+
+1. 尝试读取当前 repo 的 `.repo_manager/search_rules.json`；如果不存在，就从 `repo_manager_core/default_search_rules.json` 生成初始版本。
+2. 尝试读取当前 repo 的 `.repo_manager/smell_rules.json`；如果不存在，就从 `repo_manager_core/default_smell_rules.json` 生成初始版本。
+3. 使用 `search_rules` 控制扫描哪些目录、文件后缀，以及要排除的目录/文件/glob。
+4. 使用 `smell_rules` 控制哪些 keyword 可疑、上下文相关、允许或逐例判断。
+5. 生成 `repo_manager_report/`，并在报告里列出 `Learned Repository Policies` 和 `Feedback Requested`。
+6. 只有用户显式提供 `--feedback` 时，才会写入 `.repo_manager/user_feedback.jsonl` 并更新 `.repo_manager/smell_rules.json`。
+
+运行后，如果当前仓库还没有这些文件，工具会自动创建：
+
+```text
+.repo_manager/search_rules.json
+.repo_manager/smell_rules.json
+```
+
+后续让 agent 调整扫描策略时，优先让它改这两个文件，而不是改 Python 源码。这样不同仓库可以保留自己的规则，默认配置也不会被污染。
 
 在 agent 对话里可以这样要求：
 
@@ -197,15 +213,84 @@ Use the code-health-review skill to review this repo for AI-generated code healt
 也可以直接运行脚本：
 
 ```bash
-# 扫描仓库
-PYTHONPATH=. python3 skills/code-health-review/scripts/health_scan.py template/messy_ai_case --output outputs/repo_profile.json
+# 扫描当前工作空间
+PYTHONPATH=. python3 skills/code-health-review/scripts/health_scan.py .
 
 # 检测函数味道
-PYTHONPATH=. python3 skills/code-health-review/scripts/health_detect_smells.py template/messy_ai_case --output outputs/smell_report.json
+PYTHONPATH=. python3 skills/code-health-review/scripts/health_detect_smells.py .
 
 # 生成完整报告
-PYTHONPATH=. python3 skills/code-health-review/scripts/health_generate_report.py template/messy_ai_case --output-dir outputs
+PYTHONPATH=. python3 skills/code-health-review/scripts/health_generate_report.py .
 ```
+
+如果报告里提示某个 keyword 需要确认，可以显式记录反馈：
+
+```bash
+# 将 fix 标记为上下文相关：只有未使用/缺少验证时才更可疑
+PYTHONPATH=. python3 skills/code-health-review/scripts/health_generate_report.py . \
+  --feedback fix=contextual \
+  --feedback-reason "Used in public APIs"
+
+# 将 old 目录标记为允许，例如它是兼容层
+PYTHONPATH=. python3 skills/code-health-review/scripts/health_generate_report.py . \
+  --feedback suspicious_directory_keywords:old=allowed \
+  --feedback-reason "Compatibility layer"
+```
+
+支持的 policy：
+
+- `suspicious`：总是作为可疑信号
+- `contextual`：只在上下文更可疑时提示，例如未被扫描调用
+- `allowed`：当前仓库允许这种命名
+- `case_by_case`：不自动报警，但继续在报告里请求人工判断
+
+典型调整方式：
+
+```json
+{
+  "patch_keywords": {
+    "fix": {
+      "policy": "contextual",
+      "source": "user_feedback",
+      "reason": "This repo exposes fix_* functions as stable public APIs"
+    },
+    "safe": {
+      "policy": "allowed",
+      "source": "repo_convention",
+      "reason": "safe_* is the local convention for tolerant parsers"
+    }
+  }
+}
+```
+
+`.repo_manager/smell_rules.json` 示例：
+
+```json
+{
+  "patch_keywords": {
+    "fix": {
+      "policy": "contextual",
+      "source": "user_feedback",
+      "reason": "Used in public APIs"
+    }
+  }
+}
+```
+
+`.repo_manager/search_rules.json` 示例：
+
+```json
+{
+  "include_paths": ["src", "tests"],
+  "exclude_dirs": [".git", ".venv", "__pycache__", "repo_manager_report"],
+  "exclude_files": ["main_rocopar.py", "tests/main_rocopar_test.py"],
+  "exclude_globs": ["scripts/debug_*.py", "generated/*.py"],
+  "file_suffixes": [".py"],
+  "schema_version": 1
+}
+```
+
+`exclude_files` 支持两种写法：`"main.py"` 会排除任意目录下同名文件，`"src/main.py"` 只排除指定相对路径。`exclude_globs` 用于排除一类文件；不含 `/` 的 pattern 按文件名匹配，包含 `/` 的 pattern 按仓库相对路径匹配。
 
 ### 5. 运行 Benchmark Scorer
 

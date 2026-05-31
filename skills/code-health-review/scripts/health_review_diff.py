@@ -5,12 +5,18 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from _bootstrap import bootstrap_repo_manager_core
+
+# Diffing should work from any repo after global skill installation.
+bootstrap_repo_manager_core()
+
 from repo_manager_core.style.learn_repo_style import read_json, write_json, resolve_output_path
 from repo_manager_core.style.style_profile import build_profile, build_smell_report
 from repo_manager_core.style.learn_repo_style import learn_repo_style
 
 
 def _warning_key(w: dict) -> str:
+    # Warnings are compared by stable content instead of object identity.
     return f"{w.get('type','')}:{w.get('file','')}:{w.get('function','')}:{w.get('reason','')}"
 
 
@@ -18,10 +24,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--before", required=True, help="Path to before-profile JSON or repo root.")
     parser.add_argument("--after", required=True, help="Path to after-profile JSON or repo root.")
-    parser.add_argument("--output", default="outputs/diff_report.json", help="Output path for diff report.")
+    parser.add_argument("--output", default="repo_manager_report/diff_report.json", help="Output path for diff report.")
     args = parser.parse_args()
 
     def _load_or_build(path_str: str) -> dict:
+        # Accept either a precomputed repo_profile.json or a repository path.
         p = Path(path_str)
         if p.is_dir():
             return build_profile(p)
@@ -36,6 +43,7 @@ def main() -> int:
     before_keys = {_warning_key(w) for w in before_smells.get("warnings", [])}
     after_keys = {_warning_key(w) for w in after_smells.get("warnings", [])}
 
+    # Keep the detailed warning objects so reports can show exact files/functions.
     new_warnings = [w for w in after_smells.get("warnings", []) if _warning_key(w) not in before_keys]
     resolved_warnings = [w for w in before_smells.get("warnings", []) if _warning_key(w) not in after_keys]
 
@@ -60,6 +68,7 @@ def main() -> int:
     }
 
     repo_root = Path(args.after) if Path(args.after).is_dir() else Path(".")
+    # Relative diff output goes under the "after" repo when --after is a repo.
     output_path = resolve_output_path(repo_root, args.output)
     write_json(diff, output_path)
     print(f"Diff: +{len(new_warnings)} new, -{len(resolved_warnings)} resolved")

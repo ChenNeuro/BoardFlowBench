@@ -12,11 +12,11 @@ def test_clean_repo_scores_full():
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         # Create a minimal artifact directory with a markdown file
-        artifacts = root / "template" / "expense_lite" / "artifacts"
+        artifacts = root / "repo_manager_report" / "artifacts"
         artifacts.mkdir(parents=True)
         (artifacts / "report.md").write_text("# Report")
         # Create scratch with just .gitkeep
-        scratch = root / "template" / "expense_lite" / ".scratch"
+        scratch = root / ".repo_manager" / "scratch"
         scratch.mkdir(parents=True)
         (scratch / ".gitkeep").write_text("")
 
@@ -29,10 +29,10 @@ def test_forbidden_root_file_detected():
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         (root / "tmp.py").write_text("x = 1")
-        artifacts = root / "template" / "expense_lite" / "artifacts"
+        artifacts = root / "repo_manager_report" / "artifacts"
         artifacts.mkdir(parents=True)
         (artifacts / "report.md").write_text("# Report")
-        scratch = root / "template" / "expense_lite" / ".scratch"
+        scratch = root / ".repo_manager" / "scratch"
         scratch.mkdir(parents=True)
         (scratch / ".gitkeep").write_text("")
 
@@ -45,10 +45,10 @@ def test_cache_file_detected():
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         (root / "__pycache__").mkdir()
-        artifacts = root / "template" / "expense_lite" / "artifacts"
+        artifacts = root / "repo_manager_report" / "artifacts"
         artifacts.mkdir(parents=True)
         (artifacts / "report.md").write_text("# Report")
-        scratch = root / "template" / "expense_lite" / ".scratch"
+        scratch = root / ".repo_manager" / "scratch"
         scratch.mkdir(parents=True)
         (scratch / ".gitkeep").write_text("")
 

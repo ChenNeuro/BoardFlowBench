@@ -42,6 +42,7 @@ def check_handoff(
     score = 0
 
     if handoffs:
+        # Use the latest matching handoff as the active transition record.
         score += 3
         handoff = handoffs[-1]["data"]
     elif required:
@@ -70,6 +71,8 @@ def check_handoff(
 
     changed_files = changed_files or []
     if changed_files and not handoff.get("files_changed"):
+        # If git observed changes, the handoff should tell the next agent where
+        # to look first.
         violations.append("files_changed is empty but repository changes were detected")
     else:
         score += 2
@@ -170,6 +173,7 @@ def _load_handoffs(root: Path, task_id: str) -> list[dict[str, Any]]:
         try:
             data = json.loads(p.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
+            # Ignore malformed handoffs rather than breaking the whole score.
             continue
         if data.get("task_id") == task_id:
             matches.append({"path": str(p.relative_to(root)), "data": data})

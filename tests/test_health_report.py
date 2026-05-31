@@ -36,6 +36,8 @@ def test_render_review_report_contains_expected_sections():
     assert "Repo Manager Code Health Review" in report
     assert "## Summary" in report
     assert "## Warning Counts" in report
+    assert "## Learned Repository Policies" in report
+    assert "## Feedback Requested" in report
     assert "## Findings" in report
     assert "## Style Profile" in report
     assert "## Cleanup Plan" in report

@@ -44,6 +44,8 @@ def check_board_consistency(repo: str | Path, task: dict[str, Any]) -> dict[str,
         violations.append(f"dependencies are not respected for {tid}")
 
     if status == "DONE":
+        # DONE tasks must carry observable evidence so the next agent/scorer is
+        # not forced to trust chat history.
         if board_task.get("current_handoff") or board_task.get("acceptance_evidence"):
             score += 3
         else:
@@ -78,6 +80,7 @@ def _dependencies_respected(board: dict[str, Any], task: dict[str, Any]) -> bool
     if status == "TODO":
         return True
 
+    # Any task that has started must wait for dependency tasks to be DONE.
     tasks = {
         item.get("id"): item
         for item in board.get("tasks", [])

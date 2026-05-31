@@ -45,6 +45,7 @@ def write_agent_context(
     ]
 
     if board and board.get("tasks"):
+        # Keep this compact: the detailed source of truth remains .board/tasks.yaml.
         lines.extend(["## Current Task Board", ""])
         for task in board["tasks"]:
             status = task.get("status", "TODO")
