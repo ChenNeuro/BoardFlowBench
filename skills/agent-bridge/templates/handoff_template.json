@@ -1,0 +1,26 @@
+{
+  "task_id": "",
+  "agent_id": "",
+  "agent_role": "",
+  "status": "READY_FOR_REVIEW",
+  "files_changed": [],
+  "commands_run": [
+    {
+      "command": "",
+      "result": "",
+      "notes": ""
+    }
+  ],
+  "tests": [
+    {
+      "name": "",
+      "result": "",
+      "notes": ""
+    }
+  ],
+  "temporary_files_created": [],
+  "temporary_files_removed": [],
+  "decisions": [],
+  "risks": "",
+  "next_recommended_step": ""
+}

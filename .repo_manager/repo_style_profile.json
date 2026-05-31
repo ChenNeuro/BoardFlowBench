@@ -1,0 +1,13 @@
+{
+  "repo_path": "",
+  "function_count": 0,
+  "module_count": 0,
+  "snake_case_function_count": 0,
+  "docstring_function_count": 0,
+  "patch_like_function_count": 0,
+  "average_function_length": 0,
+  "median_function_length": 0,
+  "max_function_length": 0,
+  "common_name_prefixes": [],
+  "style_warnings": []
+}
