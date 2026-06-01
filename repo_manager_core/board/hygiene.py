@@ -1,11 +1,11 @@
-"""Repository hygiene checks for BoardFlowBench."""
+"""Repository hygiene checks — prevents AI agent file clutter."""
 
 from __future__ import annotations
 
-import subprocess
 from pathlib import Path
 from typing import Any
 
+from ._git_utils import git_lines
 
 FORBIDDEN_ROOT_NAMES = {
     "result.txt",
@@ -24,7 +24,11 @@ CACHE_NAMES = {
 }
 
 
-def check_hygiene(repo: str | Path) -> dict[str, Any]:
+def check_hygiene(
+    repo: str | Path,
+    artifact_dir: str | Path = "repo_manager_report/artifacts",
+    scratch_dir: str | Path = ".repo_manager/scratch",
+) -> dict[str, Any]:
     """Score repository hygiene out of 20."""
     root = Path(repo)
     score = 0
@@ -32,6 +36,7 @@ def check_hygiene(repo: str | Path) -> dict[str, Any]:
     warnings: list[str] = []
     details: dict[str, Any] = {}
 
+    # Root-level tmp/debug/result files are a common residue of agent attempts.
     forbidden_root = [
         path.name
         for path in root.iterdir()
@@ -43,19 +48,17 @@ def check_hygiene(repo: str | Path) -> dict[str, Any]:
     else:
         score += 6
 
-    artifact_issues = _artifact_issues(root)
+    artifact_issues = _artifact_issues(root, Path(artifact_dir))
     details["artifact_issues"] = artifact_issues
     if artifact_issues:
         violations.extend(artifact_issues)
     else:
         score += 5
 
-    scratch_entries = _scratch_entries(root)
+    scratch_entries = _scratch_entries(root, Path(scratch_dir))
     details["scratch_entries"] = scratch_entries
     if scratch_entries:
-        violations.append(
-            "demo_repo_template/.scratch contains files not justified by scorer"
-        )
+        violations.append(".scratch contains files not justified by scorer")
     else:
         score += 4
 
@@ -70,9 +73,7 @@ def check_hygiene(repo: str | Path) -> dict[str, Any]:
     details["unexpected_untracked_files"] = untracked["files"]
     warnings.extend(untracked["warnings"])
     if untracked["files"]:
-        violations.append(
-            "unexpected untracked files found: " + ", ".join(untracked["files"])
-        )
+        violations.append("unexpected untracked files found: " + ", ".join(untracked["files"]))
     else:
         score += 2
 
@@ -90,15 +91,16 @@ def _is_forbidden_root_name(name: str) -> bool:
     return lower in FORBIDDEN_ROOT_NAMES or lower.startswith(("tmp.", "debug."))
 
 
-def _artifact_issues(root: Path) -> list[str]:
-    artifact_dir = root / "demo_repo_template" / "artifacts"
-    if not artifact_dir.exists():
+def _artifact_issues(root: Path, artifact_dir: Path) -> list[str]:
+    full_path = root / artifact_dir
+    if not full_path.exists():
         return []
 
     issues: list[str] = []
-    for path in artifact_dir.iterdir():
+    for path in full_path.iterdir():
         if path.name == ".gitkeep":
             continue
+        # For the benchmark, accepted artifacts are stable Markdown files only.
         if path.is_dir():
             issues.append(f"artifact directory is not expected: {path}")
         elif path.suffix != ".md":
@@ -108,13 +110,13 @@ def _artifact_issues(root: Path) -> list[str]:
     return issues
 
 
-def _scratch_entries(root: Path) -> list[str]:
-    scratch = root / "demo_repo_template" / ".scratch"
-    if not scratch.exists():
+def _scratch_entries(root: Path, scratch_dir: Path) -> list[str]:
+    full_path = root / scratch_dir
+    if not full_path.exists():
         return []
     return [
         str(path.relative_to(root))
-        for path in scratch.iterdir()
+        for path in full_path.iterdir()
         if path.name != ".gitkeep"
     ]
 
@@ -130,7 +132,9 @@ def _cache_files(root: Path) -> list[str]:
 
 
 def _unexpected_untracked(root: Path) -> dict[str, Any]:
-    tracked = _git_lines(root, ["git", "ls-files"])
+    # Git gives the best signal for stray files without requiring a hard-coded
+    # list of every valid path in the repository.
+    tracked = git_lines(root, ["git", "ls-files"])
     if tracked is None:
         return {
             "files": [],
@@ -139,14 +143,10 @@ def _unexpected_untracked(root: Path) -> dict[str, Any]:
     if not tracked:
         return {
             "files": [],
-            "warnings": [
-                "git has no tracked baseline; skipped unexpected untracked check"
-            ],
+            "warnings": ["git has no tracked baseline; skipped unexpected untracked check"],
         }
 
-    status = _git_lines(
-        root, ["git", "status", "--porcelain", "--untracked-files=all"]
-    )
+    status = git_lines(root, ["git", "status", "--porcelain", "--untracked-files=all"])
     if status is None:
         return {
             "files": [],
@@ -163,20 +163,3 @@ def _unexpected_untracked(root: Path) -> dict[str, Any]:
         files.append(path)
 
     return {"files": sorted(files), "warnings": []}
-
-
-def _git_lines(root: Path, command: list[str]) -> list[str] | None:
-    try:
-        result = subprocess.run(
-            command,
-            cwd=root,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=False,
-        )
-    except OSError:
-        return None
-    if result.returncode != 0:
-        return None
-    return [line for line in result.stdout.splitlines() if line.strip()]

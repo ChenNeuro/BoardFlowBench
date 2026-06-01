@@ -11,7 +11,7 @@ sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from benchmark.scoring.score import main  # noqa: E402
+from tools.benchmark_scorer import main  # noqa: E402
 
 
 if __name__ == "__main__":

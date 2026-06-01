@@ -1,4 +1,4 @@
-"""Task and board loading helpers for BoardFlowBench scoring."""
+"""Task and board loading helpers for the BoardFlow protocol."""
 
 from __future__ import annotations
 
@@ -16,12 +16,22 @@ def load_task(task_path: str | Path, repo: str | Path = ".") -> dict[str, Any]:
 
 
 def load_board(repo: str | Path = ".") -> dict[str, Any]:
-    """Load the machine-readable BoardFlow board."""
+    """Load the machine-readable BoardFlow board from .board/tasks.yaml."""
     path = Path(repo) / ".board" / "tasks.yaml"
     board = load_yaml(path)
     if not isinstance(board, dict):
         raise ValueError(f"board file must contain a mapping: {path}")
     return board
+
+
+def save_board(board: dict[str, Any], repo: str | Path = ".") -> Path:
+    """Write board data back to .board/tasks.yaml."""
+    root = Path(repo)
+    path = root / ".board" / "tasks.yaml"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    text = _dump_yaml(board)
+    path.write_text(text, encoding="utf-8")
+    return path
 
 
 def task_id(task: dict[str, Any]) -> str:
@@ -40,6 +50,7 @@ def load_yaml(path: str | Path) -> Any:
 
         return yaml.safe_load(text)
     except ModuleNotFoundError:
+        # Keep the command-line tools usable in minimal Python environments.
         return _parse_simple_yaml(text)
 
 
@@ -50,11 +61,59 @@ def _resolve_path(repo: str | Path, path: str | Path) -> Path:
     return Path(repo) / path
 
 
+# ---- Simple YAML dumper (minimal, for task board) ----
+
+def _dump_yaml(value: Any, indent: int = 0) -> str:
+    prefix = "  " * indent
+    if isinstance(value, dict):
+        if not value:
+            return "{}"
+        lines = []
+        for k, v in value.items():
+            if isinstance(v, (dict, list)):
+                lines.append(f"{prefix}{k}:")
+                lines.append(_dump_yaml(v, indent + 1))
+            elif v is None:
+                lines.append(f"{prefix}{k}:")
+            elif isinstance(v, bool):
+                lines.append(f"{prefix}{k}: {'true' if v else 'false'}")
+            elif isinstance(v, str):
+                lines.append(f"{prefix}{k}: {v}")
+            else:
+                lines.append(f"{prefix}{k}: {v}")
+        return "\n".join(lines) + "\n"
+    if isinstance(value, list):
+        if not value:
+            return "[]"
+        lines = []
+        for item in value:
+            if isinstance(item, dict):
+                # The board format uses lists of task mappings, so this dumper
+                # supports that case without pulling in a required dependency.
+                lines.append(f"{prefix}- ")
+                for k, v in item.items():
+                    if isinstance(v, (dict, list)):
+                        lines.append(f"{prefix}  {k}:")
+                        lines.append(_dump_yaml(v, indent + 2))
+                    else:
+                        lines.append(f"{prefix}  {k}: {v}")
+            elif isinstance(item, str):
+                lines.append(f"{prefix}- {item}")
+            else:
+                lines.append(f"{prefix}- {item}")
+        return "\n".join(lines) + "\n"
+    return f"{prefix}{value}"
+
+
+# ---- Simple YAML subset parser (fallback when PyYAML unavailable) ----
+
 def _parse_simple_yaml(text: str) -> Any:
     lines: list[tuple[int, str]] = []
     for raw in text.splitlines():
         if not raw.strip() or raw.lstrip().startswith("#"):
             continue
+        # The fallback parser is indentation-based and intentionally supports
+        # only the subset used by task boards and benchmark task files.
         indent = len(raw) - len(raw.lstrip(" "))
         lines.append((indent, raw.strip()))
 

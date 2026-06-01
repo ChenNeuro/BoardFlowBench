@@ -1,4 +1,4 @@
-"""Structured handoff checks for BoardFlowBench."""
+"""Structured handoff writing and validation."""
 
 from __future__ import annotations
 
@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from repo_manager_core.board.task_status import VALID_STATUSES
 
 REQUIRED_FIELDS = [
     "task_id",
@@ -28,9 +29,9 @@ def check_handoff(
 ) -> dict[str, Any]:
     """Score structured handoff quality out of 15."""
     root = Path(repo)
-    task_id = str(task.get("task_id") or task.get("id"))
+    tid = str(task.get("task_id") or task.get("id"))
     required = _handoff_required(task)
-    handoffs = _load_handoffs(root, task_id)
+    handoffs = _load_handoffs(root, tid)
     warnings: list[str] = []
     violations: list[str] = []
     details: dict[str, Any] = {
@@ -41,10 +42,11 @@ def check_handoff(
     score = 0
 
     if handoffs:
+        # Use the latest matching handoff as the active transition record.
         score += 3
         handoff = handoffs[-1]["data"]
     elif required:
-        violations.append(f"handoff required for {task_id} but none was found")
+        violations.append(f"handoff required for {tid} but none was found")
         handoff = None
     else:
         score += 3
@@ -69,6 +71,8 @@ def check_handoff(
 
     changed_files = changed_files or []
     if changed_files and not handoff.get("files_changed"):
+        # If git observed changes, the handoff should tell the next agent where
+        # to look first.
         violations.append("files_changed is empty but repository changes were detected")
     else:
         score += 2
@@ -94,6 +98,64 @@ def check_handoff(
     }
 
 
+def write_handoff(
+    repo: str | Path,
+    task_id: str,
+    agent_id: str,
+    agent_role: str,
+    status: str,
+    files_changed: list[str] | None = None,
+    commands_run: list[dict[str, str]] | None = None,
+    tests: list[dict[str, str]] | None = None,
+    temporary_files_created: list[str] | None = None,
+    temporary_files_removed: list[str] | None = None,
+    decisions: list[str] | None = None,
+    risks: str | None = None,
+    next_recommended_step: str | None = None,
+) -> Path:
+    """Create a structured handoff JSON file under .board/handoffs/."""
+    if status not in VALID_STATUSES:
+        raise ValueError(f"invalid status '{status}', must be one of {VALID_STATUSES}")
+
+    root = Path(repo)
+    handoff_dir = root / ".board" / "handoffs"
+    handoff_dir.mkdir(parents=True, exist_ok=True)
+
+    data: dict[str, Any] = {
+        "task_id": task_id,
+        "agent_id": agent_id,
+        "agent_role": agent_role,
+        "status": status,
+        "files_changed": files_changed or [],
+        "commands_run": commands_run or [],
+        "tests": tests or [],
+        "temporary_files_created": temporary_files_created or [],
+        "temporary_files_removed": temporary_files_removed or [],
+        "decisions": decisions or [],
+        "risks": risks,
+        "next_recommended_step": next_recommended_step,
+    }
+
+    # Generate unique filename: <task_id>_<agent_id>_<timestamp>.json
+    import time
+    ts = int(time.time())
+    path = handoff_dir / f"{task_id}_{agent_id}_{ts}.json"
+    path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return path
+
+
+def validate_handoff_schema(handoff_data: dict[str, Any], schema_path: str | Path) -> list[str]:
+    """Validate handoff data against a JSON Schema file. Returns list of missing fields."""
+    schema_path = Path(schema_path)
+    if not schema_path.exists():
+        return ["schema not found"]
+
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    required = schema.get("required", [])
+    missing = [field for field in required if not _field_complete(handoff_data, field)]
+    return missing
+
+
 def _handoff_required(task: dict[str, Any]) -> bool:
     value = task.get("handoff_requirement")
     if isinstance(value, dict):
@@ -107,13 +169,14 @@ def _load_handoffs(root: Path, task_id: str) -> list[dict[str, Any]]:
         return []
 
     matches: list[dict[str, Any]] = []
-    for path in sorted(handoff_dir.glob("*.json")):
+    for p in sorted(handoff_dir.glob("*.json")):
         try:
-            data = json.loads(path.read_text(encoding="utf-8"))
+            data = json.loads(p.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
+            # Ignore malformed handoffs rather than breaking the whole score.
             continue
         if data.get("task_id") == task_id:
-            matches.append({"path": str(path.relative_to(root)), "data": data})
+            matches.append({"path": str(p.relative_to(root)), "data": data})
     return matches
 
 

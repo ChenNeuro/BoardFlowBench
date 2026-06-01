@@ -8,15 +8,15 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from benchmark.scoring.board_consistency import check_board_consistency
-from benchmark.scoring.handoff_check import check_handoff
-from benchmark.scoring.hygiene import check_hygiene
-from benchmark.scoring.scope_check import check_scope
-from benchmark.scoring.task_loader import load_task, task_id
+from repo_manager_core.board.board_io import load_task, task_id
+from repo_manager_core.board.board_validator import check_board_consistency
+from repo_manager_core.board.handoff_writer import check_handoff
+from repo_manager_core.board.hygiene import check_hygiene
+from repo_manager_core.board.scope_check import check_scope
 
 
 def score_task(repo: str | Path, task_path: str | Path) -> dict[str, Any]:
-    """Run all minimal checks and return a score report."""
+    """Run all checks and return a score report."""
     root = Path(repo)
     task = load_task(task_path, root)
     tid = task_id(task)
@@ -65,7 +65,7 @@ def write_score(report: dict[str, Any], output: str | Path) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--task", required=True, help="Path to benchmark task YAML.")
+    parser.add_argument("--task", required=True, help="Path to task YAML.")
     parser.add_argument("--repo", default=".", help="Repository root to score.")
     parser.add_argument("--output", required=True, help="Path for score JSON output.")
     args = parser.parse_args(argv)
@@ -100,9 +100,7 @@ def _score_correctness(root: Path, task: dict[str, Any]) -> dict[str, Any]:
 
     regression_commands = task.get("regression_commands") or []
     if regression_commands:
-        regression_results = [
-            _run_command(root, command) for command in regression_commands
-        ]
+        regression_results = [_run_command(root, command) for command in regression_commands]
         details["regression_commands"] = regression_results
         if all(result["returncode"] == 0 for result in regression_results):
             score += 10

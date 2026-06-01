@@ -1,30 +1,28 @@
-"""Board consistency checks for BoardFlowBench."""
+"""Board consistency checks for the BoardFlow protocol."""
 
 from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
 
-from benchmark.scoring.task_loader import load_board
-
-
-VALID_STATUSES = {"TODO", "IN_PROGRESS", "BLOCKED", "READY_FOR_REVIEW", "DONE"}
+from .board_io import load_board
+from .task_status import VALID_STATUSES
 
 
 def check_board_consistency(repo: str | Path, task: dict[str, Any]) -> dict[str, Any]:
     """Score machine-readable board consistency out of 10."""
     board = load_board(repo)
-    task_id = str(task.get("task_id") or task.get("id"))
-    board_task = _find_task(board, task_id)
+    tid = str(task.get("task_id") or task.get("id"))
+    board_task = _find_task(board, tid)
     warnings: list[str] = []
     violations: list[str] = []
-    details: dict[str, Any] = {"task_id": task_id, "board_task_found": bool(board_task)}
+    details: dict[str, Any] = {"task_id": tid, "board_task_found": bool(board_task)}
 
     if board_task is None:
         return {
             "score": 0,
             "max": 10,
-            "violations": [f"{task_id} is missing from .board/tasks.yaml"],
+            "violations": [f"{tid} is missing from .board/tasks.yaml"],
             "warnings": warnings,
             "details": details,
         }
@@ -38,26 +36,28 @@ def check_board_consistency(repo: str | Path, task: dict[str, Any]) -> dict[str,
     if status in VALID_STATUSES:
         score += 2
     else:
-        violations.append(f"invalid task status for {task_id}: {status}")
+        violations.append(f"invalid task status for {tid}: {status}")
 
     if _dependencies_respected(board, board_task):
         score += 3
     else:
-        violations.append(f"dependencies are not respected for {task_id}")
+        violations.append(f"dependencies are not respected for {tid}")
 
     if status == "DONE":
+        # DONE tasks must carry observable evidence so the next agent/scorer is
+        # not forced to trust chat history.
         if board_task.get("current_handoff") or board_task.get("acceptance_evidence"):
             score += 3
         else:
-            violations.append(f"{task_id} is DONE without acceptance evidence")
+            violations.append(f"{tid} is DONE without acceptance evidence")
     else:
         score += 3
-        warnings.append(f"{task_id} is not DONE; acceptance evidence is not required yet")
+        warnings.append(f"{tid} is not DONE; acceptance evidence is not required yet")
 
     if owner is not None and status is not None:
         score += 2
     else:
-        violations.append(f"{task_id} must include owner and status")
+        violations.append(f"{tid} must include owner and status")
 
     return {
         "score": score,
@@ -80,6 +80,7 @@ def _dependencies_respected(board: dict[str, Any], task: dict[str, Any]) -> bool
     if status == "TODO":
         return True
 
+    # Any task that has started must wait for dependency tasks to be DONE.
     tasks = {
         item.get("id"): item
         for item in board.get("tasks", [])

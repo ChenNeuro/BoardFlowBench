@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "repo-manager"
+version = "0.1.0"
+description = "A Skill Suite for Agent Handoff and AI Code Health Review"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+health-scan = "repo_manager_core.health.scan_repo_functions:main"
+benchmark-score = "tools.benchmark_scorer:main"
+
+[tool.setuptools.packages.find]
+include = ["repo_manager_core*"]
+
+[tool.setuptools.package-data]
+repo_manager_core = ["default_search_rules.json", "default_smell_rules.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
