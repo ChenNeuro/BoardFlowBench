@@ -1,0 +1,43 @@
+task_id: T001
+title: Date parser
+description: Fix the Expense Lite date parser so it accepts both YYYY-MM-DD and YYYY/MM/DD while returning normalized YYYY-MM-DD strings.
+allowed_paths:
+  - demo_repo_template/src/expense_lite/parser.py
+  - demo_repo_template/tests/test_parser.py
+  - .board/tasks.yaml
+  - PROJECT_BOARD.md
+  - .board/handoffs/
+forbidden_paths:
+  - demo_repo_template/src/expense_lite/validator.py
+  - demo_repo_template/src/expense_lite/summary.py
+  - demo_repo_template/src/expense_lite/report.py
+  - demo_repo_template/src/expense_lite/cli.py
+  - demo_repo_template/tests/test_validator.py
+  - demo_repo_template/tests/test_summary.py
+  - demo_repo_template/tests/test_report.py
+  - demo_repo_template/pyproject.toml
+dependencies: []
+acceptance_criteria:
+  - Keep public parser function names unchanged.
+  - Accept YYYY-MM-DD dates.
+  - Accept YYYY/MM/DD dates.
+  - Normalize both accepted formats to YYYY-MM-DD strings.
+  - Reject malformed dates with clear ValueError messages.
+acceptance_commands:
+  - PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=demo_repo_template/src python3 -m unittest discover -s demo_repo_template/tests -p 'test_parser.py'
+expected_failing_test_initial_state:
+  command: PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=demo_repo_template/src python3 -m unittest discover -s demo_repo_template/tests -p 'test_parser.py'
+  test: test_parser.DateParserTest.test_normalize_accepts_slash_date
+  reason: The initial parser only accepts YYYY-MM-DD, so YYYY/MM/DD raises ValueError.
+hygiene_rules:
+  - Do not create root-level temporary files.
+  - Do not create files named result.txt, output.txt, final.md, tmp.py, debug.py, or similar.
+  - Remove scratch files before handoff unless recorded in the handoff.
+handoff_requirement:
+  required: true
+  schema: .board/handoff.schema.json
+  directory: .board/handoffs/
+forbidden_behavior:
+  - Do not change public parser function names.
+  - Do not modify unrelated modules for T001.
+  - Do not mark T001 DONE in the initial buggy state.
