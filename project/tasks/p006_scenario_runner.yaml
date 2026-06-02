@@ -1,0 +1,10 @@
+task_id: P006
+title: Scenario runner and oracle isolation
+description: Add four experiment conditions, isolated oracle packs, command adapters, manual checkpoints, and sequential task orchestration.
+dependencies:
+  - P004
+acceptance_criteria:
+  - Keep oracle files outside agent workspaces.
+  - Support no-board, native instructions, native docs handoff, and full BoardFlow conditions.
+  - Stop runs after failed deterministic finalize checks.
+  - Resume manual checkpoints without requiring an embedded agent provider.

@@ -1,0 +1,8 @@
+schema_version: 1
+id: expense_lite
+title: Expense Lite Bench Demo
+repo_url: https://github.com/ChenNeuro/ExpenseLiteBenchDemo.git
+seed_tag: benchmark-seed-v1
+seed_commit: 30ce6f0d76e2338e56d599fd2beb6fe954b96452
+oracle_commit: 03a6bbcd0703587addc043cdfee54fb0be704702
+task_directory: benchmark/tasks/expense_lite

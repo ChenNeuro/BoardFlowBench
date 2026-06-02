@@ -1,10 +1,10 @@
 schema_version: 1
 project: BoardFlowBench
 current_milestone:
-  id: M1
-  title: Basic expense parsing and reporting
-  status: IN_PROGRESS
-  goal: Complete the four-step Expense Lite sequence used to evaluate sequential handoff.
+  id: M2
+  title: Trusted control-plane hardening
+  status: DONE
+  goal: Close benchmark trust boundaries exposed by independent review before treating lifecycle results as reliable.
 status_values:
   - TODO
   - IN_PROGRESS
@@ -12,66 +12,73 @@ status_values:
   - READY_FOR_REVIEW
   - DONE
 tasks:
-  - id: T001
-    title: Date parser
+  - id: P001
+    title: Independent reviewer integration
     status: DONE
-    owner: agent_b
+    owner: codex
     dependencies: []
-    allowed_paths:
-      - demo_repo_template/src/expense_lite/parser.py
-      - demo_repo_template/tests/test_parser.py
-      - .board/tasks.yaml
-      - PROJECT_BOARD.md
-      - .board/handoffs/
-    acceptance_commands:
-      - PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=demo_repo_template/src python3 -m unittest discover -s demo_repo_template/tests -p 'test_parser.py'
-    acceptance_source: benchmark/tasks/task_001_date_parser.yaml
-    current_handoff: .board/handoffs/T001_agent_b_handoff.json
-    notes: Agent B verified acceptance and regression tests from repo-local state.
-  - id: T002
-    title: CSV import
-    status: TODO
-    owner: unassigned
+    acceptance_source: project/tasks/p001_reviewer_integration.yaml
+    current_handoff: .board/handoffs/P001_codex_handoff.json
+    notes: Added reviewdog publishing and optional independent PR-Agent review.
+  - id: P002
+    title: Bridge lifecycle refresh
+    status: DONE
+    owner: codex
+    dependencies: []
+    acceptance_source: project/tasks/p002_bridge_refresh.yaml
+    current_handoff: .board/handoffs/P002_codex_handoff.json
+    notes: Add minimal blackboard and sticker lifecycle refresh.
+  - id: P003
+    title: BoardFlowBench and demo repository separation
+    status: DONE
+    owner: codex
     dependencies:
-      - T001
-    allowed_paths:
-      - demo_repo_template/src/expense_lite/parser.py
-      - demo_repo_template/src/expense_lite/validator.py
-      - demo_repo_template/tests/test_parser.py
-      - demo_repo_template/tests/test_validator.py
-    acceptance_commands:
-      - PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=demo_repo_template/src python3 -m unittest discover -s demo_repo_template/tests -p 'test_parser.py'
-      - PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=demo_repo_template/src python3 -m unittest discover -s demo_repo_template/tests -p 'test_validator.py'
-    acceptance_source: benchmark/tasks/task_002_csv_import.yaml
-    current_handoff: null
-    notes: Import CSV rows using the date parser.
-  - id: T003
-    title: Monthly summary
-    status: TODO
-    owner: unassigned
+      - P002
+    acceptance_source: project/tasks/p003_demo_repository_separation.yaml
+    current_handoff: .board/handoffs/P003_codex_handoff.json
+    notes: Split the demo into an independent Git repository and keep root state project-only.
+  - id: P004
+    title: Evidence gate and scorer hardening
+    status: DONE
+    owner: codex
     dependencies:
-      - T002
-    allowed_paths:
-      - demo_repo_template/src/expense_lite/summary.py
-      - demo_repo_template/tests/test_summary.py
-    acceptance_commands:
-      - PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=demo_repo_template/src python3 -m unittest discover -s demo_repo_template/tests -p 'test_summary.py'
-    acceptance_source: benchmark/tasks/task_003_monthly_summary.yaml
-    current_handoff: null
-    notes: Summarize expenses by month and category.
-  - id: T004
-    title: Report artifact
-    status: TODO
-    owner: unassigned
+      - P003
+    acceptance_source: project/tasks/p004_scorer_calibration.yaml
+    current_handoff: .board/handoffs/P004_codex_handoff.json
+    notes: Add deterministic finalize gates, condition-aware scoring, and baseline diff scope checks.
+  - id: P005
+    title: Trusted repository bootstrap
+    status: DONE
+    owner: codex
     dependencies:
-      - T003
-    allowed_paths:
-      - demo_repo_template/src/expense_lite/report.py
-      - demo_repo_template/src/expense_lite/cli.py
-      - demo_repo_template/tests/test_report.py
-      - demo_repo_template/artifacts/
-    acceptance_commands:
-      - PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=demo_repo_template/src python3 -m unittest discover -s demo_repo_template/tests -p 'test_report.py'
-    acceptance_source: benchmark/tasks/task_004_report_artifact.yaml
-    current_handoff: null
-    notes: Render a stable Markdown report artifact.
+      - P004
+    acceptance_source: project/tasks/p005_trusted_bootstrap.yaml
+    current_handoff: .board/handoffs/P005_codex_handoff.json
+    notes: Recommend allowlisted Copier or Git templates for empty repositories.
+  - id: P006
+    title: Scenario runner and oracle isolation
+    status: DONE
+    owner: codex
+    dependencies:
+      - P004
+    acceptance_source: project/tasks/p006_scenario_runner.yaml
+    current_handoff: .board/handoffs/P006_codex_handoff.json
+    notes: Add four experiment conditions, isolated oracle packs, adapters, and checkpoints.
+  - id: P007
+    title: Result aggregation and reviewer reporting
+    status: DONE
+    owner: codex
+    dependencies:
+      - P006
+    acceptance_source: project/tasks/p007_result_aggregation.yaml
+    current_handoff: .board/handoffs/P007_codex_handoff.json
+    notes: Aggregate external run results and keep independent reviewer findings non-blocking.
+  - id: P008
+    title: Trusted control-plane hardening
+    status: DONE
+    owner: codex
+    dependencies:
+      - P007
+    acceptance_source: project/tasks/p008_trusted_control_plane.yaml
+    current_handoff: .board/handoffs/P008_codex_1780411029751578000.json
+    notes: Move benchmark authority outside the agent workspace and close independent-review trust boundary findings.

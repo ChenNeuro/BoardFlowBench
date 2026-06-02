@@ -11,7 +11,7 @@ from _bootstrap import bootstrap_repo_manager_core
 # the user to set PYTHONPATH in every target workspace.
 bootstrap_repo_manager_core()
 
-from repo_manager_core.style.style_profile import build_profile, build_smell_report
+from repo_manager_core.style.style_profile import build_profile, build_smell_report, refresh_structure_profile
 from repo_manager_core.style.learn_repo_style import read_json, write_json, resolve_output_path
 
 
@@ -30,7 +30,8 @@ def main() -> int:
         repo_profile = read_json(profile_path)
     else:
         repo_profile = build_profile(root)
-        write_json(repo_profile, profile_path)
+    repo_profile = refresh_structure_profile(repo_profile, root)
+    write_json(repo_profile, profile_path)
 
     smell_report = build_smell_report(repo_profile)
     output_path = resolve_output_path(root, args.output)

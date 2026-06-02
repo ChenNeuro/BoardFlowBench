@@ -1,0 +1,115 @@
+{
+  "agent_id": "codex",
+  "agent_role": "implementation",
+  "commands_run": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 -m pytest -p no:cacheprovider -q",
+      "notes": "111 passed.",
+      "result": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "notes": "No whitespace errors.",
+      "result": "PASS"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 - <<'PY' ... check_board_views('.') ... PY",
+      "notes": "Returned [].",
+      "result": "PASS"
+    },
+    {
+      "command": "scripts/run_scenario.py smoke with ExpenseLiteBenchDemo and ExpenseLiteBenchOracles",
+      "notes": "Seed B001 slash-date failure reproduced; B001 finalize, trusted evidence, B002 activation, aggregation, no-board boundary, and seed validation passed.",
+      "result": "PASS"
+    }
+  ],
+  "decisions": [
+    "P008 is left READY_FOR_REVIEW instead of DONE because final independent rereview could not run after subagent usage limits were reached.",
+    "Runner lifecycle is the trusted path; standalone activation and finalize scripts now recover signed runner state instead of directly mutating lifecycle authority.",
+    "Workspace `.board/run.yaml` and evidence remain readable mirrors; signed external results are authoritative.",
+    "Reviewer adapters are operator-trusted commands and cannot mutate trusted control-plane files without detection.",
+    "Policy files `search_rules.json` and `smell_rules.json` are tracked at full-BoardFlow baseline so strategy changes are scored."
+  ],
+  "files_changed": [
+    ".board/tasks.yaml",
+    ".board/handoffs/P008_codex_1780404303182111000.json",
+    ".board/reviews/P008_independent_review.md",
+    ".board/reviews/P008_independent_rereview.md",
+    ".repo_manager/agent_context.md",
+    ".repo_manager/repo_style_profile.json",
+    "PROJECT_BOARD.md",
+    "README.md",
+    "benchmark/bootstrap_templates/catalog.json",
+    "benchmark/targets/expense_lite.yaml",
+    "docs/DESIGN.md",
+    "docs/EXPERIMENT_PROTOCOL.md",
+    "docs/\u4e2d\u6587\u8bf4\u660e\u4e0e\u6269\u5c55\u6307\u5357.md",
+    "project/tasks/p008_trusted_control_plane.yaml",
+    "repo_manager_core/benchmark/aggregation.py",
+    "repo_manager_core/benchmark/commands.py",
+    "repo_manager_core/benchmark/control.py",
+    "repo_manager_core/benchmark/finalize.py",
+    "repo_manager_core/benchmark/oracle.py",
+    "repo_manager_core/benchmark/runner.py",
+    "repo_manager_core/benchmark/workspace.py",
+    "repo_manager_core/board/board_sync.py",
+    "repo_manager_core/board/board_validator.py",
+    "repo_manager_core/board/evidence.py",
+    "repo_manager_core/board/handoff_writer.py",
+    "repo_manager_core/board/hygiene.py",
+    "repo_manager_core/board/scope_check.py",
+    "repo_manager_core/bootstrap.py",
+    "repo_manager_core/style/context_writer.py",
+    "scripts/activate_benchmark_task.py",
+    "scripts/finalize_benchmark_task.py",
+    "scripts/run_scenario.py",
+    "scripts/validate_benchmark_seed.py",
+    "skills/agent-bridge/SKILL.md",
+    "skills/agent-bridge/scripts/bridge_handoff.py",
+    "skills/agent-bridge/scripts/bridge_refresh.py",
+    "skills/boardflow-reviewer/SKILL.md",
+    "tests/test_aggregation.py",
+    "tests/test_benchmark_scorer.py",
+    "tests/test_benchmark_workspace.py",
+    "tests/test_board_sync.py",
+    "tests/test_bootstrap.py",
+    "tests/test_bridge_refresh.py",
+    "tests/test_commands.py",
+    "tests/test_control.py",
+    "tests/test_handoff.py",
+    "tests/test_hygiene.py",
+    "tests/test_oracle.py",
+    "tests/test_runner.py",
+    "tests/test_scope_check.py",
+    "tools/benchmark_scorer.py"
+  ],
+  "next_recommended_step": "Run two independent read-only rereviews when subagent quota is available, then mark P008 and M2 DONE if no blocking findings remain.",
+  "risks": [
+    "Final independent rereview is pending because two reviewer agents errored with the Codex usage-limit message.",
+    "HMAC and digest checks do not replace an OS sandbox for hostile agent or reviewer processes.",
+    "Adapter timeout remains a follow-up hardening item."
+  ],
+  "status": "READY_FOR_REVIEW",
+  "task_id": "P008",
+  "temporary_files_created": [
+    "/tmp/boardflowbench-p008-smoke-final-workspace",
+    "/tmp/boardflowbench-p008-smoke-final-results",
+    "/tmp/boardflowbench-p008-noboard-final-workspace",
+    "/tmp/boardflowbench-p008-seed-score.json",
+    "/tmp/boardflowbench-p008-smoke-final-handoff.json",
+    "/private/tmp/p008_handoff.json"
+  ],
+  "temporary_files_removed": [],
+  "tests": [
+    {
+      "name": "Full pytest suite",
+      "notes": "111 passed, including mutation tests for signed manifests, trusted evidence, reviewer mutations, aggregation bindings, handoff semantics, policy-file scope, command placeholders, and oracle pinning.",
+      "result": "PASS"
+    },
+    {
+      "name": "Real Expense Lite smoke",
+      "notes": "Ran against local sibling demo and oracle repositories with fixed seed and oracle commits.",
+      "result": "PASS"
+    }
+  ]
+}

@@ -9,8 +9,12 @@ BoardFlowBench 的核心目标不是做一个 GUI 工具，也不是单纯检查
 本仓库包含三层内容：
 
 - **BoardFlow 协议**：`.board/`、`.repo_manager/` 等仓库内状态文件，用来记录任务、交接、风险、验证证据和 agent 上下文。
-- **Agent skills**：Claude Code 可使用的 skills，帮助 agent 读取状态、更新看板、写 handoff、做代码健康审查。
+- **Agent skills**：coding agent 可使用的 skills，帮助 agent 读取状态、更新看板、写 handoff、做代码健康审查和独立 review。
 - **Benchmark checks**：`tools/benchmark_scorer.py` 和 core checker，用可观察的 repo 状态评估任务完成、交接质量、scope control、hygiene 和 board consistency。
+
+Expense Lite demo 不再作为本仓库中的业务代码维护。它位于独立仓库
+`ChenNeuro/ExpenseLiteBenchDemo`，每次实验从固定 seed commit clone 到临时 workspace。
+根目录的 `PROJECT_BOARD.md` 和 `.board/` 只记录 BoardFlowBench 自身研发任务。
 
 ## 核心 Agent Skills
 
@@ -68,21 +72,29 @@ BoardFlowBench 的核心目标不是做一个 GUI 工具，也不是单纯检查
 - 改默认初始规则：编辑 `repo_manager_core/default_smell_rules.json` 或 `repo_manager_core/default_search_rules.json`。
 - 改算法阈值：当前仍在源码中，例如 wrapper 长度、fragmented helper 数量、顶层 Python 文件数量。
 
+### BoardFlow Reviewer (`boardflow-reviewer`)
+
+独立检查 scorer 输出、git diff、handoff、scope、hygiene 和 board consistency。Reviewer 只报告风险，不在同一个 reviewer pass 中修改实现，也不能把自己的判断当成验收证据。确定性 finalize gate 才能决定 sticker 是否可以进入下一阶段。
+
 ## 目录结构
 
 ```
 BoardFlowBench/
-├── .claude/
-│   └── skills/              # Claude Code 项目级 skill 入口
 ├── repo_manager_core/       # 唯一核心实现
 │   ├── board/               # Agent Bridge: 看板 I/O、交接、验证
 │   ├── style/               # 风格学习、profile 构建
 │   └── health/              # Code Health: AST 扫描、味道检测
 ├── skills/
 │   ├── agent-bridge/        # Skill: 任务交接管理
-│   └── code-health-review/  # Skill: 代码健康审查
+│   ├── code-health-review/  # Skill: 代码健康审查
+│   └── boardflow-reviewer/  # Skill: 独立 reviewer
 ├── tools/
 │   └── benchmark_scorer.py  # 评分运行器
+├── benchmark/
+│   ├── targets/             # 独立 demo 仓库地址和固定 seed commit
+│   ├── tasks/expense_lite/  # Demo benchmark 任务规格
+│   └── templates/           # 注入临时 workspace 的协议模板
+├── project/tasks/           # BoardFlowBench 自身研发任务规格
 ├── install/                 # Claude Code 安装脚本
 ├── tests/                   # 测试
 ├── .board/                  # Agent Bridge 状态文件
@@ -110,17 +122,6 @@ PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_init_board.py --help
 
 这个项目里的“agent”不是一个单独启动的后台服务，而是一组给 Claude Code 读取的 **skills + repo-local 状态协议**。实际用法是：让当前 coding agent 调用对应 skill，skill 再读写 `.board/` 和 `.repo_manager/` 中的共享状态。
 
-#### 作为 Claude Code 项目使用
-
-仓库内已经包含 Claude Code 项目级 skill 配置：
-
-```text
-.claude/skills/agent-bridge/SKILL.md
-.claude/skills/code-health-review/SKILL.md
-```
-
-打开本仓库时，Claude Code 可以直接读取这些项目级 skills。它们是 wrapper，真正实现仍在 `skills/` 和 `repo_manager_core/` 中，避免维护两份逻辑。
-
 #### 安装为 Claude Code 全局 skill
 
 如果希望在其他仓库中也使用这些 skills：
@@ -137,13 +138,13 @@ bash install/install_claude.sh
 `agent-bridge` 用来做任务接手、状态同步和交接记录。你可以直接在 agent 对话里这样要求：
 
 ```text
-Use the agent-bridge skill. Read .board/tasks.yaml and .repo_manager/agent_context.md, then continue task T002.
+Use the agent-bridge skill. Read .board/tasks.yaml and .repo_manager/agent_context.md, then continue the assigned project task.
 ```
 
 中文也可以直接说：
 
 ```text
-使用 agent-bridge。先读 .board/tasks.yaml 和 .repo_manager/agent_context.md，检查 T002 的依赖、allowed_paths 和 acceptance_commands，然后继续任务。
+使用 agent-bridge。先读 .board/tasks.yaml 和 .repo_manager/agent_context.md，检查被分配项目任务的依赖和验收条件，然后继续任务。
 ```
 
 agent 应该按这个顺序工作：
@@ -156,7 +157,7 @@ agent 应该按这个顺序工作：
 6. 停止或移交前写 `.board/handoffs/<task_id>_<agent>.json`。
 7. 更新 `.repo_manager/agent_context.md`，让下一个 agent 能接手。
 
-当前仓库的 `.board/tasks.yaml` 中，`T001` 已经是 `DONE`，`T002` 还在 `TODO`，所以演示接手时通常从 `T002` 开始。
+根 taskboard 只服务 BoardFlowBench 研发。Demo 实验使用初始化命令生成自己的 B 系列 taskboard。
 
 ### 3. 直接运行 Agent Bridge 脚本
 
@@ -167,21 +168,26 @@ agent 应该按这个顺序工作：
 PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_init_board.py --repo .
 
 # 更新任务状态
-PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_status.py T002 IN_PROGRESS --owner codex --repo .
+PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_status.py P004 IN_PROGRESS --owner codex --repo .
 
-# 创建交接记录
-PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_handoff.py T002 codex first_worker \
+# 开始任务前刷新 blackboard、sticker 和 git 状态
+PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_refresh.py \
+  --phase start --agent-id codex --task-id P004 --repo .
+
+# 创建交接记录。handoff.json 必须包含命令、测试及其真实结果。
+PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_handoff.py \
   --repo . \
-  --status IN_PROGRESS \
-  --files src/parser.py \
-  --risks "CSV edge cases still need review" \
-  --next-step "Run parser and validator tests"
+  --input handoff.json
 
 # 学习仓库风格
 PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_learn_style.py .
 
 # 更新 agent 上下文
-PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_update_context.py --repo . --agent-id codex --task-id T002
+PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_update_context.py --repo . --agent-id codex --task-id P004
+
+# 结束前刷新共享上下文
+PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_refresh.py \
+  --phase end --agent-id codex --task-id P004 --repo .
 ```
 
 ### 4. Code Health Review 怎么用
@@ -294,11 +300,87 @@ PYTHONPATH=. python3 skills/code-health-review/scripts/health_generate_report.py
 
 ### 5. 运行 Benchmark Scorer
 
+先从独立 demo seed 初始化临时实验 workspace：
+
 ```bash
-PYTHONPATH=. python3 tools/benchmark_scorer.py --task path/to/task.yaml --repo . --output outputs/score.json
+PYTHONPATH=. python3 scripts/init_benchmark_workspace.py \
+  --target expense_lite \
+  --condition full_boardflow \
+  --task-id B001 \
+  --workspace /tmp/boardflowbench-runs/run-001
 ```
 
-### 6. 运行测试
+本地验证尚未推送的 sibling demo 仓库时，追加
+`--source-repo ../ExpenseLiteBenchDemo`。
+
+完整 runner 会在确定性 gate 通过后自动注入下一任务规格。下面的命令只用于恢复 runner 已写入的签名 activation 过渡：
+
+```bash
+PYTHONPATH=. python3 scripts/activate_benchmark_task.py \
+  --run-manifest /tmp/boardflowbench-results/<run-id>/run.json
+```
+
+scorer 针对临时 workspace 运行：
+
+```bash
+PYTHONPATH=. python3 tools/benchmark_scorer.py \
+  --task .board/assigned_task.yaml \
+  --repo /tmp/boardflowbench-runs/run-001 \
+  --baseline <sticker-baseline-sha> \
+  --oracle-root ../ExpenseLiteBenchOracles \
+  --oracle-commit <fixed-oracle-pack-sha> \
+  --output /tmp/boardflowbench-runs/run-001-score.json \
+  --fail-on-violations
+```
+
+完整实验 runner 会按条件初始化 workspace、验证 seed、暂停等待 agent、执行确定性 finalize gate，并在 gate 通过后激活下一个 sticker：
+
+```bash
+PYTHONPATH=. python3 scripts/run_scenario.py \
+  --target expense_lite \
+  --condition full_boardflow \
+  --workspace /tmp/boardflowbench-runs/run-001 \
+  --oracle-root ../ExpenseLiteBenchOracles \
+  --results-dir /tmp/boardflowbench-results \
+  --source-repo ../ExpenseLiteBenchDemo
+```
+
+完整生命周期优先使用 runner。单独的 workspace 初始化命令用于检查注入边界；`.board/run.yaml` 和 workspace 内 evidence 只是可读镜像。runner 将签名 `run.json`、可信 score 和 evidence 保存在 workspace 外部的 results 目录，并要求同样位于 workspace 外部的私有 oracle 仓库处于 target manifest 固定 commit 且没有本地改动。full BoardFlow 初始化会将 repo-local `search_rules.json` 和 `smell_rules.json` 纳入 Git 基线，后续策略改动不会绕过 scope 检查。
+
+HMAC 签名只防止 workspace 内伪造，不能替代 OS sandbox。使用 `--agent-command` 自动运行不可信 agent 时，需要外部 sandbox，并显式传入 `--allow-unisolated-agent-command` 表示已知晓该边界。
+
+恢复人工 checkpoint：
+
+```bash
+PYTHONPATH=. python3 scripts/run_scenario.py \
+  --resume /tmp/boardflowbench-results/<run-id>/run.json
+```
+
+如需 reviewer adapter，在每次 resume 时由操作员重新传入 `--reviewer-command`。可执行 adapter 命令不会写入签名 manifest。Reviewer adapter 只能使用操作员信任的命令；runner 会在执行前后校验签名状态、key、score 和 evidence 的摘要，但这不能替代外部 OS sandbox。
+
+聚合外部结果：
+
+```bash
+PYTHONPATH=. python3 scripts/aggregate_benchmark_results.py \
+  --results-dir /tmp/boardflowbench-results \
+  --output /tmp/boardflowbench-results/summary.json
+```
+
+### 6. 初始化空仓库
+
+空仓库不由 agent 凭空发明通用 scaffold。先列出 allowlist 中固定 commit 的成熟外部模板，再由用户明确选择：
+
+```bash
+PYTHONPATH=. python3 scripts/bootstrap_repo.py recommend \
+  --catalog benchmark/bootstrap_templates/catalog.json
+
+PYTHONPATH=. python3 scripts/bootstrap_repo.py apply \
+  --repo /tmp/new-repo \
+  --prompt-file /tmp/user-prompt.md \
+  --template-id python-package-copier-pdm
+```
+
+### 7. 运行测试
 
 ```bash
 PYTHONPATH=. python3 -m pytest tests/ -v
@@ -330,3 +412,4 @@ Reviewer / scorer 检查任务完成、handoff、scope、hygiene 和 board consi
 - **Code Health 管"质量"** — 代码结构审查
 - **Benchmark Scorer 管"证据"** — 只基于可观察 repo 状态评分
 - **仓库状态是真理来源** — 不依赖聊天记录传递上下文
+- **Demo 是独立测试平台** — 根仓库不维护 demo 业务功能，实验使用固定 seed 的临时 clone

@@ -1,0 +1,22 @@
+task_id: B004
+title: Report artifact
+description: Generate a stable Markdown report artifact from monthly summaries.
+dependencies:
+  - B003
+allowed_paths:
+  - src/expense_lite/report.py
+  - src/expense_lite/cli.py
+  - tests/test_report.py
+  - artifacts/
+  - .board/tasks.yaml
+  - PROJECT_BOARD.md
+  - .board/handoffs/
+acceptance_criteria:
+  - Render a Markdown report with deterministic headings and totals.
+  - Write generated reports only under artifacts/.
+  - Do not leave scratch files in the repository root.
+  - Add focused tests for report rendering.
+handoff_requirement:
+  required: true
+  schema: .board/handoff.schema.json
+  directory: .board/handoffs/

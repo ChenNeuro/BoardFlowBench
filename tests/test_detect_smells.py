@@ -24,6 +24,13 @@ def test_detects_patch_name_smell():
     assert any(warning["type"] == "patch_name_smell" for warning in report["warnings"])
 
 
+def test_patch_name_smell_in_tests_is_low_severity():
+    report = detect_function_smells([_fn("test_detects_patch_name_smell", file_path="tests/test_detect_smells.py")])
+
+    warning = next(warning for warning in report["warnings"] if warning["type"] == "patch_name_smell")
+    assert warning["severity"] == "low"
+
+
 def test_detects_unused_function():
     report = detect_function_smells([_fn("used"), _fn("caller", calls=["used"])])
 

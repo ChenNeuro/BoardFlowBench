@@ -1,6 +1,6 @@
 # Design Notes
 
-BoardFlowBench separates protocol state, benchmark definitions, and the demo repository under test.
+BoardFlowBench separates project development state, benchmark definitions, and standalone demo repositories under test.
 
 ## BoardFlow Architecture
 
@@ -9,16 +9,18 @@ BoardFlow is a repo-local shared state protocol for sequential multi-agent codin
 It has three layers:
 
 - policy layer: `AGENTS.md` and `AI_CONTRACT.md`
-- state layer: `PROJECT_BOARD.md`, `.board/tasks.yaml`, and `.board/handoffs/*.json`
-- benchmark layer: `benchmark/tasks/`, `benchmark/scenarios/`, and future scoring checks
+- project state layer: `PROJECT_BOARD.md`, `.board/tasks.yaml`, and `.board/handoffs/*.json`
+- benchmark layer: `benchmark/targets/`, `benchmark/tasks/`, `benchmark/scenarios/`, and scoring checks
 
-`demo_repo_template/` is the target repo that agents modify during benchmark tasks. It is intentionally small so the benchmark focuses on context continuity and coordination discipline rather than difficult application logic.
+Expense Lite is maintained as the standalone `ChenNeuro/ExpenseLiteBenchDemo` target repository. Each experiment clones a fixed seed commit into an external workspace. BoardFlow condition setup injects run-local protocol state into that clone. No-board setup leaves the clone free of BoardFlow files.
+
+The workspace contains readable board and evidence mirrors. Benchmark authority stays outside the agent workspace: the runner signs external `run.json`, binds stage evidence to finalized Git commits, executes a clean oracle pack pinned by commit SHA, and requires both the results directory and oracle pack to remain outside the workspace. Reviewer adapters are operator-trusted only; the runner checks trusted control-plane digests before and after reviewer execution. This integrity layer does not replace an OS sandbox for hostile agent or reviewer processes.
 
 ## Board And Handoff Separation
 
 The board and handoff files answer different questions.
 
-`PROJECT_BOARD.md` and `.board/tasks.yaml` describe the current shared state:
+The root `PROJECT_BOARD.md` and `.board/tasks.yaml` describe BoardFlowBench development state. Injected workspace copies describe one demo run:
 
 - current milestone
 - task list
@@ -47,11 +49,10 @@ It must not contain current milestone status, task owner, or task progress. Thos
 
 ## Consistency Verification
 
-The benchmark should later verify:
+The benchmark verifies:
 
 - `PROJECT_BOARD.md` and `.board/tasks.yaml` name the same milestone.
 - Task ids, statuses, owners, and dependencies match between board views.
 - Task statuses use only `TODO`, `IN_PROGRESS`, `BLOCKED`, `READY_FOR_REVIEW`, and `DONE`.
-- Handoff JSON files match `.board/handoff.schema.json`.
-- Handoff `task_id` values exist in `.board/tasks.yaml`.
+- The latest relevant handoff JSON matches `.board/handoff.schema.json`, belongs to the expected task, and records at least one passing command and test.
 - Files changed by an agent stay within the task's allowed paths unless an exception is recorded.

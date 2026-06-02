@@ -10,23 +10,26 @@ This skill maintains shared repository state for coding agents.
 ## Workflow
 
 1. Read `.board/tasks.yaml` if it exists.
-2. Read `.repo_manager/agent_context.md` if it exists.
-3. Identify the current task, owner, status, and dependencies.
-4. Learn or update repository style using the style learner.
-5. Record completed work and remaining work.
-6. Write a handoff JSON file when stopping or transferring work.
-7. Update `.board/tasks.yaml`.
-8. Summarize what the next agent should know.
+2. Run `bridge_refresh.py --phase start` before changing code.
+3. Read `.repo_manager/agent_context.md` if it exists.
+4. Identify the current task, owner, status, and dependencies.
+5. Learn or update repository style using the style learner.
+6. Record completed work and remaining work.
+7. Write a handoff JSON file when stopping or transferring work.
+8. Update task status through `bridge_status.py`.
+9. Run `bridge_refresh.py --phase end` before stopping.
+10. Summarize what the next agent should know.
 
 ## Scripts
 
 | Script | Purpose |
 |--------|---------|
 | `bridge_init_board.py` | Initialize `.board/tasks.yaml` and handoffs/reviews directories |
-| `bridge_status.py` | Update task status in the board |
-| `bridge_handoff.py` | Create a structured handoff JSON for agent transition |
+| `bridge_status.py` | Update task status in both taskboard views |
+| `bridge_handoff.py` | Validate and store a complete handoff JSON supplied with `--input` |
 | `bridge_learn_style.py` | Learn repository style and write `.repo_manager/repo_style_profile.json` |
 | `bridge_update_context.py` | Write `.repo_manager/agent_context.md` for the next agent |
+| `bridge_refresh.py` | Check taskboard, git state, and shared context at turn start or end |
 
 ## Outputs
 
@@ -40,5 +43,10 @@ This skill maintains shared repository state for coding agents.
 
 - Never modify files outside the task's allowed paths.
 - Keep dynamic state in `.board/` files, not in agent memory.
-- Always write a handoff record before transferring work.
+- Treat each task as one sticker on the shared blackboard.
+- Use `bridge_status.py` for status changes so `PROJECT_BOARD.md` and `.board/tasks.yaml` stay synchronized.
+- Stop and resolve taskboard inconsistencies instead of guessing which view is correct.
+- Preserve human-written records verbatim.
+- Always write a non-empty handoff record before transferring work.
+- Include at least one real `PASS` command record and one real `PASS` test record in each handoff.
 - Treat the repository as the source of truth, not chat history.

@@ -1,0 +1,104 @@
+{
+  "task_id": "P001",
+  "agent_id": "codex",
+  "agent_role": "reviewer_integration_implementer",
+  "status": "DONE",
+  "files_changed": [
+    ".github/workflows/reviewer.yml",
+    "repo_manager_core/health/reviewdog_export.py",
+    "tests/test_reviewdog_export.py",
+    "benchmark/tasks/task_005_reviewer_integration.yaml",
+    ".board/tasks.yaml",
+    "PROJECT_BOARD.md",
+    ".board/handoffs/P001_codex_handoff.json"
+  ],
+  "commands_run": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 -m pytest tests/test_reviewdog_export.py",
+      "result": "PASS",
+      "notes": "Ran 3 targeted reviewdog exporter tests; all passed."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 -m pytest",
+      "result": "PASS",
+      "notes": "Ran the full repository regression suite; 36 tests passed."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 skills/code-health-review/scripts/health_generate_report.py . --output-dir demo_repo_template/.scratch/t005-reviewdog-smoke",
+      "result": "PASS",
+      "notes": "Generated a real health report under the permitted scratch directory for smoke validation."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 -m repo_manager_core.health.reviewdog_export --input demo_repo_template/.scratch/t005-reviewdog-smoke/smell_report.json --profile demo_repo_template/.scratch/t005-reviewdog-smoke/repo_profile.json --output demo_repo_template/.scratch/t005-reviewdog-smoke/reviewdog.rdjsonl --repo .",
+      "result": "PASS",
+      "notes": "Exported 93 file-backed reviewdog diagnostics from a real Repo Manager smell report."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 - <<'PY' ... validate workflow YAML, action pins, and fork PR guard ... PY",
+      "result": "PASS",
+      "notes": "Parsed reviewer.yml and verified both jobs, immutable action pins, absence of pull_request_target, absence of local call_agent usage, and the fork PR guard."
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS",
+      "notes": "No whitespace errors were reported."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/run_score.py --task benchmark/tasks/task_005_reviewer_integration.yaml --repo . --output /tmp/boardflow_t005_score.json",
+      "result": "PASS",
+      "notes": "Scorer reported total=98: correctness 40/40, hygiene 18/20, scope control 15/15, handoff 15/15, and board consistency 10/10. The only deduction is for legitimate new implementation files remaining untracked before staging."
+    },
+    {
+      "command": "command -v actionlint",
+      "result": "NOT_RUN",
+      "notes": "actionlint is not installed locally, so workflow validation used YAML parsing and structural assertions instead."
+    }
+  ],
+  "tests": [
+    {
+      "name": "tests/test_reviewdog_export.py",
+      "result": "PASS",
+      "notes": "Covered relative path normalization, function line mapping, non-file finding filtering, severity mapping, rdjsonl writing, and CLI execution."
+    },
+    {
+      "name": "tests",
+      "result": "PASS",
+      "notes": "Full pytest regression suite passed with 36 tests."
+    },
+    {
+      "name": "reviewdog exporter smoke validation",
+      "result": "PASS",
+      "notes": "Validated 93 generated diagnostics against real repository files: 5 WARNING and 88 INFO."
+    },
+    {
+      "name": "GitHub Actions hosted execution",
+      "result": "NOT_RUN",
+      "notes": "Hosted GitHub Actions execution requires pushing the workflow to GitHub."
+    }
+  ],
+  "temporary_files_created": [
+    "demo_repo_template/.scratch/t005-reviewdog-smoke/",
+    ".pytest_cache/",
+    "/tmp/boardflow_t005_score.json"
+  ],
+  "temporary_files_removed": [
+    "demo_repo_template/.scratch/t005-reviewdog-smoke/",
+    ".pytest_cache/",
+    "/tmp/boardflow_t005_score.json"
+  ],
+  "decisions": [
+    "Kept Repo Manager as a deterministic signal producer and used reviewdog as the publishing adapter.",
+    "Added PR-Agent as a separately configured optional reviewer instead of reusing repo_manager_core.health.call_agent.",
+    "Pinned third-party GitHub Actions to immutable commit SHAs.",
+    "Kept T005 independent from the T001 through T004 benchmark sequence so reviewer tooling can be completed early.",
+    "Skipped publishing and PR-Agent execution for fork pull requests rather than using pull_request_target to run untrusted code with write-capable credentials."
+  ],
+  "risks": [
+    "PR-Agent remains disabled until the repository variable ENABLE_PR_AGENT is set to true and the OPENAI_KEY secret is configured.",
+    "Hosted GitHub Actions execution was not available locally; the workflow was validated through YAML parsing, structural assertions, tests, and a real exporter smoke run.",
+    "Fork pull requests run tests and signal generation but do not publish reviewdog comments or run PR-Agent because pull_request tokens are intentionally read-only.",
+    "The current repo health scan generated 93 file-backed diagnostics. Reviewdog publishes warning-or-higher findings, but repo-local smell rules should still be calibrated over time through explicit user feedback.",
+    "The final local scorer result is 98/100 because five legitimate T005 implementation files remain untracked before staging. They are all inside T005 allowed_paths; no cache, scratch, scope, correctness, handoff, or board-consistency issue remains."
+  ],
+  "next_recommended_step": "Push the branch to exercise the hosted workflow, then set ENABLE_PR_AGENT=true and configure OPENAI_KEY when independent AI PR review is desired."
+}

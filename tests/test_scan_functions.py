@@ -152,3 +152,22 @@ def test_structure_scan_respects_search_rules(tmp_path):
 
     assert structure["python_file_count"] == 1
     assert not any(warning["type"] == "suspicious_directory_name" for warning in structure["warnings"])
+
+
+def test_structure_scan_only_flags_output_directory_segments(tmp_path):
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    (scripts / "aggregate_results.py").write_text("def aggregate_results():\n    return []\n", encoding="utf-8")
+    outputs = tmp_path / "outputs"
+    outputs.mkdir()
+    (outputs / "generated.py").write_text("def generated():\n    return []\n", encoding="utf-8")
+
+    structure = analyze_repo_structure(tmp_path)
+    output_warnings = [
+        warning
+        for warning in structure["warnings"]
+        if warning["type"] == "python_file_inside_output_directory"
+    ]
+
+    assert len(output_warnings) == 1
+    assert output_warnings[0]["file"].endswith("outputs/generated.py")

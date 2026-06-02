@@ -1,0 +1,22 @@
+task_id: B002
+title: CSV import
+description: Add CSV expense import after date parsing exists.
+dependencies:
+  - B001
+allowed_paths:
+  - src/expense_lite/parser.py
+  - src/expense_lite/validator.py
+  - tests/test_parser.py
+  - tests/test_validator.py
+  - .board/tasks.yaml
+  - PROJECT_BOARD.md
+  - .board/handoffs/
+acceptance_criteria:
+  - Read CSV rows with date, description, category, and amount fields.
+  - Reuse the date parser instead of duplicating date logic.
+  - Report missing required columns clearly.
+  - Add focused tests for valid CSV and malformed CSV.
+handoff_requirement:
+  required: true
+  schema: .board/handoff.schema.json
+  directory: .board/handoffs/

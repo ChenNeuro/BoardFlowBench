@@ -22,12 +22,18 @@ CACHE_NAMES = {
     ".ruff_cache",
     ".DS_Store",
 }
+GENERATED_REPO_MANAGER_PATHS = {
+    ".repo_manager/agent_context.md",
+    ".repo_manager/repo_style_profile.json",
+}
 
 
 def check_hygiene(
     repo: str | Path,
     artifact_dir: str | Path = "repo_manager_report/artifacts",
     scratch_dir: str | Path = ".repo_manager/scratch",
+    *,
+    allowed_paths: list[str] | None = None,
 ) -> dict[str, Any]:
     """Score repository hygiene out of 20."""
     root = Path(repo)
@@ -69,7 +75,7 @@ def check_hygiene(
     else:
         score += 3
 
-    untracked = _unexpected_untracked(root)
+    untracked = _unexpected_untracked(root, allowed_paths=allowed_paths or [])
     details["unexpected_untracked_files"] = untracked["files"]
     warnings.extend(untracked["warnings"])
     if untracked["files"]:
@@ -131,7 +137,7 @@ def _cache_files(root: Path) -> list[str]:
     return sorted(matches)
 
 
-def _unexpected_untracked(root: Path) -> dict[str, Any]:
+def _unexpected_untracked(root: Path, *, allowed_paths: list[str]) -> dict[str, Any]:
     # Git gives the best signal for stray files without requiring a hard-coded
     # list of every valid path in the repository.
     tracked = git_lines(root, ["git", "ls-files"])
@@ -158,8 +164,19 @@ def _unexpected_untracked(root: Path) -> dict[str, Any]:
         if not line.startswith("?? "):
             continue
         path = line[3:]
-        if path.startswith("benchmark/results/"):
+        if (
+            path in GENERATED_REPO_MANAGER_PATHS
+            or _matches_any(path, allowed_paths)
+        ):
             continue
         files.append(path)
 
     return {"files": sorted(files), "warnings": []}
+
+
+def _matches_any(path: str, patterns: list[str]) -> bool:
+    for pattern in patterns:
+        normalized = pattern.rstrip("/")
+        if path == normalized or (pattern.endswith("/") and path.startswith(normalized + "/")):
+            return True
+    return False

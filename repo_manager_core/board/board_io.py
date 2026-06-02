@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
@@ -71,16 +72,13 @@ def _dump_yaml(value: Any, indent: int = 0) -> str:
         lines = []
         for k, v in value.items():
             if isinstance(v, (dict, list)):
-                lines.append(f"{prefix}{k}:")
-                lines.append(_dump_yaml(v, indent + 1))
-            elif v is None:
-                lines.append(f"{prefix}{k}:")
-            elif isinstance(v, bool):
-                lines.append(f"{prefix}{k}: {'true' if v else 'false'}")
-            elif isinstance(v, str):
-                lines.append(f"{prefix}{k}: {v}")
+                if v:
+                    lines.append(f"{prefix}{k}:")
+                    lines.append(_dump_yaml(v, indent + 1).rstrip("\n"))
+                else:
+                    lines.append(f"{prefix}{k}: {'{}' if isinstance(v, dict) else '[]'}")
             else:
-                lines.append(f"{prefix}{k}: {v}")
+                lines.append(f"{prefix}{k}: {_dump_scalar(v)}")
         return "\n".join(lines) + "\n"
     if isinstance(value, list):
         if not value:
@@ -90,19 +88,41 @@ def _dump_yaml(value: Any, indent: int = 0) -> str:
             if isinstance(item, dict):
                 # The board format uses lists of task mappings, so this dumper
                 # supports that case without pulling in a required dependency.
-                lines.append(f"{prefix}- ")
+                first = True
                 for k, v in item.items():
+                    item_prefix = f"{prefix}- " if first else f"{prefix}  "
                     if isinstance(v, (dict, list)):
-                        lines.append(f"{prefix}  {k}:")
-                        lines.append(_dump_yaml(v, indent + 2))
+                        if v:
+                            lines.append(f"{item_prefix}{k}:")
+                            lines.append(_dump_yaml(v, indent + 2).rstrip("\n"))
+                        else:
+                            lines.append(f"{item_prefix}{k}: {'{}' if isinstance(v, dict) else '[]'}")
                     else:
-                        lines.append(f"{prefix}  {k}: {v}")
-            elif isinstance(item, str):
-                lines.append(f"{prefix}- {item}")
+                        lines.append(f"{item_prefix}{k}: {_dump_scalar(v)}")
+                    first = False
             else:
-                lines.append(f"{prefix}- {item}")
+                lines.append(f"{prefix}- {_dump_scalar(item)}")
         return "\n".join(lines) + "\n"
     return f"{prefix}{value}"
+
+
+def _dump_scalar(value: Any) -> str:
+    if value is None:
+        return "null"
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if not isinstance(value, str):
+        return str(value)
+    reserved = {"", "null", "None", "~", "true", "false"}
+    if (
+        value not in reserved
+        and value == value.strip()
+        and ": " not in value
+        and " #" not in value
+        and not value.startswith(("-", "?", ":", "!", "&", "*", "{", "}", "[", "]", ",", "#", "|", ">", "@", "`"))
+    ):
+        return value
+    return json.dumps(value, ensure_ascii=False)
 
 
 # ---- Simple YAML subset parser (fallback when PyYAML unavailable) ----
@@ -216,6 +236,10 @@ def _parse_mapping(
 
 
 def _parse_scalar(value: str) -> Any:
+    if value == "[]":
+        return []
+    if value == "{}":
+        return {}
     if value in {"null", "None", "~"}:
         return None
     if value == "true":

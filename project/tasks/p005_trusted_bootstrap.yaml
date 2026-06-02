@@ -1,0 +1,10 @@
+task_id: P005
+title: Trusted repository bootstrap
+description: Recommend allowlisted Copier or Git templates for empty repositories without inventing a universal business scaffold.
+dependencies:
+  - P004
+acceptance_criteria:
+  - List fixed-ref template candidates before modifying an empty repository.
+  - Reject unregistered templates and templates without a fixed ref.
+  - Require explicit confirmation before Copier template tasks may run.
+  - Preserve the original user prompt in an auditable bootstrap record.

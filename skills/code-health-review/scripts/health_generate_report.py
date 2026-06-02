@@ -16,7 +16,7 @@ from repo_manager_core.style.learn_repo_style import (
     resolve_output_path,
     learn_repo_style,
 )
-from repo_manager_core.style.style_profile import build_profile, build_smell_report
+from repo_manager_core.style.style_profile import build_profile, build_smell_report, refresh_structure_profile
 from repo_manager_core.health.generate_health_report import render_review_report
 from repo_manager_core.smell_learning import record_feedback, update_smell_rules
 
@@ -78,6 +78,7 @@ def main() -> int:
     # Keep the scan artifact when present; it is the expensive repository walk.
     # Smell/style artifacts below are cheap and depend on mutable learned rules.
     repo_profile = read_json(profile_path) if profile_path.exists() else build_profile(root)
+    repo_profile = refresh_structure_profile(repo_profile, root)
     write_json(repo_profile, profile_path)
 
     # Derived artifacts are rebuilt on each report run so changed smell_rules.json

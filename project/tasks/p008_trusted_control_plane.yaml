@@ -1,0 +1,13 @@
+task_id: P008
+title: Trusted control-plane hardening
+description: Move benchmark authority outside the agent workspace and close the trust-boundary failures identified by independent protocol, security, and architecture review.
+dependencies:
+  - P007
+acceptance_criteria:
+  - Sign external run manifests and reject modified or unsigned resume state.
+  - Treat workspace run metadata and evidence as mirrors only; require trusted external evidence for activation.
+  - Pin and validate clean oracle-pack commits before executing hidden checks.
+  - Fail closed for unavailable scope baselines and bind accepted evidence to the finalized workspace commit.
+  - Require meaningful handoff validation against the project-owned schema.
+  - Harden bootstrap trust policy, command placeholder handling, and aggregation validation.
+  - Add mutation tests for trust-boundary failures and complete an independent re-review.

@@ -11,12 +11,12 @@ from repo_manager_core.smell_learning import (
     POLICY_ALLOWED,
     POLICY_CASE_BY_CASE,
     POLICY_CONTEXTUAL,
-    active_keywords,
     feedback_question,
     generate_learned_policy_summary,
     keyword_rule,
     load_default_smell_rules,
     load_smell_rules,
+    matching_keywords,
 )
 
 from .scan_repo_functions import IGNORED_DIRS, iter_python_files
@@ -87,7 +87,7 @@ def analyze_repo_structure(
             # 目录名策略同样来自 smell rules。比如 old/ 在某些项目里可能是
             # compatibility layer，可以通过反馈标记为 allowed。扫描范围本身由
             # search_rules 控制，所以被排除的目录不会继续产生结构类误报。
-            for keyword in _matching_keywords(rules, "suspicious_directory_keywords", path.name):
+            for keyword in matching_keywords(rules, "suspicious_directory_keywords", path.name):
                 rule = keyword_rule(rules, "suspicious_directory_keywords", keyword)
                 _maybe_request_feedback(
                     feedback_candidates,
@@ -119,7 +119,7 @@ def analyze_repo_structure(
         # 中文说明：
         # 文件名命中策略时，不需要函数名也命中。因为 parser_final.py、
         # debug_utils.py 这类文件本身就可能是临时/归档痕迹。
-        for keyword in _matching_keywords(rules, "suspicious_file_keywords", path.name):
+        for keyword in matching_keywords(rules, "suspicious_file_keywords", path.name):
             rule = keyword_rule(rules, "suspicious_file_keywords", keyword)
             _maybe_request_feedback(
                 feedback_candidates,
@@ -144,7 +144,7 @@ def analyze_repo_structure(
                     "policy_source": rule["source"],
                 }
             )
-        if any(_contains_keyword(part, OUTPUT_DIR_KEYWORDS) for part in path.parts):
+        if any(_contains_keyword(part, OUTPUT_DIR_KEYWORDS) for part in _relative_parent_parts(path, root)):
             # Python under output/artifact directories is often generated or
             # misplaced source; either case is worth human review.
             # 中文说明：
@@ -172,18 +172,18 @@ def analyze_repo_structure(
     }
 
 
-def _matching_keywords(rules: dict[str, Any], category: str, value: str) -> list[str]:
-    # 中文说明：
-    # 结构规则也使用简单子串匹配，保持和函数名规则一致。
-    lowered = value.lower()
-    return [keyword for keyword in active_keywords(rules, category) if keyword in lowered]
-
-
 def _should_warn(rule: dict[str, str]) -> bool:
     # 中文说明：
     # 结构类规则目前没有 unused_by_scan 这类上下文，因此 contextual 仍会报警，
     # 但 severity 会降为 low；allowed 和 case_by_case 不自动报警。
     return rule["policy"] not in {POLICY_ALLOWED, POLICY_CASE_BY_CASE}
+
+
+def _relative_parent_parts(path: Path, root: Path) -> tuple[str, ...]:
+    try:
+        return path.relative_to(root).parent.parts
+    except ValueError:
+        return path.parent.parts
 
 
 def _maybe_request_feedback(

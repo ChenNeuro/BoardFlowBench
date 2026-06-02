@@ -1,0 +1,12 @@
+task_id: P004
+title: Evidence gate and scorer hardening
+description: Add deterministic finalize gates, condition-aware scoring, baseline diff scope checks, and mutation fixtures.
+dependencies:
+  - P003
+acceptance_criteria:
+  - Treat unavailable git baselines as not evaluated instead of full scope credit.
+  - Check both taskboard views and real handoff schema validity.
+  - Distinguish legitimate task-owned additions from hygiene residue.
+  - Cover scorer failure modes with mutation fixtures.
+  - Separate seed validation from completion scoring.
+  - Require gate evidence before DONE and downstream task activation.

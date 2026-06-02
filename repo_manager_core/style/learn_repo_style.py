@@ -85,6 +85,7 @@ def learn_repo_style(repo_profile: dict[str, Any]) -> dict[str, Any]:
         "max_function_length": max(lengths) if lengths else 0,
         "common_name_prefixes": prefixes.most_common(10),
         "style_warnings": style_warnings,
+        "test_style": _test_style_summary(repo_profile, snake_case_pattern),
     }
 
 
@@ -94,3 +95,47 @@ def _matches_patch_policy(rules: dict[str, Any], name: str) -> bool:
         if keyword in lowered and keyword_rule(rules, "patch_keywords", keyword)["policy"] != POLICY_ALLOWED:
             return True
     return False
+
+
+def _test_style_summary(
+    repo_profile: dict[str, Any],
+    snake_case_pattern: re.Pattern[str],
+) -> dict[str, Any]:
+    root = Path(str(repo_profile.get("repo_path", "."))).resolve()
+    test_files = sorted(
+        {
+            str(item.get("file_path"))
+            for item in repo_profile.get("files", [])
+            if item.get("file_path") and _is_test_file(str(item["file_path"]))
+        }
+    )
+    test_functions = [
+        fn
+        for fn in repo_profile.get("functions", [])
+        if _is_test_file(str(fn.get("file_path", "")))
+        and str(fn.get("function_name", "")).startswith("test_")
+    ]
+    directories = Counter(_relative_parent(path, root) for path in test_files)
+    return {
+        "test_file_count": len(test_files),
+        "test_function_count": len(test_functions),
+        "snake_case_test_function_count": sum(
+            1
+            for fn in test_functions
+            if snake_case_pattern.match(str(fn.get("function_name", "")))
+        ),
+        "common_test_directories": directories.most_common(10),
+    }
+
+
+def _is_test_file(file_path: str) -> bool:
+    path = Path(file_path)
+    return path.name.startswith("test_") or "tests" in path.parts
+
+
+def _relative_parent(file_path: str, root: Path) -> str:
+    parent = Path(file_path).resolve().parent
+    try:
+        return parent.relative_to(root).as_posix() or "."
+    except ValueError:
+        return parent.as_posix()

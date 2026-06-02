@@ -1,13 +1,80 @@
 {
-  "repo_path": "",
-  "function_count": 0,
-  "module_count": 0,
-  "snake_case_function_count": 0,
-  "docstring_function_count": 0,
-  "patch_like_function_count": 0,
-  "average_function_length": 0,
-  "median_function_length": 0,
-  "max_function_length": 0,
-  "common_name_prefixes": [],
-  "style_warnings": []
+  "average_function_length": 18.82,
+  "common_name_prefixes": [
+    [
+      "",
+      157
+    ],
+    [
+      "test",
+      98
+    ],
+    [
+      "load",
+      11
+    ],
+    [
+      "write",
+      10
+    ],
+    [
+      "validate",
+      7
+    ],
+    [
+      "check",
+      5
+    ],
+    [
+      "run",
+      4
+    ],
+    [
+      "inject",
+      3
+    ],
+    [
+      "normalize",
+      2
+    ],
+    [
+      "oracle",
+      2
+    ]
+  ],
+  "docstring_function_count": 102,
+  "function_count": 375,
+  "max_function_length": 193,
+  "median_function_length": 12,
+  "module_count": 12,
+  "patch_like_function_count": 15,
+  "repo_path": ".",
+  "snake_case_function_count": 374,
+  "style_warnings": [
+    {
+      "reason": "Found 15 function names with patch-like words.",
+      "severity": "medium",
+      "suggestion": "Replace temporary fix names with stable domain names after behavior is validated.",
+      "type": "patch_like_naming_style"
+    }
+  ],
+  "test_style": {
+    "common_test_directories": [
+      [
+        "tests",
+        25
+      ],
+      [
+        "tests/fixtures",
+        1
+      ],
+      [
+        "tests/fixtures/sample_repo/pkg",
+        1
+      ]
+    ],
+    "snake_case_test_function_count": 98,
+    "test_file_count": 27,
+    "test_function_count": 98
+  }
 }

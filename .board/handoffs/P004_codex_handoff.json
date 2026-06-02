@@ -1,0 +1,49 @@
+{
+  "task_id": "P004",
+  "agent_id": "codex",
+  "agent_role": "implementer",
+  "status": "DONE",
+  "files_changed": [
+    ".board/handoff.schema.json",
+    "repo_manager_core/default_handoff.schema.json",
+    "repo_manager_core/board/evidence.py",
+    "repo_manager_core/board/schema_validation.py",
+    "repo_manager_core/board/board_sync.py",
+    "repo_manager_core/board/board_validator.py",
+    "repo_manager_core/board/handoff_writer.py",
+    "repo_manager_core/board/hygiene.py",
+    "repo_manager_core/board/scope_check.py",
+    "repo_manager_core/benchmark/commands.py",
+    "repo_manager_core/benchmark/finalize.py",
+    "tools/benchmark_scorer.py"
+  ],
+  "commands_run": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 -m pytest -p no:cacheprovider",
+      "result": "PASS",
+      "notes": "Repository test suite passed before final board closeout."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 scripts/validate_benchmark_seed.py --workspace ../ExpenseLiteBenchDemo --oracle-root ../ExpenseLiteBenchOracles",
+      "result": "PASS",
+      "notes": "Fixed seed reproduced its intentional B001 gap and passed the private seed oracle."
+    }
+  ],
+  "tests": [
+    {
+      "name": "condition-aware scorer and evidence gate tests",
+      "result": "PASS",
+      "notes": "Covered committed scope drift, missing baselines, empty handoffs, evidence-gated activation, and seed scoring."
+    }
+  ],
+  "temporary_files_created": [],
+  "temporary_files_removed": [],
+  "decisions": [
+    "Use observable git baseline diffs and external private oracle results as deterministic evidence.",
+    "Treat unavailable scope baselines as not evaluated instead of granting full credit.",
+    "Require non-empty schema-valid handoffs before full BoardFlow dependency activation.",
+    "Require external score evidence to match task, condition, baseline, seed SHA, and oracle pack commit."
+  ],
+  "risks": [],
+  "next_recommended_step": "Use the deterministic scorer as the blocking acceptance gate and keep qualitative reviewer findings separate."
+}
