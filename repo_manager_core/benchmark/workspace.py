@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
 from pathlib import Path
@@ -212,7 +213,7 @@ def _validate_transition_records(
             )
         )
         if external_evidence.exists():
-            evidence = load_yaml(external_evidence)
+            evidence = _load_json(external_evidence)
             snapshot = find_stage_snapshot(state, str(dep))
             violations.extend(validate_stage_snapshot(snapshot, evidence))
             if isinstance(evidence, dict) and evidence.get("seed_commit") != manifest["seed_commit"]:
@@ -230,6 +231,13 @@ def _validate_transition_records(
             ).get("violations", [])
         )
     return violations
+
+
+def _load_json(path: Path) -> Any:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        raise ValueError(f"external evidence is unreadable: {exc}") from exc
 
 
 def _restore_interrupted_activation(dest: Path, state: dict[str, Any], current: str) -> None:
