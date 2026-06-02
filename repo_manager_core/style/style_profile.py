@@ -13,7 +13,17 @@ from repo_manager_core.health.detect_function_smells import detect_function_smel
 def build_profile(repo_path: str | Path) -> dict[str, Any]:
     """Scan a repo and build a complete profile (functions + structure)."""
     profile = scan_repo_functions(repo_path)
-    structure = analyze_repo_structure(repo_path)
+    return refresh_structure_profile(profile, repo_path)
+
+
+def refresh_structure_profile(
+    repo_profile: dict[str, Any],
+    repo_path: str | Path | None = None,
+) -> dict[str, Any]:
+    """Refresh structure warnings in a cached function-scan profile."""
+    profile = dict(repo_profile)
+    root = Path(repo_path or profile.get("repo_path", "."))
+    structure = analyze_repo_structure(root)
     # Attach structure warnings to the same profile so downstream scripts only
     # need one JSON input.
     profile["structure_warnings"] = structure["warnings"]

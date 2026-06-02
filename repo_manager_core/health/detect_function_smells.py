@@ -11,12 +11,12 @@ from repo_manager_core.smell_learning import (
     POLICY_ALLOWED,
     POLICY_CASE_BY_CASE,
     POLICY_CONTEXTUAL,
-    active_keywords,
     feedback_question,
     generate_learned_policy_summary,
     keyword_rule,
     load_default_smell_rules,
     load_smell_rules,
+    matching_keywords,
 )
 
 
@@ -103,12 +103,12 @@ def detect_function_smells(
         # - suspicious：命中就报警；
         # - contextual：只有在 unused_by_scan 等上下文更可疑时报警；
         # - allowed/case_by_case：不自动报警，但可能生成反馈问题。
-        for keyword in _matching_keywords(rules, "patch_keywords", lowered):
+        for keyword in matching_keywords(rules, "patch_keywords", lowered):
             rule = keyword_rule(rules, "patch_keywords", keyword)
             _maybe_request_feedback(feedback_candidates, rule, "patch_keywords", keyword, name)
             if not _should_warn(rule, unused_by_scan=unused_by_scan):
                 continue
-            severity = "low" if rule["policy"] == POLICY_CONTEXTUAL else "medium"
+            severity = "low" if rule["policy"] == POLICY_CONTEXTUAL or _is_test_code(file_path, name) else "medium"
             warnings.append(
                 _with_rule_context(
                     _warning(
@@ -181,7 +181,7 @@ def detect_function_smells(
         # 文件名 smell 和函数名 smell 分开处理。即使一个文件没有很多函数，
         # 名字里出现 final/backup/debug 等策略命中的词，也可能说明代码归档
         # 或临时副本被留在主仓库。
-        for keyword in _matching_keywords(rules, "suspicious_file_keywords", file_name):
+        for keyword in matching_keywords(rules, "suspicious_file_keywords", file_name):
             rule = keyword_rule(rules, "suspicious_file_keywords", keyword)
             _maybe_request_feedback(
                 feedback_candidates,
@@ -253,13 +253,6 @@ def detect_function_smells(
     }
 
 
-def _matching_keywords(rules: dict[str, Any], category: str, value: str) -> list[str]:
-    # 中文说明：
-    # keyword 匹配目前是子串匹配，简单、透明、容易通过规则文件调整。
-    # 如果未来误报多，可以在这里升级为 word-boundary 或正则策略。
-    return [keyword for keyword in active_keywords(rules, category) if keyword in value]
-
-
 def _should_warn(rule: dict[str, str], *, unused_by_scan: bool) -> bool:
     # 中文说明：
     # policy 是自适应学习的核心：
@@ -274,6 +267,11 @@ def _should_warn(rule: dict[str, str], *, unused_by_scan: bool) -> bool:
     if rule["policy"] == POLICY_CONTEXTUAL:
         return unused_by_scan
     return True
+
+
+def _is_test_code(file_path: str, function_name: str) -> bool:
+    path = Path(file_path)
+    return "tests" in path.parts or path.name.startswith("test_") or function_name.startswith("test_")
 
 
 def _with_rule_context(
@@ -309,7 +307,7 @@ def _helper_keyword_match(rules: dict[str, Any], function_name: str) -> bool:
     # 中文说明：
     # helper-like 的判断也走规则文件。如果某个仓库大量使用 parse/format
     # 作为稳定领域术语，可以把对应 keyword 标记为 allowed。
-    for keyword in _matching_keywords(rules, "helper_keywords", function_name):
+    for keyword in matching_keywords(rules, "helper_keywords", function_name):
         rule = keyword_rule(rules, "helper_keywords", keyword)
         if rule["policy"] != POLICY_ALLOWED:
             return True
@@ -323,7 +321,7 @@ def _collect_helper_feedback(
 ) -> None:
     for fn in short_helpers:
         name = fn["function_name"]
-        for keyword in _matching_keywords(rules, "helper_keywords", name.lower()):
+        for keyword in matching_keywords(rules, "helper_keywords", name.lower()):
             rule = keyword_rule(rules, "helper_keywords", keyword)
             _maybe_request_feedback(
                 feedback_candidates,

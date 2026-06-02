@@ -68,6 +68,74 @@ def test_export_diagnostics_skips_non_file_findings(tmp_path):
     assert export_diagnostics(smells, repo=tmp_path) == []
 
 
+def test_export_diagnostics_filters_and_limits_findings(tmp_path):
+    source = tmp_path / "sample.py"
+    source.write_text("def first():\n    return 1\n\ndef second():\n    return 2\n", encoding="utf-8")
+    smells = {
+        "warnings": [
+            {
+                "severity": "low",
+                "type": "unused_function",
+                "file": str(source),
+                "function": "first",
+                "reason": "Low signal finding.",
+            },
+            {
+                "severity": "medium",
+                "type": "patch_name_smell",
+                "file": str(source),
+                "function": "first",
+                "reason": "Medium signal finding.",
+            },
+            {
+                "severity": "medium",
+                "type": "wrapper_function",
+                "file": str(source),
+                "function": "second",
+                "reason": "Another medium signal finding.",
+            },
+        ]
+    }
+
+    diagnostics = export_diagnostics(
+        smells,
+        repo=tmp_path,
+        min_severity="medium",
+        max_diagnostics=1,
+    )
+
+    assert len(diagnostics) == 1
+    assert diagnostics[0]["code"]["value"] == "patch_name_smell"
+
+
+def test_export_diagnostics_can_deduplicate_repeated_file_findings(tmp_path):
+    source = tmp_path / "sample.py"
+    source.write_text("def first():\n    return 1\n\ndef second():\n    return 2\n", encoding="utf-8")
+    smells = {
+        "warnings": [
+            {
+                "severity": "medium",
+                "type": "suspicious_file_name",
+                "file": str(source),
+                "function": "first",
+                "reason": "File name contains a suspicious keyword.",
+            },
+            {
+                "severity": "medium",
+                "type": "suspicious_file_name",
+                "file": str(source),
+                "function": "second",
+                "reason": "File name contains a suspicious keyword.",
+            },
+        ]
+    }
+
+    diagnostics = export_diagnostics(smells, repo=tmp_path, deduplicate=True)
+
+    assert len(diagnostics) == 1
+    assert diagnostics[0]["location"]["range"]["start"]["line"] == 1
+
+
 def test_write_rdjsonl_and_cli(tmp_path):
     source = tmp_path / "sample.py"
     source.write_text("def sample():\n    return 1\n", encoding="utf-8")

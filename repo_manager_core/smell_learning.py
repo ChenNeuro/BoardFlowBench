@@ -7,6 +7,7 @@ auditable, reversible, and independent from packaged default config.
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -41,6 +42,9 @@ DECISION_TO_POLICY = {
     "allowed_naming_convention": POLICY_ALLOWED,
     "case_by_case": POLICY_CASE_BY_CASE,
 }
+
+_CAMEL_BOUNDARY = re.compile(r"(?<=[a-z0-9])(?=[A-Z])")
+_TOKEN_SPLIT = re.compile(r"[^A-Za-z0-9]+")
 
 
 def load_default_smell_rules(path: str | Path = DEFAULT_RULES_PATH) -> dict[str, Any]:
@@ -157,6 +161,23 @@ def active_keywords(rules: dict[str, Any], category: str) -> list[str]:
     return sorted(rules.get(category, {}))
 
 
+def matching_keywords(rules: dict[str, Any], category: str, value: str) -> list[str]:
+    """Return active keywords that match identifier/file-name tokens."""
+    return [keyword for keyword in active_keywords(rules, category) if keyword_matches(value, keyword)]
+
+
+def keyword_matches(value: str, keyword: str) -> bool:
+    """Return whether keyword appears as a complete identifier token sequence."""
+    keyword_tokens = _identifier_tokens(keyword)
+    if not keyword_tokens:
+        return False
+    value_tokens = _identifier_tokens(value)
+    if len(keyword_tokens) == 1:
+        return keyword_tokens[0] in value_tokens
+    width = len(keyword_tokens)
+    return any(value_tokens[index : index + width] == keyword_tokens for index in range(len(value_tokens)))
+
+
 def feedback_question(
     *,
     category: str,
@@ -206,6 +227,11 @@ def _read_rules_file(path: Path) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise ValueError(f"smell rules file must contain an object: {path}")
     return data
+
+
+def _identifier_tokens(value: str) -> list[str]:
+    expanded = _CAMEL_BOUNDARY.sub("_", value)
+    return [token.lower() for token in _TOKEN_SPLIT.split(expanded) if token]
 
 
 def _merge_rules(base: dict[str, Any], overrides: dict[str, Any]) -> dict[str, Any]:

@@ -6,6 +6,7 @@ import json
 from repo_manager_core.health.detect_function_smells import detect_function_smells
 from repo_manager_core.search_rules import load_search_rules
 from repo_manager_core.smell_learning import (
+    keyword_matches,
     load_default_smell_rules,
     load_smell_rules,
     record_feedback,
@@ -89,6 +90,15 @@ def test_default_rules_are_loaded_from_json():
     assert "safe" in rules["patch_keywords"]
     assert "parse" in rules["helper_keywords"]
     assert "old" in rules["suspicious_file_keywords"]
+
+
+def test_keyword_matching_uses_identifier_tokens():
+    assert keyword_matches("parse_date_safe", "safe")
+    assert keyword_matches("final_parser.py", "final")
+    assert keyword_matches("debugUtils", "debug")
+    assert not keyword_matches("apply_template", "temp")
+    assert not keyword_matches("_normalise_suffixes", "fix")
+    assert not keyword_matches("finalize.py", "final")
 
 
 def test_missing_rule_files_are_created_from_defaults(tmp_path):
