@@ -16,9 +16,17 @@ The agent must not use:
 
 This condition measures how much context continuity is available without repo-local shared state.
 
-## Condition 2: BoardFlow Sequential Handoff
+## Condition 2: Native Instructions
 
-In `boardflow_sequential`, initialize a temporary clone of the fixed demo seed with run-local BoardFlow files. Each agent uses the injected reading order from `AGENTS.md`, works on one assigned B-series task, updates run-local board state, and writes a structured handoff.
+In `native_instructions`, inject only the repository instruction file native to the selected agent profile, such as `AGENTS.md`, `CLAUDE.md`, or `GEMINI.md`.
+
+## Condition 3: Native Docs Handoff
+
+In `native_docs_handoff`, inject the native instruction file plus human-readable `PROJECT_BOARD.md` and `HANDOFF.md`. Do not inject `.board/`.
+
+## Condition 4: Full BoardFlow
+
+In `full_boardflow`, initialize a temporary clone of the fixed demo seed with run-local BoardFlow files. `boardflow_sequential` remains a compatibility alias. Each agent uses the injected reading order from `AGENTS.md`, works on one assigned B-series task, updates run-local board state, and writes a structured handoff.
 
 The observable repo state is the source of truth. Previous chat transcripts are not part of the handoff.
 
@@ -75,14 +83,14 @@ Scoring should use only observable artifacts:
 - `.board/handoffs/*.json`
 - assigned `benchmark/tasks/*.yaml`
 - command and test records inside handoff files
-- future checker outputs under `benchmark/results/`
+- external scorer, evidence, and reviewer outputs under the selected results directory
 
 ## Workspace Initialization
 
 ```bash
 PYTHONPATH=. python3 scripts/init_benchmark_workspace.py \
   --target expense_lite \
-  --condition boardflow_sequential \
+  --condition full_boardflow \
   --task-id B001 \
   --workspace /tmp/boardflowbench-runs/run-001
 ```
@@ -95,7 +103,20 @@ PYTHONPATH=. python3 scripts/activate_benchmark_task.py \
   --task-id B002
 ```
 
-## Not Implemented Yet
+## Scenario Runner
 
-- result aggregation
-- statistical analysis
+```bash
+PYTHONPATH=. python3 scripts/run_scenario.py \
+  --target expense_lite \
+  --condition full_boardflow \
+  --workspace /tmp/boardflowbench-runs/run-001 \
+  --oracle-root ../ExpenseLiteBenchOracles \
+  --results-dir /tmp/boardflowbench-results
+```
+
+The runner validates the seed, calls start and end refresh around each full-BoardFlow sticker, stores results outside this repository, and stops when a deterministic finalize gate fails. An optional reviewer command can publish non-blocking qualitative risks after acceptance.
+
+## Terms
+
+- `seed`: the fixed starting commit cloned before an experiment begins. It contains the initial platform and an intentional task gap, not the reference answer.
+- `scope`: the file boundary assigned to one sticker. The scorer compares the sticker baseline commit with the evaluated workspace and reports changes outside `allowed_paths`.

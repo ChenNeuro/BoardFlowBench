@@ -1,0 +1,39 @@
+{
+  "task_id": "P005",
+  "agent_id": "codex",
+  "agent_role": "implementer",
+  "status": "DONE",
+  "files_changed": [
+    "benchmark/bootstrap_templates/catalog.json",
+    "pyproject.toml",
+    "repo_manager_core/bootstrap.py",
+    "scripts/bootstrap_repo.py",
+    "tests/test_bootstrap.py"
+  ],
+  "commands_run": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 -m pytest -p no:cacheprovider tests/test_bootstrap.py",
+      "result": "PASS",
+      "notes": "Bootstrap tests passed."
+    }
+  ],
+  "tests": [
+    {
+      "name": "trusted bootstrap allowlist",
+      "result": "PASS",
+      "notes": "Covered prompt preservation, valid generated board views, unregistered templates, and moving-ref rejection."
+    }
+  ],
+  "temporary_files_created": [],
+  "temporary_files_removed": [],
+  "decisions": [
+    "Recommend mature external templates and require explicit user selection before mutation.",
+    "Allow only immutable release tags or commit SHAs.",
+    "Preserve the original human prompt verbatim in the bootstrap record.",
+    "Generate a default handoff schema in scaffolded repositories and support immutable commit SHAs as git-template refs."
+  ],
+  "risks": [
+    "Copier must be installed explicitly before applying the allowlisted Copier template."
+  ],
+  "next_recommended_step": "Add more allowlisted templates only after pinning immutable refs and reviewing their task behavior."
+}

@@ -1,58 +1,58 @@
 {
-  "average_function_length": 18.7,
+  "average_function_length": 18.86,
   "common_name_prefixes": [
     [
       "",
-      103
+      132
     ],
     [
       "test",
-      51
+      67
     ],
     [
       "load",
-      7
+      10
     ],
     [
       "write",
-      7
+      9
     ],
     [
       "check",
       5
     ],
     [
-      "update",
+      "run",
+      4
+    ],
+    [
+      "inject",
+      3
+    ],
+    [
+      "validate",
+      3
+    ],
+    [
+      "normalize",
       2
     ],
     [
-      "read",
-      2
-    ],
-    [
-      "generate",
-      2
-    ],
-    [
-      "scan",
-      2
-    ],
-    [
-      "build",
+      "record",
       2
     ]
   ],
-  "docstring_function_count": 59,
-  "function_count": 229,
+  "docstring_function_count": 83,
+  "function_count": 309,
   "max_function_length": 193,
   "median_function_length": 12,
   "module_count": 12,
-  "patch_like_function_count": 5,
+  "patch_like_function_count": 14,
   "repo_path": ".",
-  "snake_case_function_count": 228,
+  "snake_case_function_count": 308,
   "style_warnings": [
     {
-      "reason": "Found 5 function names with patch-like words.",
+      "reason": "Found 14 function names with patch-like words.",
       "severity": "medium",
       "suggestion": "Replace temporary fix names with stable domain names after behavior is validated.",
       "type": "patch_like_naming_style"
@@ -62,7 +62,7 @@
     "common_test_directories": [
       [
         "tests",
-        16
+        22
       ],
       [
         "tests/fixtures",
@@ -73,8 +73,8 @@
         1
       ]
     ],
-    "snake_case_test_function_count": 51,
-    "test_file_count": 18,
-    "test_function_count": 51
+    "snake_case_test_function_count": 67,
+    "test_file_count": 24,
+    "test_function_count": 67
   }
 }

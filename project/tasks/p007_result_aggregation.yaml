@@ -1,0 +1,9 @@
+task_id: P007
+title: Result aggregation and reviewer reporting
+description: Aggregate external run results and publish independent reviewer risks without allowing an AI reviewer to approve its own implementation.
+dependencies:
+  - P006
+acceptance_criteria:
+  - Aggregate task pass rate, regressions, scope drift, hygiene issues, handoff completeness, board consistency, reviewer risks, and stage durations.
+  - Store runtime results outside BoardFlowBench by default.
+  - Keep deterministic finalize checks as the only blocking gate.

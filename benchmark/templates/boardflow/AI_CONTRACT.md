@@ -19,4 +19,4 @@ This file contains stable rules for an isolated demo benchmark run.
 - Run or explicitly waive relevant acceptance commands.
 - Remove or record temporary files.
 - Update both taskboard views.
-- Create a handoff when the scenario requires one.
+- Create a non-empty handoff when the scenario requires one.

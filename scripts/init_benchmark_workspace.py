@@ -16,10 +16,15 @@ from repo_manager_core.benchmark.workspace import initialize_workspace  # noqa: 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--target", required=True, help="Benchmark target id.")
-    parser.add_argument("--condition", required=True, choices=("boardflow_sequential", "no_board_baseline"))
+    parser.add_argument(
+        "--condition",
+        required=True,
+        choices=("boardflow_sequential", "full_boardflow", "native_instructions", "native_docs_handoff", "no_board_baseline"),
+    )
     parser.add_argument("--task-id", required=True, help="Assigned benchmark task id.")
     parser.add_argument("--workspace", required=True, help="New workspace directory.")
     parser.add_argument("--source-repo", default=None, help="Optional local clone source for offline validation.")
+    parser.add_argument("--agent-profile", default="codex", help="Native instructions profile.")
     args = parser.parse_args()
     try:
         result = initialize_workspace(
@@ -29,6 +34,7 @@ def main() -> int:
             args.task_id,
             args.workspace,
             source_repo=args.source_repo,
+            agent_profile=args.agent_profile,
         )
     except ValueError as exc:
         print(f"Error: {exc}")

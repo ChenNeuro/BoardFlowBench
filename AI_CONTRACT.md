@@ -30,6 +30,7 @@ This file contains stable agent discipline and repo hygiene rules. It must not c
 ## Handoff Discipline
 
 - Create a structured handoff when stopping task work or passing work to another agent.
+- Do not create an empty handoff. Record real commands, tests, risks, and the next recommended step.
 - Record files changed, commands run, tests, temporary files, decisions, risks, and the next recommended step.
 - Do not rely on previous chat transcripts as handoff state during benchmark runs.
 - Treat observable repo state as the source of truth.

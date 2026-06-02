@@ -3,7 +3,7 @@ project: BoardFlowBench
 current_milestone:
   id: M1
   title: BoardFlowBench protocol separation and calibration
-  status: IN_PROGRESS
+  status: DONE
   goal: Keep BoardFlowBench development separate from demo benchmark execution, then harden scorer calibration.
 status_values:
   - TODO
@@ -38,11 +38,38 @@ tasks:
     current_handoff: .board/handoffs/P003_codex_handoff.json
     notes: Split the demo into an independent Git repository and keep root state project-only.
   - id: P004
-    title: Scorer calibration and hardening
-    status: TODO
-    owner: unassigned
+    title: Evidence gate and scorer hardening
+    status: DONE
+    owner: codex
     dependencies:
       - P003
     acceptance_source: project/tasks/p004_scorer_calibration.yaml
-    current_handoff: null
-    notes: Correct protocol-scoring false positives, hard gates, and mutation fixtures.
+    current_handoff: .board/handoffs/P004_codex_handoff.json
+    notes: Add deterministic finalize gates, condition-aware scoring, and baseline diff scope checks.
+  - id: P005
+    title: Trusted repository bootstrap
+    status: DONE
+    owner: codex
+    dependencies:
+      - P004
+    acceptance_source: project/tasks/p005_trusted_bootstrap.yaml
+    current_handoff: .board/handoffs/P005_codex_handoff.json
+    notes: Recommend allowlisted Copier or Git templates for empty repositories.
+  - id: P006
+    title: Scenario runner and oracle isolation
+    status: DONE
+    owner: codex
+    dependencies:
+      - P004
+    acceptance_source: project/tasks/p006_scenario_runner.yaml
+    current_handoff: .board/handoffs/P006_codex_handoff.json
+    notes: Add four experiment conditions, isolated oracle packs, adapters, and checkpoints.
+  - id: P007
+    title: Result aggregation and reviewer reporting
+    status: DONE
+    owner: codex
+    dependencies:
+      - P006
+    acceptance_source: project/tasks/p007_result_aggregation.yaml
+    current_handoff: .board/handoffs/P007_codex_handoff.json
+    notes: Aggregate external run results and keep independent reviewer findings non-blocking.

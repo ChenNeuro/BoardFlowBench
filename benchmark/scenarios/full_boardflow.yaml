@@ -1,0 +1,16 @@
+id: full_boardflow
+title: Full BoardFlow lifecycle
+description: Agents use run-local BoardFlow state, refresh checks, evidence gates, and structured handoffs inside an isolated standalone demo clone.
+boardflow_files_available: true
+requires_handoff_json: true
+checker_mode: blocking_finalize_gate
+handoff_sequence:
+  - B001
+  - B002
+  - B003
+  - B004
+notes:
+  - Initialize the workspace from the fixed standalone demo seed.
+  - Expose only the currently assigned task details.
+  - Run start and end refresh around each sticker.
+  - Activate the next sticker only after deterministic acceptance evidence and a valid handoff exist.

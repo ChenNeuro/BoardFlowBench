@@ -8,6 +8,8 @@ from pathlib import Path
 from repo_manager_core.board.board_io import load_board
 from repo_manager_core.board.board_sync import check_board_views
 from repo_manager_core.board.git_state import inspect_git_state
+from repo_manager_core.board.evidence import validate_acceptance_evidence
+from repo_manager_core.board.handoff_writer import check_handoff
 from repo_manager_core.style.context_writer import write_agent_context, write_style_profile
 from repo_manager_core.style.learn_repo_style import learn_repo_style
 from repo_manager_core.style.style_profile import build_profile
@@ -41,7 +43,7 @@ def main() -> int:
         return 1
 
     git_state = inspect_git_state(root)
-    blockers = _start_blockers(board, args.task_id, git_state) if args.phase == "start" else []
+    blockers = _start_blockers(root, board, args.task_id, git_state) if args.phase == "start" else []
     style_profile = learn_repo_style(build_profile(root))
     write_style_profile(root, style_profile)
     context_path = write_agent_context(
@@ -77,7 +79,7 @@ def _find_task(board: dict, task_id: str) -> dict | None:
     return None
 
 
-def _start_blockers(board: dict, current_task_id: str, git_state: dict) -> list[str]:
+def _start_blockers(root: Path, board: dict, current_task_id: str, git_state: dict) -> list[str]:
     blockers = [
         f"{task.get('id')} remains {task.get('status')}"
         for task in board.get("tasks", [])
@@ -87,6 +89,21 @@ def _start_blockers(board: dict, current_task_id: str, git_state: dict) -> list[
         blockers.append("git workspace status is unavailable")
     elif not git_state.get("clean"):
         blockers.append("git workspace has staged, unstaged, or untracked files")
+    current = _find_task(board, current_task_id) or {}
+    tasks = {
+        task.get("id"): task
+        for task in board.get("tasks", [])
+        if isinstance(task, dict) and task.get("id")
+    }
+    for dep_id in current.get("dependencies", []) or []:
+        dependency = tasks.get(dep_id, {})
+        if dependency.get("status") != "DONE":
+            blockers.append(f"{dep_id} dependency is not DONE")
+            continue
+        if dependency.get("require_gate_evidence"):
+            blockers.extend(validate_acceptance_evidence(root, dependency))
+        handoff = check_handoff(root, {"task_id": dep_id, "handoff_required": True})
+        blockers.extend(handoff.get("violations", []))
     return blockers
 
 

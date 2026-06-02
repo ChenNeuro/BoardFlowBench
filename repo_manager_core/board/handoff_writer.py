@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from repo_manager_core.board.schema_validation import validate_json_schema
 from repo_manager_core.board.task_status import VALID_STATUSES
 
 REQUIRED_FIELDS = [
@@ -62,12 +63,20 @@ def check_handoff(
             "details": details,
         }
 
+    schema_path = _schema_path(root, task)
+    schema_violations = validate_handoff_schema(handoff, schema_path)
+    details["schema_violations"] = schema_violations
+    if schema_violations:
+        violations.append("handoff schema violations: " + "; ".join(schema_violations))
+    else:
+        score += 4
+
     missing = [field for field in REQUIRED_FIELDS if not _field_complete(handoff, field)]
     details["missing_or_empty_required_fields"] = missing
     if missing:
         violations.append("handoff missing required fields: " + ", ".join(missing))
     else:
-        score += 4
+        score += 2
 
     changed_files = changed_files or []
     if changed_files and not handoff.get("files_changed"):
@@ -75,12 +84,12 @@ def check_handoff(
         # to look first.
         violations.append("files_changed is empty but repository changes were detected")
     else:
-        score += 2
+        score += 1
 
     if isinstance(handoff.get("commands_run"), list) and isinstance(
         handoff.get("tests"), list
     ):
-        score += 3
+        score += 2
     else:
         violations.append("commands_run and tests fields must both be arrays")
 
@@ -110,7 +119,7 @@ def write_handoff(
     temporary_files_created: list[str] | None = None,
     temporary_files_removed: list[str] | None = None,
     decisions: list[str] | None = None,
-    risks: str | None = None,
+    risks: list[str] | str | None = None,
     next_recommended_step: str | None = None,
 ) -> Path:
     """Create a structured handoff JSON file under .board/handoffs/."""
@@ -132,28 +141,44 @@ def write_handoff(
         "temporary_files_created": temporary_files_created or [],
         "temporary_files_removed": temporary_files_removed or [],
         "decisions": decisions or [],
-        "risks": risks,
+        "risks": _normalize_risks(risks),
         "next_recommended_step": next_recommended_step,
     }
 
     # Generate unique filename: <task_id>_<agent_id>_<timestamp>.json
     import time
-    ts = int(time.time())
+    ts = time.time_ns()
     path = handoff_dir / f"{task_id}_{agent_id}_{ts}.json"
     path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return path
 
 
+def write_validated_handoff(
+    repo: str | Path,
+    handoff_data: dict[str, Any],
+    schema_path: str | Path,
+) -> Path:
+    """Write a caller-supplied handoff only after full schema validation."""
+    root = Path(repo)
+    violations = validate_handoff_schema(handoff_data, schema_path)
+    if violations:
+        raise ValueError("handoff schema violations: " + "; ".join(violations))
+    handoff_dir = root / ".board" / "handoffs"
+    handoff_dir.mkdir(parents=True, exist_ok=True)
+    import time
+    path = handoff_dir / f"{handoff_data['task_id']}_{handoff_data['agent_id']}_{time.time_ns()}.json"
+    path.write_text(json.dumps(handoff_data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return path
+
+
 def validate_handoff_schema(handoff_data: dict[str, Any], schema_path: str | Path) -> list[str]:
-    """Validate handoff data against a JSON Schema file. Returns list of missing fields."""
+    """Validate handoff data against the repository-local JSON Schema."""
     schema_path = Path(schema_path)
     if not schema_path.exists():
         return ["schema not found"]
 
     schema = json.loads(schema_path.read_text(encoding="utf-8"))
-    required = schema.get("required", [])
-    missing = [field for field in required if not _field_complete(handoff_data, field)]
-    return missing
+    return validate_json_schema(handoff_data, schema)
 
 
 def _handoff_required(task: dict[str, Any]) -> bool:
@@ -187,3 +212,18 @@ def _field_complete(handoff: dict[str, Any], field: str) -> bool:
     if isinstance(value, str):
         return bool(value.strip())
     return value is not None
+
+
+def _schema_path(root: Path, task: dict[str, Any]) -> Path:
+    requirement = task.get("handoff_requirement")
+    if isinstance(requirement, dict) and requirement.get("schema"):
+        return root / str(requirement["schema"])
+    return root / ".board" / "handoff.schema.json"
+
+
+def _normalize_risks(value: list[str] | str | None) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        return [value]
+    return list(value)

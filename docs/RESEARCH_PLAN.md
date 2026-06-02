@@ -4,6 +4,8 @@
 
 项目副标题：A benchmark for repo-local shared state in sequential multi-agent coding handoff.
 
+> 注：本文保留早期研究设计语言，作为项目演进记录。当前实现以 `docs/EXPERIMENT_PROTOCOL.md`、`benchmark/scenarios/`、`benchmark/targets/` 和 `scripts/run_scenario.py` 为准。Expense Lite 已拆分为独立 target 仓库。
+
 ## 1. Problem statement
 
 现代开发者经常在 Codex、Claude Code、OpenCode、Cursor、GitHub Copilot 等 coding agents 之间切换。同一个 repo 中的任务可能由一个 agent 开始、另一个 agent 接手、第三个 agent 复核或修补。当前常见问题不是单个 agent 完全不会写代码，而是在 sequential handoff 中容易丢失上下文和协作纪律。

@@ -47,7 +47,7 @@ It must not contain current milestone status, task owner, or task progress. Thos
 
 ## Consistency Verification
 
-The benchmark should later verify:
+The benchmark verifies:
 
 - `PROJECT_BOARD.md` and `.board/tasks.yaml` name the same milestone.
 - Task ids, statuses, owners, and dependencies match between board views.

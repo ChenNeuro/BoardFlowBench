@@ -6,6 +6,8 @@ from pathlib import Path
 from typing import Any
 
 from .board_io import load_board
+from .board_sync import check_board_views
+from .evidence import validate_acceptance_evidence
 from .task_status import VALID_STATUSES
 
 
@@ -17,6 +19,9 @@ def check_board_consistency(repo: str | Path, task: dict[str, Any]) -> dict[str,
     warnings: list[str] = []
     violations: list[str] = []
     details: dict[str, Any] = {"task_id": tid, "board_task_found": bool(board_task)}
+    view_violations = check_board_views(repo, board)
+    if view_violations:
+        violations.extend(view_violations)
 
     if board_task is None:
         return {
@@ -46,7 +51,14 @@ def check_board_consistency(repo: str | Path, task: dict[str, Any]) -> dict[str,
     if status == "DONE":
         # DONE tasks must carry observable evidence so the next agent/scorer is
         # not forced to trust chat history.
-        if board_task.get("current_handoff") or board_task.get("acceptance_evidence"):
+        evidence_violations = (
+            validate_acceptance_evidence(repo, board_task)
+            if board_task.get("require_gate_evidence")
+            else []
+        )
+        if board_task.get("require_gate_evidence") and evidence_violations:
+            violations.extend(evidence_violations)
+        elif board_task.get("current_handoff") or board_task.get("acceptance_evidence"):
             score += 3
         else:
             violations.append(f"{tid} is DONE without acceptance evidence")
@@ -59,6 +71,8 @@ def check_board_consistency(repo: str | Path, task: dict[str, Any]) -> dict[str,
     else:
         violations.append(f"{tid} must include owner and status")
 
+    if view_violations:
+        score = max(0, score - 2)
     return {
         "score": score,
         "max": 10,

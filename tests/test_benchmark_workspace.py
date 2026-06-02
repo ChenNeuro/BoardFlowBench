@@ -1,6 +1,7 @@
 """Tests for isolated standalone demo benchmark workspaces."""
 from __future__ import annotations
 
+import json
 import subprocess
 from pathlib import Path
 
@@ -145,15 +146,50 @@ def test_activate_task_requires_done_dependencies_and_commits_new_baseline(tmp_p
         source_repo=source,
     )
 
-    with pytest.raises(ValueError, match="task dependencies are not DONE: B001"):
+    with pytest.raises(ValueError, match="task dependencies are not accepted: B001 is not DONE"):
         activate_task(project, workspace, "B002")
 
     handoff = workspace / ".board" / "handoffs" / "B001_test.json"
-    handoff.write_text("{}\n", encoding="utf-8")
+    handoff.write_text(
+        '{"task_id":"B001","agent_id":"test","agent_role":"tester","status":"DONE",'
+        '"files_changed":[],"commands_run":[],"tests":[],"temporary_files_created":[],'
+        '"temporary_files_removed":[],"decisions":[],"risks":[],"next_recommended_step":"Continue."}\n',
+        encoding="utf-8",
+    )
+    score = tmp_path / "B001-score.json"
+    score.write_text(
+        json.dumps(
+            {
+                "task_id": "B001",
+                "phase": "completion",
+                "condition": "full_boardflow",
+                "hard_gate_pass": True,
+                "scope_control": {"details": {"baseline_commit": "baseline"}},
+                "correctness": {
+                    "details": {
+                        "oracle": {
+                            "seed_commit": "seed",
+                            "oracle_pack_commit": "oracle",
+                        }
+                    }
+                },
+            }
+        )
+    )
+    evidence = workspace / ".board" / "evidence" / "B001.json"
+    evidence.write_text(
+        '{"task_id":"B001","condition":"full_boardflow","gate_pass":true,'
+        '"baseline_commit":"baseline","evaluated_head":"head","seed_commit":"seed",'
+        f'"oracle_pack_commit":"oracle","score_file":{json.dumps(str(score))}' + "}\n",
+        encoding="utf-8",
+    )
     board = load_board(workspace)
     board["tasks"][0]["current_handoff"] = ".board/handoffs/B001_test.json"
+    board["tasks"][0]["acceptance_evidence"] = ".board/evidence/B001.json"
     save_board(board, workspace)
     update_task_status(workspace, "B001", "DONE", owner="tester")
+    _git(workspace, "add", "-A")
+    _git(workspace, "commit", "-m", "accept B001")
 
     result = activate_task(project, workspace, "B002")
 
@@ -161,3 +197,67 @@ def test_activate_task_requires_done_dependencies_and_commits_new_baseline(tmp_p
     assert "Future CSV details must stay hidden." in assigned
     assert result["task_id"] == "B002"
     assert _git(workspace, "status", "--porcelain") == ""
+
+
+def test_activate_task_rejects_empty_handoff_even_when_file_exists(tmp_path):
+    project, source = _fixture(tmp_path)
+    workspace = tmp_path / "run"
+    initialize_workspace(project, "expense_lite", "full_boardflow", "B001", workspace, source_repo=source)
+    handoff = workspace / ".board" / "handoffs" / "B001_empty.json"
+    handoff.write_text("{}\n", encoding="utf-8")
+    evidence = workspace / ".board" / "evidence" / "B001.json"
+    score = tmp_path / "B001-score.json"
+    score.write_text(
+        json.dumps(
+            {
+                "task_id": "B001",
+                "phase": "completion",
+                "condition": "full_boardflow",
+                "hard_gate_pass": True,
+                "scope_control": {"details": {"baseline_commit": "baseline"}},
+                "correctness": {
+                    "details": {
+                        "oracle": {
+                            "seed_commit": "seed",
+                            "oracle_pack_commit": "oracle",
+                        }
+                    }
+                },
+            }
+        )
+    )
+    evidence.write_text(
+        '{"task_id":"B001","condition":"full_boardflow","gate_pass":true,'
+        '"baseline_commit":"baseline","evaluated_head":"head","seed_commit":"seed",'
+        f'"oracle_pack_commit":"oracle","score_file":{json.dumps(str(score))}' + "}\n",
+        encoding="utf-8",
+    )
+    board = load_board(workspace)
+    board["tasks"][0]["status"] = "DONE"
+    board["tasks"][0]["current_handoff"] = ".board/handoffs/B001_empty.json"
+    board["tasks"][0]["acceptance_evidence"] = ".board/evidence/B001.json"
+    save_board(board, workspace)
+    project_board = workspace / "PROJECT_BOARD.md"
+    project_board.write_text(project_board.read_text().replace("| B001 | Date parser | TODO |", "| B001 | Date parser | DONE |"))
+    _git(workspace, "add", "-A")
+    _git(workspace, "commit", "-m", "fake empty handoff")
+
+    with pytest.raises(ValueError, match="handoff required for B001 but none was found"):
+        activate_task(project, workspace, "B002")
+
+
+@pytest.mark.parametrize(
+    ("condition", "expected", "absent"),
+    [
+        ("native_instructions", "AGENTS.md", ".board"),
+        ("native_docs_handoff", "HANDOFF.md", ".board"),
+        ("no_board_baseline", "src/expense_lite/parser.py", ".board"),
+    ],
+)
+def test_condition_injection_boundaries(tmp_path, condition, expected, absent):
+    project, source = _fixture(tmp_path)
+    workspace = tmp_path / "run"
+    _write(project / "benchmark" / "templates" / "native" / "INSTRUCTIONS.md", "# Native\n")
+    initialize_workspace(project, "expense_lite", condition, "B001", workspace, source_repo=source)
+    assert (workspace / expected).exists()
+    assert not (workspace / absent).exists()

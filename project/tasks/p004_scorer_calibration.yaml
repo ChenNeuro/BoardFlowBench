@@ -1,6 +1,6 @@
 task_id: P004
-title: Scorer calibration and hardening
-description: Correct protocol-scoring false positives, add hard gates, and validate scorer behavior with mutation fixtures.
+title: Evidence gate and scorer hardening
+description: Add deterministic finalize gates, condition-aware scoring, baseline diff scope checks, and mutation fixtures.
 dependencies:
   - P003
 acceptance_criteria:
@@ -8,3 +8,5 @@ acceptance_criteria:
   - Check both taskboard views and real handoff schema validity.
   - Distinguish legitimate task-owned additions from hygiene residue.
   - Cover scorer failure modes with mutation fixtures.
+  - Separate seed validation from completion scoring.
+  - Require gate evidence before DONE and downstream task activation.

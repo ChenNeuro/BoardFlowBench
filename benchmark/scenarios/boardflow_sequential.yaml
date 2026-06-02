@@ -1,6 +1,6 @@
 id: boardflow_sequential
 title: BoardFlow sequential handoff
-description: Agents use run-local BoardFlow state inside an isolated standalone demo clone.
+description: Compatibility alias for full_boardflow. Agents use run-local BoardFlow state inside an isolated standalone demo clone.
 boardflow_files_available: true
 requires_handoff_json: true
 checker_mode: enabled

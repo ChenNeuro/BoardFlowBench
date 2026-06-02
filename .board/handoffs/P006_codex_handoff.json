@@ -1,0 +1,65 @@
+{
+  "task_id": "P006",
+  "agent_id": "codex",
+  "agent_role": "implementer",
+  "status": "DONE",
+  "files_changed": [
+    "benchmark/scenarios/full_boardflow.yaml",
+    "benchmark/scenarios/native_instructions.yaml",
+    "benchmark/scenarios/native_docs_handoff.yaml",
+    "benchmark/templates/native/INSTRUCTIONS.md",
+    "repo_manager_core/benchmark/oracle.py",
+    "repo_manager_core/benchmark/runner.py",
+    "repo_manager_core/benchmark/workspace.py",
+    "scripts/finalize_benchmark_task.py",
+    "scripts/run_scenario.py",
+    "scripts/validate_benchmark_seed.py",
+    "tests/test_runner.py"
+  ],
+  "commands_run": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 scripts/run_scenario.py --target expense_lite --condition full_boardflow --workspace /tmp/boardflowbench-runner-smoke --oracle-root ../ExpenseLiteBenchOracles --results-dir /tmp/boardflowbench-runner-results --source-repo ../ExpenseLiteBenchDemo",
+      "result": "PASS",
+      "notes": "Real manual-checkpoint runner smoke initialized from the fixed demo seed."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 scripts/run_scenario.py --resume /tmp/boardflowbench-runner-results/<run-id>/run.json",
+      "result": "PASS",
+      "notes": "Repeated across B001-B004; each sticker ran end refresh, deterministic gate, evidence checkpoint, activation, and next start refresh."
+    }
+  ],
+  "tests": [
+    {
+      "name": "real Expense Lite B001-B004 full_boardflow smoke",
+      "result": "PASS",
+      "notes": "All four isolated oracle stages passed and the final workspace was clean."
+    },
+    {
+      "name": "runner lifecycle unit tests",
+      "result": "PASS",
+      "notes": "Covered refresh ordering and external manual checkpoint resume."
+    }
+  ],
+  "temporary_files_created": [
+    "/tmp/boardflowbench-runner-smoke",
+    "/tmp/boardflowbench-runner-results",
+    "/tmp/boardflowbench-gate-smoke",
+    "/tmp/boardflowbench-gate-results",
+    "/tmp/boardflowbench-gate-b001.json"
+  ],
+  "temporary_files_removed": [
+    "/tmp/boardflowbench-runner-smoke",
+    "/tmp/boardflowbench-runner-results",
+    "/tmp/boardflowbench-gate-smoke",
+    "/tmp/boardflowbench-gate-results",
+    "/tmp/boardflowbench-gate-b001.json"
+  ],
+  "decisions": [
+    "Keep oracle files in a separate sibling Git repository outside agent workspaces.",
+    "Bind oracle execution to the target manifest seed SHA and require the oracle pack to have a Git commit.",
+    "Support no-board, native instructions, native docs handoff, and full BoardFlow conditions.",
+    "Run refresh externally around full BoardFlow sticker sections."
+  ],
+  "risks": [],
+  "next_recommended_step": "Use external result directories for real experiment runs and remove temporary smoke workspaces after verification."
+}

@@ -7,11 +7,12 @@ from pathlib import Path
 from typing import Any
 
 from .board_io import _dump_yaml, load_board
+from .evidence import has_valid_acceptance_evidence
 from .task_status import VALID_STATUSES
 
 PROJECT_BOARD_PATH = "PROJECT_BOARD.md"
 TASKS_PATH = ".board/tasks.yaml"
-SYNCED_TASK_FIELDS = ("status", "owner", "notes")
+SYNCED_TASK_FIELDS = ("title", "status", "owner", "dependencies", "notes")
 
 
 def check_board_views(repo: str | Path, board: dict[str, Any] | None = None) -> list[str]:
@@ -96,6 +97,7 @@ def read_project_board(repo: str | Path) -> dict[str, Any]:
                 "title": cells[1],
                 "status": cells[2],
                 "owner": cells[3],
+                "dependencies": [] if cells[4] == "none" else [item.strip() for item in cells[4].split(",")],
                 "notes": "|".join(cells[5:]).strip(),
             }
         )
@@ -123,6 +125,8 @@ def _find_task(board: dict[str, Any], task_id: str) -> dict[str, Any] | None:
 
 
 def _has_completion_evidence(root: Path, task: dict[str, Any]) -> bool:
+    if task.get("require_gate_evidence"):
+        return has_valid_acceptance_evidence(root, task)
     if task.get("acceptance_evidence"):
         return True
     handoff = task.get("current_handoff")

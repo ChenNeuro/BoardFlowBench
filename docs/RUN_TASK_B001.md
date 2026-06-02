@@ -11,7 +11,7 @@ Initialize an isolated workspace from the BoardFlowBench repository:
 ```bash
 PYTHONPATH=. python3 scripts/init_benchmark_workspace.py \
   --target expense_lite \
-  --condition boardflow_sequential \
+  --condition full_boardflow \
   --task-id B001 \
   --workspace /tmp/boardflowbench-runs/run-001
 cd /tmp/boardflowbench-runs/run-001
@@ -38,11 +38,13 @@ The agent should only modify the allowed paths listed in `.board/assigned_task.y
 
 Before stopping, the agent should update the board state and write a structured handoff if the scenario requires it.
 
+The runner performs the blocking finalize gate and activates the next sticker only after acceptance evidence and a valid handoff exist.
+
 ## Compare Conditions Later
 
 For the no-board baseline, initialize the same standalone seed without BoardFlow injection and provide only the task prompt and demo repo files needed for B001. Do not provide BoardFlow state files or previous handoffs.
 
-For the BoardFlow sequential condition, provide the observable repo state and require the agent to use BoardFlow files. Compare:
+For the full BoardFlow condition, provide the observable repo state and require the agent to use BoardFlow files. Compare:
 
 - whether the agent identifies the same failing test,
 - whether it stays within allowed paths,

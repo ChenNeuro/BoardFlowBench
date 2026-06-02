@@ -1,0 +1,10 @@
+id: native_docs_handoff
+title: Native instructions with human-readable coordination docs
+description: Agents receive runtime-native instructions, a Markdown backlog, and a Markdown handoff file without machine-readable BoardFlow state.
+boardflow_files_available: false
+requires_handoff_json: false
+checker_mode: deterministic_finalize_gate
+notes:
+  - Use the same fixed standalone demo seed as every other condition.
+  - Inject PROJECT_BOARD.md and HANDOFF.md as human-readable coordination documents.
+  - Do not inject .board files.

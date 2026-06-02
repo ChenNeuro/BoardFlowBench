@@ -47,5 +47,5 @@ This skill maintains shared repository state for coding agents.
 - Use `bridge_status.py` for status changes so `PROJECT_BOARD.md` and `.board/tasks.yaml` stay synchronized.
 - Stop and resolve taskboard inconsistencies instead of guessing which view is correct.
 - Preserve human-written records verbatim.
-- Always write a handoff record before transferring work.
+- Always write a non-empty handoff record before transferring work.
 - Treat the repository as the source of truth, not chat history.
