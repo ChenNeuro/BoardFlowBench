@@ -8,7 +8,8 @@ This file contains stable agent discipline and repo hygiene rules. It must not c
 - Work only on the assigned task.
 - Respect task dependencies before starting downstream work.
 - Use only the task statuses defined by BoardFlow: `TODO`, `IN_PROGRESS`, `BLOCKED`, `READY_FOR_REVIEW`, `DONE`.
-- Do not solve future benchmark tasks early.
+- Keep BoardFlowBench project tasks separate from demo benchmark tasks.
+- Do not ignore unfinished tasks or unassigned git changes when starting new work.
 
 ## Scope Control
 
@@ -22,8 +23,8 @@ This file contains stable agent discipline and repo hygiene rules. It must not c
 
 - Do not create root-level temporary files.
 - Do not create files named `result.txt`, `output.txt`, `final.md`, `tmp.py`, `debug.py`, or similar scratch artifacts.
-- Keep generated demo artifacts under `demo_repo_template/artifacts/` when a task explicitly requires artifacts.
-- Keep temporary demo work under `demo_repo_template/.scratch/` and remove it before handoff unless it is intentionally retained and recorded.
+- Do not add generated benchmark workspaces or demo implementation artifacts to this repository.
+- Use isolated external workspaces for demo benchmark execution.
 - Do not add unnecessary dependencies.
 
 ## Handoff Discipline
@@ -32,6 +33,7 @@ This file contains stable agent discipline and repo hygiene rules. It must not c
 - Record files changed, commands run, tests, temporary files, decisions, risks, and the next recommended step.
 - Do not rely on previous chat transcripts as handoff state during benchmark runs.
 - Treat observable repo state as the source of truth.
+- Run Agent Bridge start refresh before work and end refresh before stopping.
 
 ## Done Criteria
 

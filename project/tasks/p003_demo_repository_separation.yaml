@@ -1,0 +1,16 @@
+task_id: P003
+title: BoardFlowBench and demo repository separation
+description: Split Expense Lite into an independent Git repository, keep BoardFlowBench project state separate from demo run state, and add minimal benchmark workspace initialization.
+dependencies:
+  - P002
+acceptance_criteria:
+  - Keep BoardFlowBench root taskboards project-only.
+  - Preserve the complete Expense Lite implementation on a standalone reference-history branch.
+  - Use an orphan standalone seed branch tagged benchmark-seed-v1 so agent-visible history does not contain answers.
+  - Store the standalone target URL and fixed seed commit in benchmark/targets/expense_lite.yaml.
+  - Initialize boardflow and no-board workspaces without modifying BoardFlowBench.
+  - Expose only the assigned demo task details inside a boardflow workspace.
+acceptance_commands:
+  - PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 -m pytest -p no:cacheprovider tests/test_benchmark_workspace.py
+  - PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 -m pytest -p no:cacheprovider
+  - git diff --check

@@ -1,10 +1,10 @@
 # Experiment Protocol
 
-This file defines the initial BoardFlowBench experiment flow. It is not a runner implementation.
+This file defines the BoardFlowBench experiment flow for standalone demo workspaces.
 
 ## Condition 1: No-Board Baseline
 
-In `no_board_baseline`, the agent receives only the assigned task prompt and the demo repository state.
+In `no_board_baseline`, initialize a temporary clone of the fixed demo seed without injecting BoardFlow files. The agent receives only the assigned task prompt and demo repository state.
 
 The agent must not use:
 
@@ -18,7 +18,7 @@ This condition measures how much context continuity is available without repo-lo
 
 ## Condition 2: BoardFlow Sequential Handoff
 
-In `boardflow_sequential`, each agent uses the BoardFlow reading order from `AGENTS.md`, works on one assigned task, updates board state, and writes a structured handoff.
+In `boardflow_sequential`, initialize a temporary clone of the fixed demo seed with run-local BoardFlow files. Each agent uses the injected reading order from `AGENTS.md`, works on one assigned B-series task, updates run-local board state, and writes a structured handoff.
 
 The observable repo state is the source of truth. Previous chat transcripts are not part of the handoff.
 
@@ -77,10 +77,25 @@ Scoring should use only observable artifacts:
 - command and test records inside handoff files
 - future checker outputs under `benchmark/results/`
 
+## Workspace Initialization
+
+```bash
+PYTHONPATH=. python3 scripts/init_benchmark_workspace.py \
+  --target expense_lite \
+  --condition boardflow_sequential \
+  --task-id B001 \
+  --workspace /tmp/boardflowbench-runs/run-001
+```
+
+Future task details are activated only after dependencies are complete:
+
+```bash
+PYTHONPATH=. python3 scripts/activate_benchmark_task.py \
+  --workspace /tmp/boardflowbench-runs/run-001 \
+  --task-id B002
+```
+
 ## Not Implemented Yet
 
-- automatic checkers
-- scoring script
-- scenario runner
 - result aggregation
 - statistical analysis

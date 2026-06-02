@@ -1,0 +1,20 @@
+task_id: B003
+title: Monthly summary
+description: Summarize imported expenses by month and category.
+dependencies:
+  - B002
+allowed_paths:
+  - src/expense_lite/summary.py
+  - tests/test_summary.py
+  - .board/tasks.yaml
+  - PROJECT_BOARD.md
+  - .board/handoffs/
+acceptance_criteria:
+  - Group expenses by YYYY-MM month.
+  - Sum amounts by category within each month.
+  - Keep deterministic ordering for stable reports.
+  - Add focused tests for multiple months and categories.
+handoff_requirement:
+  required: true
+  schema: .board/handoff.schema.json
+  directory: .board/handoffs/

@@ -1,0 +1,7 @@
+task_id: P002
+title: Bridge lifecycle refresh
+description: Add a minimal blackboard and sticker lifecycle refresh for taskboard consistency, git-aware continuation checks, and shared agent context.
+dependencies: []
+acceptance_commands:
+  - PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 -m pytest -p no:cacheprovider tests/test_board_sync.py tests/test_bridge_refresh.py tests/test_style_bridge.py
+  - PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 -m pytest -p no:cacheprovider

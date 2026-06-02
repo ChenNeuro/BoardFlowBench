@@ -1,14 +1,14 @@
 # PROJECT_BOARD.md
 
-Human-readable BoardFlow milestone board for BoardFlowBench.
+Human-readable development board for BoardFlowBench itself.
 
-Dynamic milestone and task state belongs here and in `.board/tasks.yaml`. Stable policy belongs in `AI_CONTRACT.md`.
+Dynamic project state belongs here and in `.board/tasks.yaml`. Demo benchmark state belongs only inside an initialized demo workspace.
 
 ## Current Milestone
 
-Milestone: M1 - Basic expense parsing and reporting
+Milestone: M1 - BoardFlowBench protocol separation and calibration
 
-Goal: complete the four-step Expense Lite task sequence used to evaluate sequential multi-agent handoff.
+Goal: keep BoardFlowBench development separate from demo benchmark execution, then harden scorer calibration.
 
 Status: IN_PROGRESS
 
@@ -16,10 +16,10 @@ Status: IN_PROGRESS
 
 | Task | Title | Status | Owner | Dependencies | Notes |
 | --- | --- | --- | --- | --- | --- |
-| T001 | Date parser | DONE | agent_b | none | Agent B verified acceptance and regression tests from repo-local state. |
-| T002 | CSV import | TODO | unassigned | T001 | Import CSV rows using the date parser. |
-| T003 | Monthly summary | TODO | unassigned | T002 | Summarize expenses by month and category. |
-| T004 | Report artifact | TODO | unassigned | T003 | Render a stable Markdown report artifact. |
+| P001 | Independent reviewer integration | DONE | codex | none | Added reviewdog publishing and optional independent PR-Agent review. |
+| P002 | Bridge lifecycle refresh | DONE | codex | none | Add minimal blackboard and sticker lifecycle refresh. |
+| P003 | BoardFlowBench and demo repository separation | DONE | codex | P002 | Split the demo into an independent Git repository and keep root state project-only. |
+| P004 | Scorer calibration and hardening | TODO | unassigned | P003 | Correct protocol-scoring false positives, hard gates, and mutation fixtures. |
 
 ## Status Values
 
@@ -27,11 +27,15 @@ Use only: `TODO`, `IN_PROGRESS`, `BLOCKED`, `READY_FOR_REVIEW`, `DONE`.
 
 ## Handoff State
 
-Latest T001 handoff: `.board/handoffs/T001_agent_b_handoff.json`
+Latest P001 handoff: `.board/handoffs/P001_codex_handoff.json`
 
-## Consistency Checks Planned
+Latest P002 handoff: `.board/handoffs/P002_codex_handoff.json`
+
+Latest P003 handoff: `.board/handoffs/P003_codex_handoff.json`
+
+## Consistency Checks
 
 - `PROJECT_BOARD.md` and `.board/tasks.yaml` should name the same current milestone.
 - Every task listed here should exist in `.board/tasks.yaml`.
 - Task status and owner should match between this file and `.board/tasks.yaml`.
-- Each completed task should have a relevant handoff when the scenario requires handoff.
+- Demo benchmark stickers must not be added to this project board.

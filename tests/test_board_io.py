@@ -10,8 +10,8 @@ from .conftest import REPO_ROOT
 
 
 def test_task_id_extraction():
-    assert task_id({"task_id": "T001"}) == "T001"
-    assert task_id({"id": "T002"}) == "T002"
+    assert task_id({"task_id": "P001"}) == "P001"
+    assert task_id({"id": "B002"}) == "B002"
 
 
 def test_load_board_from_dot_board():
@@ -25,7 +25,7 @@ def test_save_and_load_board_roundtrip():
     board = {
         "schema_version": 1,
         "tasks": [
-            {"id": "T001", "title": "Test", "status": "TODO", "owner": "agent-a"}
+            {"id": "P001", "title": "Test", "status": "TODO", "owner": "agent-a"}
         ],
     }
     with tempfile.TemporaryDirectory() as tmp:
@@ -35,7 +35,7 @@ def test_save_and_load_board_roundtrip():
         assert saved.exists()
 
         loaded = load_board(root)
-        assert loaded["tasks"][0]["id"] == "T001"
+        assert loaded["tasks"][0]["id"] == "P001"
         assert loaded["tasks"][0]["status"] == "TODO"
 
 

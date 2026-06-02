@@ -11,7 +11,7 @@ from repo_manager_core.board.task_status import VALID_STATUSES
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("task_id", help="Task identifier (e.g. T001).")
+    parser.add_argument("task_id", help="Task identifier (e.g. P001 or B001).")
     parser.add_argument("agent_id", help="Agent creating the handoff.")
     parser.add_argument("agent_role", help="Agent role (e.g. first_worker, reviewer_finisher).")
     parser.add_argument("--status", default="READY_FOR_REVIEW", choices=sorted(VALID_STATUSES))

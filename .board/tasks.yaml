@@ -2,9 +2,9 @@ schema_version: 1
 project: BoardFlowBench
 current_milestone:
   id: M1
-  title: Basic expense parsing and reporting
+  title: BoardFlowBench protocol separation and calibration
   status: IN_PROGRESS
-  goal: Complete the four-step Expense Lite sequence used to evaluate sequential handoff.
+  goal: Keep BoardFlowBench development separate from demo benchmark execution, then harden scorer calibration.
 status_values:
   - TODO
   - IN_PROGRESS
@@ -12,66 +12,37 @@ status_values:
   - READY_FOR_REVIEW
   - DONE
 tasks:
-  - id: T001
-    title: Date parser
+  - id: P001
+    title: Independent reviewer integration
     status: DONE
-    owner: agent_b
+    owner: codex
     dependencies: []
-    allowed_paths:
-      - demo_repo_template/src/expense_lite/parser.py
-      - demo_repo_template/tests/test_parser.py
-      - .board/tasks.yaml
-      - PROJECT_BOARD.md
-      - .board/handoffs/
-    acceptance_commands:
-      - PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=demo_repo_template/src python3 -m unittest discover -s demo_repo_template/tests -p 'test_parser.py'
-    acceptance_source: benchmark/tasks/task_001_date_parser.yaml
-    current_handoff: .board/handoffs/T001_agent_b_handoff.json
-    notes: Agent B verified acceptance and regression tests from repo-local state.
-  - id: T002
-    title: CSV import
+    acceptance_source: project/tasks/p001_reviewer_integration.yaml
+    current_handoff: .board/handoffs/P001_codex_handoff.json
+    notes: Added reviewdog publishing and optional independent PR-Agent review.
+  - id: P002
+    title: Bridge lifecycle refresh
+    status: DONE
+    owner: codex
+    dependencies: []
+    acceptance_source: project/tasks/p002_bridge_refresh.yaml
+    current_handoff: .board/handoffs/P002_codex_handoff.json
+    notes: Add minimal blackboard and sticker lifecycle refresh.
+  - id: P003
+    title: BoardFlowBench and demo repository separation
+    status: DONE
+    owner: codex
+    dependencies:
+      - P002
+    acceptance_source: project/tasks/p003_demo_repository_separation.yaml
+    current_handoff: .board/handoffs/P003_codex_handoff.json
+    notes: Split the demo into an independent Git repository and keep root state project-only.
+  - id: P004
+    title: Scorer calibration and hardening
     status: TODO
     owner: unassigned
     dependencies:
-      - T001
-    allowed_paths:
-      - demo_repo_template/src/expense_lite/parser.py
-      - demo_repo_template/src/expense_lite/validator.py
-      - demo_repo_template/tests/test_parser.py
-      - demo_repo_template/tests/test_validator.py
-    acceptance_commands:
-      - PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=demo_repo_template/src python3 -m unittest discover -s demo_repo_template/tests -p 'test_parser.py'
-      - PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=demo_repo_template/src python3 -m unittest discover -s demo_repo_template/tests -p 'test_validator.py'
-    acceptance_source: benchmark/tasks/task_002_csv_import.yaml
+      - P003
+    acceptance_source: project/tasks/p004_scorer_calibration.yaml
     current_handoff: null
-    notes: Import CSV rows using the date parser.
-  - id: T003
-    title: Monthly summary
-    status: TODO
-    owner: unassigned
-    dependencies:
-      - T002
-    allowed_paths:
-      - demo_repo_template/src/expense_lite/summary.py
-      - demo_repo_template/tests/test_summary.py
-    acceptance_commands:
-      - PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=demo_repo_template/src python3 -m unittest discover -s demo_repo_template/tests -p 'test_summary.py'
-    acceptance_source: benchmark/tasks/task_003_monthly_summary.yaml
-    current_handoff: null
-    notes: Summarize expenses by month and category.
-  - id: T004
-    title: Report artifact
-    status: TODO
-    owner: unassigned
-    dependencies:
-      - T003
-    allowed_paths:
-      - demo_repo_template/src/expense_lite/report.py
-      - demo_repo_template/src/expense_lite/cli.py
-      - demo_repo_template/tests/test_report.py
-      - demo_repo_template/artifacts/
-    acceptance_commands:
-      - PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=demo_repo_template/src python3 -m unittest discover -s demo_repo_template/tests -p 'test_report.py'
-    acceptance_source: benchmark/tasks/task_004_report_artifact.yaml
-    current_handoff: null
-    notes: Render a stable Markdown report artifact.
+    notes: Correct protocol-scoring false positives, hard gates, and mutation fixtures.

@@ -1,0 +1,7 @@
+task_id: P001
+title: Independent reviewer integration
+description: Add push and pull-request review orchestration that publishes deterministic Repo Manager health signals through reviewdog and runs PR-Agent as an optional independent AI reviewer.
+dependencies: []
+acceptance_commands:
+  - PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 -m pytest -p no:cacheprovider tests/test_reviewdog_export.py
+  - PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 -m pytest -p no:cacheprovider

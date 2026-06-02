@@ -6,10 +6,11 @@ import argparse
 from pathlib import Path
 
 from repo_manager_core.board.board_io import load_board
-from repo_manager_core.style.learn_repo_style import read_json
+from repo_manager_core.board.board_sync import check_board_views
+from repo_manager_core.board.git_state import inspect_git_state
 from repo_manager_core.style.style_profile import build_profile
 from repo_manager_core.style.learn_repo_style import learn_repo_style
-from repo_manager_core.style.context_writer import write_agent_context
+from repo_manager_core.style.context_writer import write_agent_context, write_style_profile
 
 
 def main() -> int:
@@ -20,20 +21,26 @@ def main() -> int:
     args = parser.parse_args()
     root = Path(args.repo)
 
-    # Build style profile if cache doesn't exist
-    style_path = root / ".repo_manager" / "repo_style_profile.json"
-    if style_path.exists():
-        style_profile = read_json(style_path)
-    else:
-        profile = build_profile(root)
-        style_profile = learn_repo_style(profile)
-
     try:
         board = load_board(root)
-    except Exception:
-        board = None
+        violations = check_board_views(root, board)
+    except Exception as exc:
+        print(f"Error: {exc}")
+        return 1
+    if violations:
+        print("Error: taskboard views are inconsistent: " + "; ".join(violations))
+        return 1
 
-    dest = write_agent_context(root, style_profile, board, args.agent_id, args.task_id)
+    style_profile = learn_repo_style(build_profile(root))
+    write_style_profile(root, style_profile)
+    dest = write_agent_context(
+        root,
+        style_profile,
+        board,
+        args.agent_id,
+        args.task_id,
+        git_state=inspect_git_state(root),
+    )
     print(f"Wrote agent context to {dest}")
     return 0
 

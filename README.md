@@ -12,6 +12,10 @@ BoardFlowBench 的核心目标不是做一个 GUI 工具，也不是单纯检查
 - **Agent skills**：Claude Code 可使用的 skills，帮助 agent 读取状态、更新看板、写 handoff、做代码健康审查。
 - **Benchmark checks**：`tools/benchmark_scorer.py` 和 core checker，用可观察的 repo 状态评估任务完成、交接质量、scope control、hygiene 和 board consistency。
 
+Expense Lite demo 不再作为本仓库中的业务代码维护。它位于独立仓库
+`ChenNeuro/ExpenseLiteBenchDemo`，每次实验从固定 seed commit clone 到临时 workspace。
+根目录的 `PROJECT_BOARD.md` 和 `.board/` 只记录 BoardFlowBench 自身研发任务。
+
 ## 核心 Agent Skills
 
 ### Agent Bridge (`agent-bridge`)
@@ -83,6 +87,11 @@ BoardFlowBench/
 │   └── code-health-review/  # Skill: 代码健康审查
 ├── tools/
 │   └── benchmark_scorer.py  # 评分运行器
+├── benchmark/
+│   ├── targets/             # 独立 demo 仓库地址和固定 seed commit
+│   ├── tasks/expense_lite/  # Demo benchmark 任务规格
+│   └── templates/           # 注入临时 workspace 的协议模板
+├── project/tasks/           # BoardFlowBench 自身研发任务规格
 ├── install/                 # Claude Code 安装脚本
 ├── tests/                   # 测试
 ├── .board/                  # Agent Bridge 状态文件
@@ -137,13 +146,13 @@ bash install/install_claude.sh
 `agent-bridge` 用来做任务接手、状态同步和交接记录。你可以直接在 agent 对话里这样要求：
 
 ```text
-Use the agent-bridge skill. Read .board/tasks.yaml and .repo_manager/agent_context.md, then continue task T002.
+Use the agent-bridge skill. Read .board/tasks.yaml and .repo_manager/agent_context.md, then continue the assigned project task.
 ```
 
 中文也可以直接说：
 
 ```text
-使用 agent-bridge。先读 .board/tasks.yaml 和 .repo_manager/agent_context.md，检查 T002 的依赖、allowed_paths 和 acceptance_commands，然后继续任务。
+使用 agent-bridge。先读 .board/tasks.yaml 和 .repo_manager/agent_context.md，检查被分配项目任务的依赖和验收条件，然后继续任务。
 ```
 
 agent 应该按这个顺序工作：
@@ -156,7 +165,7 @@ agent 应该按这个顺序工作：
 6. 停止或移交前写 `.board/handoffs/<task_id>_<agent>.json`。
 7. 更新 `.repo_manager/agent_context.md`，让下一个 agent 能接手。
 
-当前仓库的 `.board/tasks.yaml` 中，`T001` 已经是 `DONE`，`T002` 还在 `TODO`，所以演示接手时通常从 `T002` 开始。
+根 taskboard 只服务 BoardFlowBench 研发。Demo 实验使用初始化命令生成自己的 B 系列 taskboard。
 
 ### 3. 直接运行 Agent Bridge 脚本
 
@@ -167,10 +176,14 @@ agent 应该按这个顺序工作：
 PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_init_board.py --repo .
 
 # 更新任务状态
-PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_status.py T002 IN_PROGRESS --owner codex --repo .
+PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_status.py P004 IN_PROGRESS --owner codex --repo .
+
+# 开始任务前刷新 blackboard、sticker 和 git 状态
+PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_refresh.py \
+  --phase start --agent-id codex --task-id P004 --repo .
 
 # 创建交接记录
-PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_handoff.py T002 codex first_worker \
+PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_handoff.py P004 codex first_worker \
   --repo . \
   --status IN_PROGRESS \
   --files src/parser.py \
@@ -181,7 +194,11 @@ PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_handoff.py T002 codex fi
 PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_learn_style.py .
 
 # 更新 agent 上下文
-PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_update_context.py --repo . --agent-id codex --task-id T002
+PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_update_context.py --repo . --agent-id codex --task-id P004
+
+# 结束前刷新共享上下文
+PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_refresh.py \
+  --phase end --agent-id codex --task-id P004 --repo .
 ```
 
 ### 4. Code Health Review 怎么用
@@ -294,8 +311,34 @@ PYTHONPATH=. python3 skills/code-health-review/scripts/health_generate_report.py
 
 ### 5. 运行 Benchmark Scorer
 
+先从独立 demo seed 初始化临时实验 workspace：
+
 ```bash
-PYTHONPATH=. python3 tools/benchmark_scorer.py --task path/to/task.yaml --repo . --output outputs/score.json
+PYTHONPATH=. python3 scripts/init_benchmark_workspace.py \
+  --target expense_lite \
+  --condition boardflow_sequential \
+  --task-id B001 \
+  --workspace /tmp/boardflowbench-runs/run-001
+```
+
+本地验证尚未推送的 sibling demo 仓库时，追加
+`--source-repo ../ExpenseLiteBenchDemo`。
+
+后续阶段只在依赖完成后注入当前任务规格：
+
+```bash
+PYTHONPATH=. python3 scripts/activate_benchmark_task.py \
+  --workspace /tmp/boardflowbench-runs/run-001 \
+  --task-id B002
+```
+
+scorer 针对临时 workspace 运行：
+
+```bash
+PYTHONPATH=. python3 tools/benchmark_scorer.py \
+  --task .board/assigned_task.yaml \
+  --repo /tmp/boardflowbench-runs/run-001 \
+  --output /tmp/boardflowbench-runs/run-001-score.json
 ```
 
 ### 6. 运行测试
@@ -330,3 +373,4 @@ Reviewer / scorer 检查任务完成、handoff、scope、hygiene 和 board consi
 - **Code Health 管"质量"** — 代码结构审查
 - **Benchmark Scorer 管"证据"** — 只基于可观察 repo 状态评分
 - **仓库状态是真理来源** — 不依赖聊天记录传递上下文
+- **Demo 是独立测试平台** — 根仓库不维护 demo 业务功能，实验使用固定 seed 的临时 clone

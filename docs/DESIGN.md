@@ -1,6 +1,6 @@
 # Design Notes
 
-BoardFlowBench separates protocol state, benchmark definitions, and the demo repository under test.
+BoardFlowBench separates project development state, benchmark definitions, and standalone demo repositories under test.
 
 ## BoardFlow Architecture
 
@@ -9,16 +9,16 @@ BoardFlow is a repo-local shared state protocol for sequential multi-agent codin
 It has three layers:
 
 - policy layer: `AGENTS.md` and `AI_CONTRACT.md`
-- state layer: `PROJECT_BOARD.md`, `.board/tasks.yaml`, and `.board/handoffs/*.json`
-- benchmark layer: `benchmark/tasks/`, `benchmark/scenarios/`, and future scoring checks
+- project state layer: `PROJECT_BOARD.md`, `.board/tasks.yaml`, and `.board/handoffs/*.json`
+- benchmark layer: `benchmark/targets/`, `benchmark/tasks/`, `benchmark/scenarios/`, and scoring checks
 
-`demo_repo_template/` is the target repo that agents modify during benchmark tasks. It is intentionally small so the benchmark focuses on context continuity and coordination discipline rather than difficult application logic.
+Expense Lite is maintained as the standalone `ChenNeuro/ExpenseLiteBenchDemo` target repository. Each experiment clones a fixed seed commit into an external workspace. BoardFlow condition setup injects run-local protocol state into that clone. No-board setup leaves the clone free of BoardFlow files.
 
 ## Board And Handoff Separation
 
 The board and handoff files answer different questions.
 
-`PROJECT_BOARD.md` and `.board/tasks.yaml` describe the current shared state:
+The root `PROJECT_BOARD.md` and `.board/tasks.yaml` describe BoardFlowBench development state. Injected workspace copies describe one demo run:
 
 - current milestone
 - task list

@@ -1,9 +1,10 @@
 id: no_board_baseline
 title: No BoardFlow baseline
-description: Agents receive task prompts without BoardFlow shared state.
+description: Agents receive task prompts against an isolated standalone demo clone without BoardFlow shared state.
 boardflow_files_available: false
 requires_handoff_json: false
 checker_mode: none
 notes:
   - Used as the comparison condition for context continuity failures.
+  - Initialize the workspace from the same fixed standalone demo seed.
   - The demo repo may still include normal README and tests.

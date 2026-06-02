@@ -20,7 +20,7 @@
   "properties": {
     "task_id": {
       "type": "string",
-      "pattern": "^T[0-9]{3}$",
+      "pattern": "^[A-Z][0-9]{3}$",
       "minLength": 1
     },
     "agent_id": {

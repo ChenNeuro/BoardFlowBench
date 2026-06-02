@@ -1,0 +1,143 @@
+{
+  "task_id": "P003",
+  "agent_id": "codex",
+  "agent_role": "repository_separation_implementer",
+  "status": "DONE",
+  "files_changed": [
+    "PROJECT_BOARD.md",
+    ".board/tasks.yaml",
+    ".board/handoff.schema.json",
+    ".board/handoffs/P001_codex_handoff.json",
+    ".board/handoffs/P002_codex_handoff.json",
+    ".board/handoffs/P003_codex_handoff.json",
+    ".board/handoffs/T001_agent_a_handoff.json (removed)",
+    ".board/handoffs/T001_agent_b_handoff.json (removed)",
+    ".board/reviews/T001_review.md (removed)",
+    "demo_repo_template/ (removed)",
+    "project/tasks/",
+    "benchmark/targets/expense_lite.yaml",
+    "benchmark/tasks/expense_lite/",
+    "benchmark/templates/boardflow/",
+    "benchmark/scenarios/",
+    "repo_manager_core/benchmark/",
+    "scripts/init_benchmark_workspace.py",
+    "scripts/activate_benchmark_task.py",
+    "README.md",
+    "AGENTS.md",
+    "AI_CONTRACT.md",
+    "docs/",
+    "tests/test_benchmark_workspace.py",
+    "tests/test_board_io.py",
+    "tests/test_board_sync.py",
+    "tests/test_board_validator.py",
+    "tests/test_bridge_refresh.py",
+    "tests/test_handoff.py",
+    "../ExpenseLiteBenchDemo/ (new standalone Git repository)"
+  ],
+  "commands_run": [
+    {
+      "command": "git subtree split --prefix=demo_repo_template -b expense-lite-reference-history",
+      "result": "PASS",
+      "notes": "Extracted the existing embedded demo history before removing the directory from BoardFlowBench."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 -m pytest -p no:cacheprovider",
+      "result": "PASS",
+      "notes": "Ran the complete BoardFlowBench regression suite; 51 tests passed."
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS",
+      "notes": "No whitespace errors were reported."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 scripts/init_benchmark_workspace.py --target expense_lite --condition boardflow_sequential --task-id B001 --workspace /tmp/boardflowbench-p003-boardflow-2 --source-repo ../ExpenseLiteBenchDemo",
+      "result": "PASS",
+      "notes": "Created a clean BoardFlow workspace from the fixed standalone seed and injected only B001 details."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 scripts/init_benchmark_workspace.py --target expense_lite --condition no_board_baseline --task-id B001 --workspace /tmp/boardflowbench-p003-no-board --source-repo ../ExpenseLiteBenchDemo",
+      "result": "PASS",
+      "notes": "Created a clean no-board workspace without injected BoardFlow files."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 tools/benchmark_scorer.py --task .board/assigned_task.yaml --repo /tmp/boardflowbench-p003-boardflow-2 --output /tmp/boardflowbench-p003-score-2.json",
+      "result": "PASS",
+      "notes": "Scorer reported B001 correctness 40/40. The only violation was the expected missing handoff in a newly initialized run."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m unittest discover -s tests -p 'test_parser.py'",
+      "result": "FAIL",
+      "notes": "Ran on ExpenseLiteBenchDemo main. Slash-date tests fail intentionally in the fixed seed before B001."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m unittest tests.test_validator tests.test_parser.DateParserTest.test_normalize_accepts_hyphen_date tests.test_parser.DateParserTest.test_load_expenses_json_reads_records",
+      "result": "PASS",
+      "notes": "Ran on ExpenseLiteBenchDemo main. Hyphen-date, fixture loading, and validator basics passed."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m unittest discover -s tests",
+      "result": "PASS",
+      "notes": "Ran on ExpenseLiteBenchDemo reference-history. All 10 complete-reference tests passed."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_refresh.py --phase end --agent-id codex --task-id P003 --repo .",
+      "result": "PASS",
+      "notes": "Refreshed root project context before completion."
+    }
+  ],
+  "tests": [
+    {
+      "name": "tests/test_benchmark_workspace.py",
+      "result": "PASS",
+      "notes": "Covered isolated BoardFlow initialization, no-board initialization, overwrite refusal, dependency blocking, assigned-task exposure, and task activation baseline commits."
+    },
+    {
+      "name": "BoardFlowBench full pytest suite",
+      "result": "PASS",
+      "notes": "51 tests passed."
+    },
+    {
+      "name": "ExpenseLiteBenchDemo seed validation",
+      "result": "PASS",
+      "notes": "B001 slash-date failures are intentional; hyphen-date, fixture loading, and validator basics passed."
+    },
+    {
+      "name": "ExpenseLiteBenchDemo reference-history validation",
+      "result": "PASS",
+      "notes": "All 10 complete-reference tests passed."
+    }
+  ],
+  "temporary_files_created": [
+    "/tmp/expense-lite-reference",
+    "/tmp/expense-lite-reference-check",
+    "/tmp/boardflowbench-p003-boardflow",
+    "/tmp/boardflowbench-p003-boardflow-2",
+    "/tmp/boardflowbench-p003-no-board",
+    "/tmp/boardflowbench-p003-score.json",
+    "/tmp/boardflowbench-p003-score-2.json"
+  ],
+  "temporary_files_removed": [
+    "/tmp/expense-lite-reference",
+    "/tmp/expense-lite-reference-check",
+    "/tmp/boardflowbench-p003-boardflow",
+    "/tmp/boardflowbench-p003-boardflow-2",
+    "/tmp/boardflowbench-p003-no-board",
+    "/tmp/boardflowbench-p003-score.json",
+    "/tmp/boardflowbench-p003-score-2.json"
+  ],
+  "decisions": [
+    "Kept BoardFlowBench root blackboard project-only and moved demo experiment state into initialized standalone workspaces.",
+    "Used P-series ids for project work and B-series ids for demo benchmark stickers.",
+    "Preserved existing embedded demo history on ExpenseLiteBenchDemo reference-history and created main as an orphan seed branch so agent-visible history does not contain answers.",
+    "Stored only the standalone target URL and fixed seed commit in BoardFlowBench.",
+    "Injected only the currently assigned demo task details while keeping a brief B001-B004 backlog visible.",
+    "Removed legacy T001 pilot records from the current tree without adding an archive directory; Git history remains the source for retrieval."
+  ],
+  "risks": [
+    "The local sibling repository ../ExpenseLiteBenchDemo is complete, but https://github.com/ChenNeuro/ExpenseLiteBenchDemo.git does not exist yet. Create the empty GitHub repository before pushing main, reference-history, and benchmark-seed-v1.",
+    "P004 still needs to harden scorer semantics for unavailable baselines, board-view validation, handoff schema validation, and hygiene classification.",
+    "P001 and P002 handoffs retain historical command text that mentions the former embedded demo paths. Those entries are preserved as historical facts."
+  ],
+  "next_recommended_step": "Create the empty ChenNeuro/ExpenseLiteBenchDemo GitHub repository, push the standalone branches and tag, then start P004 scorer calibration and hardening."
+}

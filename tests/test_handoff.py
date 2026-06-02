@@ -9,9 +9,9 @@ from repo_manager_core.board.handoff_writer import check_handoff, write_handoff
 from .conftest import REPO_ROOT
 
 
-def test_check_handoff_finds_t001_handoffs():
-    """T001 has handoff files from the completed demo run."""
-    task = {"task_id": "T001", "handoff_required": True}
+def test_check_handoff_finds_p001_handoffs():
+    """P001 has a handoff file from the completed project task."""
+    task = {"task_id": "P001", "handoff_required": True}
     result = check_handoff(REPO_ROOT, task)
     assert result["score"] >= 3  # at least "handoff exists" points
     assert len(result["details"]["handoff_files"]) >= 1
@@ -24,7 +24,7 @@ def test_write_and_check_handoff_roundtrip():
 
         path = write_handoff(
             repo=root,
-            task_id="T001",
+            task_id="P001",
             agent_id="test-agent",
             agent_role="tester",
             status="READY_FOR_REVIEW",
@@ -34,6 +34,6 @@ def test_write_and_check_handoff_roundtrip():
         )
         assert path.exists()
 
-        task = {"task_id": "T001", "handoff_required": True}
+        task = {"task_id": "P001", "handoff_required": True}
         result = check_handoff(root, task)
         assert result["score"] >= 3

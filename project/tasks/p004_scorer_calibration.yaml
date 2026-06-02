@@ -1,0 +1,10 @@
+task_id: P004
+title: Scorer calibration and hardening
+description: Correct protocol-scoring false positives, add hard gates, and validate scorer behavior with mutation fixtures.
+dependencies:
+  - P003
+acceptance_criteria:
+  - Treat unavailable git baselines as not evaluated instead of full scope credit.
+  - Check both taskboard views and real handoff schema validity.
+  - Distinguish legitimate task-owned additions from hygiene residue.
+  - Cover scorer failure modes with mutation fixtures.
