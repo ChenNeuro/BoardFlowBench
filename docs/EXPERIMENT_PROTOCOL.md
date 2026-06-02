@@ -30,6 +30,8 @@ In `full_boardflow`, initialize a temporary clone of the fixed demo seed with ru
 
 The observable repo state is the source of truth. Previous chat transcripts are not part of the handoff.
 
+Workspace `.board/run.yaml` and `.board/evidence/*.json` files are readable mirrors, not acceptance authority. The runner stores a signed `run.json`, trusted score files, and trusted evidence outside the workspace.
+
 ## Agent A Responsibilities
 
 Agent A starts a task from the assigned benchmark task YAML.
@@ -95,12 +97,11 @@ PYTHONPATH=. python3 scripts/init_benchmark_workspace.py \
   --workspace /tmp/boardflowbench-runs/run-001
 ```
 
-Future task details are activated only after dependencies are complete:
+The runner activates future task details only after deterministic acceptance. This command is limited to recovering a runner-authored signed activation transition:
 
 ```bash
 PYTHONPATH=. python3 scripts/activate_benchmark_task.py \
-  --workspace /tmp/boardflowbench-runs/run-001 \
-  --task-id B002
+  --run-manifest /tmp/boardflowbench-results/<run-id>/run.json
 ```
 
 ## Scenario Runner
@@ -114,7 +115,11 @@ PYTHONPATH=. python3 scripts/run_scenario.py \
   --results-dir /tmp/boardflowbench-results
 ```
 
-The runner validates the seed, calls start and end refresh around each full-BoardFlow sticker, stores results outside this repository, and stops when a deterministic finalize gate fails. An optional reviewer command can publish non-blocking qualitative risks after acceptance.
+The runner validates the seed, requires a clean oracle pack at the target manifest's fixed commit, calls start and end refresh around each full-BoardFlow sticker, stores results outside the workspace, and stops when a deterministic finalize gate fails. The oracle pack and results directory must both stay outside the workspace. An optional reviewer command can publish non-blocking qualitative risks after acceptance, but it must not modify the finalized workspace or trusted control-plane files.
+
+Use the runner for the complete lifecycle. Direct workspace initialization is for injection-boundary checks. HMAC signatures prevent workspace-local forgery; hostile agent commands still require an external OS sandbox.
+
+Executable adapter commands are not persisted in signed manifests. Operators pass `--reviewer-command` again when resuming a manual checkpoint. Reviewer adapters are operator-trusted only: the runner hashes the key, signed manifest, score, and evidence before and after review, but hostile reviewers still require an external OS sandbox.
 
 ## Terms
 

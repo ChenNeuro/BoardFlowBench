@@ -25,6 +25,9 @@ def main() -> int:
     workspace = Path(args.workspace).resolve()
     manifest = load_target(ROOT, args.target)
     baseline = run_git(["rev-parse", "HEAD"], cwd=workspace).stdout.strip()
+    if baseline != manifest["seed_commit"]:
+        print("Error: workspace HEAD does not match the fixed target seed commit")
+        return 1
     result = score_task(
         workspace,
         task_path(ROOT, manifest, args.task_id),
@@ -34,6 +37,7 @@ def main() -> int:
         oracle_root=args.oracle_root,
         target=args.target,
         seed_commit=str(manifest["seed_commit"]),
+        oracle_commit=str(manifest["oracle_commit"]),
     )
     if args.output:
         write_score(result, args.output)

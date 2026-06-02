@@ -23,6 +23,7 @@ PYTHONPATH=. python3 tools/benchmark_scorer.py \
   --repo <workspace> \
   --baseline <sticker-baseline> \
   --oracle-root <private-oracle-repo> \
+  --oracle-commit <fixed-oracle-pack-sha> \
   --output <external-score-json> \
   --fail-on-violations
 
@@ -34,6 +35,9 @@ PYTHONPATH=. python3 scripts/aggregate_benchmark_results.py \
 ## Rules
 
 - Do not modify source files while acting as reviewer.
+- Do not modify or commit the workspace after deterministic acceptance.
+- Do not modify the external key, signed manifest, score, or evidence files.
 - Do not treat an AI review as acceptance evidence.
 - Report findings against observable repository state and exact file paths.
-- Keep private oracle files outside the agent workspace.
+- Keep private oracle files and the results directory outside the agent workspace.
+- Treat reviewer adapters as operator-trusted commands. Use an external OS sandbox for an untrusted reviewer process.

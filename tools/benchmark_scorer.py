@@ -28,6 +28,8 @@ def score_task(
     oracle_root: str | Path | None = None,
     target: str = "expense_lite",
     seed_commit: str | None = None,
+    oracle_commit: str | None = None,
+    handoff_schema: str | Path | None = None,
 ) -> dict[str, Any]:
     """Run applicable checks and return a condition-aware score report."""
     root = Path(repo)
@@ -37,9 +39,9 @@ def score_task(
         raise ValueError(f"unsupported score phase: {phase}")
 
     correctness = (
-        _score_seed(root, task, oracle_root=oracle_root, target=target, seed_commit=seed_commit)
+        _score_seed(root, task, oracle_root=oracle_root, target=target, seed_commit=seed_commit, oracle_commit=oracle_commit)
         if phase == "seed"
-        else _score_completion(root, task, oracle_root=oracle_root, target=target, seed_commit=seed_commit)
+        else _score_completion(root, task, oracle_root=oracle_root, target=target, seed_commit=seed_commit, oracle_commit=oracle_commit)
     )
     hygiene = check_hygiene(
         root,
@@ -50,7 +52,7 @@ def score_task(
     scope_control = check_scope(root, task, baseline=baseline)
     changed_files = scope_control.get("details", {}).get("changed_files", [])
     if phase == "completion" and condition in FULL_BOARD_CONDITIONS:
-        handoff = check_handoff(root, task, changed_files)
+        handoff = check_handoff(root, task, changed_files, schema_path_override=handoff_schema)
         board_consistency = check_board_consistency(root, task)
         if board_consistency.get("details", {}).get("status") == "TODO":
             board_consistency["violations"].append(f"{tid} remains TODO during completion scoring")
@@ -105,6 +107,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--oracle-root", default=None, help="External private oracle pack.")
     parser.add_argument("--target", default="expense_lite")
     parser.add_argument("--seed-commit", default=None, help="Expected fixed target seed SHA.")
+    parser.add_argument("--oracle-commit", default=None, help="Expected fixed private oracle-pack SHA.")
     parser.add_argument("--fail-on-violations", action="store_true")
     args = parser.parse_args(argv)
 
@@ -117,6 +120,7 @@ def main(argv: list[str] | None = None) -> int:
         oracle_root=args.oracle_root,
         target=args.target,
         seed_commit=args.seed_commit,
+        oracle_commit=args.oracle_commit,
     )
     write_score(report, args.output)
     print(f"wrote {args.output}")
@@ -131,6 +135,7 @@ def _score_seed(
     oracle_root: str | Path | None,
     target: str,
     seed_commit: str | None,
+    oracle_commit: str | None,
 ) -> dict[str, Any]:
     expected = task.get("expected_failing_test_initial_state")
     violations: list[str] = []
@@ -159,6 +164,7 @@ def _score_seed(
             root,
             phase="seed",
             expected_seed_commit=seed_commit,
+            expected_oracle_commit=oracle_commit,
         )
         details["oracle"] = oracle
         if oracle["passed"]:
@@ -177,6 +183,7 @@ def _score_completion(
     oracle_root: str | Path | None,
     target: str,
     seed_commit: str | None,
+    oracle_commit: str | None,
 ) -> dict[str, Any]:
     violations: list[str] = []
     warnings: list[str] = []
@@ -200,6 +207,7 @@ def _score_completion(
             task_id(task),
             root,
             expected_seed_commit=seed_commit,
+            expected_oracle_commit=oracle_commit,
         )
         details["oracle"] = oracle
         if oracle["passed"]:

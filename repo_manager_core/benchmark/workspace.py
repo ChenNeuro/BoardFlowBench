@@ -8,6 +8,11 @@ from pathlib import Path
 from typing import Any
 
 from repo_manager_core.board.board_io import _dump_yaml, load_board, load_yaml, save_board
+from repo_manager_core.benchmark.control import (
+    find_stage_snapshot,
+    load_run_state,
+    validate_stage_snapshot,
+)
 from repo_manager_core.board.board_sync import check_board_views
 from repo_manager_core.board.evidence import validate_acceptance_evidence
 from repo_manager_core.board.handoff_writer import check_handoff
@@ -83,6 +88,8 @@ def activate_task(
     project_root: str | Path,
     workspace: str | Path,
     task_id: str,
+    *,
+    run_manifest: str | Path,
 ) -> dict[str, str]:
     """Expose one full-BoardFlow task after deterministic dependency gates pass."""
     root = Path(project_root).resolve()
@@ -91,6 +98,19 @@ def activate_task(
         raise ValueError(f"workspace does not exist: {dest}")
     if git_status(dest):
         raise ValueError("workspace must be clean before activating another task")
+    state = load_run_state(run_manifest)
+    if Path(state["workspace"]).resolve() != dest:
+        raise ValueError("run manifest workspace differs from activation workspace")
+    if normalize_condition(str(state["condition"])) != "full_boardflow":
+        raise ValueError("task activation requires a full BoardFlow run manifest")
+    tasks = [str(item) for item in state["tasks"]]
+    current = str(state["current_task"])
+    try:
+        expected = tasks[tasks.index(current) + 1]
+    except (ValueError, IndexError) as exc:
+        raise ValueError("run manifest does not have a next benchmark task") from exc
+    if task_id != expected:
+        raise ValueError(f"next benchmark task must be {expected}, not {task_id}")
 
     run_path = dest / ".board" / "run.yaml"
     if not run_path.exists():
@@ -98,9 +118,25 @@ def activate_task(
     run = load_yaml(run_path)
     if not isinstance(run, dict) or normalize_condition(str(run.get("condition", ""))) != "full_boardflow":
         raise ValueError("workspace is not an initialized full BoardFlow run")
+    if run.get("target") != state["target"]:
+        raise ValueError("workspace target mirror differs from external control state")
+    interrupted_activation = run.get("assigned_task") == task_id
+    if interrupted_activation and state["status"] != "activating_task":
+        raise ValueError("workspace task mirror advanced without a signed activation transition")
+    if run.get("assigned_task") not in {current, task_id}:
+        raise ValueError("workspace assigned-task mirror differs from external control state")
+    baselines = run.get("stage_baselines") or {}
+    if not isinstance(baselines, dict) or baselines.get(current) != state["baseline_commit"]:
+        raise ValueError("workspace baseline mirror differs from external control state")
 
-    manifest = load_target(root, str(run.get("target", "")))
+    manifest = load_target(root, str(state["target"]))
     specs = load_task_specs(root, manifest)
+    if tasks != [str(item["task_id"]) for item in specs]:
+        raise ValueError("run manifest task list differs from target specification")
+    if state["seed_commit"] != manifest["seed_commit"]:
+        raise ValueError("run manifest seed differs from target specification")
+    if state["oracle_commit"] != manifest["oracle_commit"]:
+        raise ValueError("run manifest oracle differs from target specification")
     task = require_task(specs, task_id)
     board = load_board(dest)
     violations = check_board_views(dest, board)
@@ -114,19 +150,25 @@ def activate_task(
     if task_id not in board_tasks:
         raise ValueError(f"task {task_id} is missing from workspace board")
 
-    dependency_violations = []
-    for dep in task.get("dependencies", []) or []:
-        board_task = board_tasks.get(str(dep), {})
-        if board_task.get("status") != "DONE":
-            dependency_violations.append(f"{dep} is not DONE")
-            continue
-        dependency_violations.extend(validate_acceptance_evidence(dest, board_task))
-        dep_spec = require_task(specs, str(dep))
-        handoff_task = dict(dep_spec)
-        handoff_task["handoff_required"] = True
-        dependency_violations.extend(check_handoff(dest, handoff_task).get("violations", []))
-    if dependency_violations:
-        raise ValueError("task dependencies are not accepted: " + "; ".join(dependency_violations))
+    external_run_dir = Path(run_manifest).resolve().parent
+    expected_head = run_git(["rev-parse", "HEAD"], cwd=dest).stdout.strip()
+    transition_violations = _validate_transition_records(
+        root,
+        dest,
+        state,
+        manifest,
+        specs,
+        board_tasks,
+        [current, *(str(item) for item in task.get("dependencies", []) or [] if str(item) != current)],
+        expected_head=None if interrupted_activation else expected_head,
+    )
+    if transition_violations:
+        raise ValueError("task dependencies are not accepted: " + "; ".join(transition_violations))
+    if interrupted_activation:
+        _restore_interrupted_activation(dest, state, current)
+        run = load_yaml(run_path)
+        if not isinstance(run, dict) or run.get("assigned_task") != current:
+            raise ValueError("interrupted activation recovery did not restore the current task mirror")
 
     shutil.copyfile(task_path(root, manifest, task_id), dest / ".board" / "assigned_task.yaml")
     run["assigned_task"] = task_id
@@ -138,6 +180,72 @@ def activate_task(
         "task_id": task_id,
         "baseline_commit": baseline,
     }
+
+
+def _validate_transition_records(
+    root: Path,
+    dest: Path,
+    state: dict[str, Any],
+    manifest: dict[str, Any],
+    specs: list[dict[str, Any]],
+    board_tasks: dict[str, dict[str, Any]],
+    accepted_tasks: list[str],
+    *,
+    expected_head: str | None,
+) -> list[str]:
+    """Validate the completed stage first, then any additional dependencies."""
+    violations = []
+    external_run_dir = Path(state["results_dir"]).resolve() / str(state["run_id"])
+    for dep in accepted_tasks:
+        board_task = board_tasks.get(str(dep), {})
+        if board_task.get("status") != "DONE":
+            violations.append(f"{dep} is not DONE")
+            continue
+        external_evidence = external_run_dir / "stages" / str(dep) / "evidence.json"
+        violations.extend(
+            validate_acceptance_evidence(
+                dest,
+                board_task,
+                external_evidence,
+                trusted_results_root=external_run_dir,
+                expected_head=expected_head if dep == accepted_tasks[0] else None,
+            )
+        )
+        if external_evidence.exists():
+            evidence = load_yaml(external_evidence)
+            snapshot = find_stage_snapshot(state, str(dep))
+            violations.extend(validate_stage_snapshot(snapshot, evidence))
+            if isinstance(evidence, dict) and evidence.get("seed_commit") != manifest["seed_commit"]:
+                violations.append(f"{dep} acceptance evidence seed differs from target manifest")
+            if isinstance(evidence, dict) and evidence.get("oracle_pack_commit") != manifest["oracle_commit"]:
+                violations.append(f"{dep} acceptance evidence oracle differs from target manifest")
+        dep_spec = require_task(specs, str(dep))
+        handoff_task = dict(dep_spec)
+        handoff_task["handoff_required"] = True
+        violations.extend(
+            check_handoff(
+                dest,
+                handoff_task,
+                schema_path_override=root / ".board" / "handoff.schema.json",
+            ).get("violations", [])
+        )
+    return violations
+
+
+def _restore_interrupted_activation(dest: Path, state: dict[str, Any], current: str) -> None:
+    """Roll back only generated control-file commits before replaying activation."""
+    snapshot = find_stage_snapshot(state, current)
+    finalized = snapshot.get("finalized_commit") if isinstance(snapshot, dict) else None
+    if not isinstance(finalized, str) or not finalized:
+        raise ValueError("signed activation transition is missing finalized evidence")
+    changed = set(run_git(["diff", "--name-only", f"{finalized}..HEAD"], cwd=dest).stdout.splitlines())
+    allowed = {".board/assigned_task.yaml", ".board/run.yaml"}
+    if not changed or not changed.issubset(allowed):
+        raise ValueError("interrupted activation recovery found unexpected committed workspace changes")
+    for relative in sorted(allowed):
+        content = run_git(["show", f"{finalized}:{relative}"], cwd=dest).stdout
+        (dest / relative).write_text(content, encoding="utf-8")
+    commit_all(dest, f"Restore interrupted activation after {current}")
 
 
 def inject_boardflow(
@@ -154,7 +262,11 @@ def inject_boardflow(
     board_dir = workspace / ".board"
     (board_dir / "handoffs").mkdir(parents=True)
     (board_dir / "evidence").mkdir()
+    repo_manager_dir = workspace / ".repo_manager"
+    repo_manager_dir.mkdir()
     shutil.copyfile(project_root / ".board" / "handoff.schema.json", board_dir / "handoff.schema.json")
+    shutil.copyfile(project_root / "repo_manager_core" / "default_search_rules.json", repo_manager_dir / "search_rules.json")
+    shutil.copyfile(project_root / "repo_manager_core" / "default_smell_rules.json", repo_manager_dir / "smell_rules.json")
     tasks = [
         {
             "id": str(spec["task_id"]),
@@ -247,7 +359,7 @@ def load_target(project_root: Path, target: str) -> dict[str, Any]:
     manifest = load_yaml(path)
     if not isinstance(manifest, dict):
         raise ValueError(f"target manifest must contain a mapping: {path}")
-    for field in ("id", "title", "repo_url", "seed_commit", "task_directory"):
+    for field in ("id", "title", "repo_url", "seed_commit", "oracle_commit", "task_directory"):
         if not manifest.get(field):
             raise ValueError(f"target manifest is missing {field}: {path}")
     return manifest

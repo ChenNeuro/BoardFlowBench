@@ -14,6 +14,8 @@ It has three layers:
 
 Expense Lite is maintained as the standalone `ChenNeuro/ExpenseLiteBenchDemo` target repository. Each experiment clones a fixed seed commit into an external workspace. BoardFlow condition setup injects run-local protocol state into that clone. No-board setup leaves the clone free of BoardFlow files.
 
+The workspace contains readable board and evidence mirrors. Benchmark authority stays outside the agent workspace: the runner signs external `run.json`, binds stage evidence to finalized Git commits, executes a clean oracle pack pinned by commit SHA, and requires both the results directory and oracle pack to remain outside the workspace. Reviewer adapters are operator-trusted only; the runner checks trusted control-plane digests before and after reviewer execution. This integrity layer does not replace an OS sandbox for hostile agent or reviewer processes.
+
 ## Board And Handoff Separation
 
 The board and handoff files answer different questions.
@@ -52,6 +54,5 @@ The benchmark verifies:
 - `PROJECT_BOARD.md` and `.board/tasks.yaml` name the same milestone.
 - Task ids, statuses, owners, and dependencies match between board views.
 - Task statuses use only `TODO`, `IN_PROGRESS`, `BLOCKED`, `READY_FOR_REVIEW`, and `DONE`.
-- Handoff JSON files match `.board/handoff.schema.json`.
-- Handoff `task_id` values exist in `.board/tasks.yaml`.
+- The latest relevant handoff JSON matches `.board/handoff.schema.json`, belongs to the expected task, and records at least one passing command and test.
 - Files changed by an agent stay within the task's allowed paths unless an exception is recorded.

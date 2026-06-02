@@ -26,7 +26,7 @@ This skill maintains shared repository state for coding agents.
 |--------|---------|
 | `bridge_init_board.py` | Initialize `.board/tasks.yaml` and handoffs/reviews directories |
 | `bridge_status.py` | Update task status in both taskboard views |
-| `bridge_handoff.py` | Create a structured handoff JSON for agent transition |
+| `bridge_handoff.py` | Validate and store a complete handoff JSON supplied with `--input` |
 | `bridge_learn_style.py` | Learn repository style and write `.repo_manager/repo_style_profile.json` |
 | `bridge_update_context.py` | Write `.repo_manager/agent_context.md` for the next agent |
 | `bridge_refresh.py` | Check taskboard, git state, and shared context at turn start or end |
@@ -48,4 +48,5 @@ This skill maintains shared repository state for coding agents.
 - Stop and resolve taskboard inconsistencies instead of guessing which view is correct.
 - Preserve human-written records verbatim.
 - Always write a non-empty handoff record before transferring work.
+- Include at least one real `PASS` command record and one real `PASS` test record in each handoff.
 - Treat the repository as the source of truth, not chat history.

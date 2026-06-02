@@ -4,6 +4,7 @@ from __future__ import annotations
 import subprocess
 
 from repo_manager_core.board.scope_check import check_scope
+from repo_manager_core.board.hygiene import check_hygiene
 from repo_manager_core.benchmark.workspace import initialize_workspace
 from tools.benchmark_scorer import score_task
 
@@ -38,6 +39,28 @@ def test_scope_without_git_baseline_is_not_evaluated(tmp_path):
     result = check_scope(tmp_path, {"allowed_paths": []})
     assert result["max"] == 0
     assert result["applicable"] is False
+
+
+def test_scope_with_unavailable_requested_baseline_fails_closed(tmp_path):
+    project, source = _fixture(tmp_path)
+    result = check_scope(source, {"allowed_paths": []}, baseline="missing-baseline")
+    assert result["max"] == 15
+    assert result["applicable"] is True
+    assert result["violations"]
+
+
+def test_unknown_repo_manager_file_is_not_exempt_from_scope_or_hygiene(tmp_path):
+    project, source = _fixture(tmp_path)
+    baseline = _git(source, "rev-parse", "HEAD")
+    path = source / ".repo_manager" / "evil.txt"
+    path.parent.mkdir()
+    path.write_text("unexpected\n")
+
+    scope = check_scope(source, {"allowed_paths": []}, baseline=baseline)
+    hygiene = check_hygiene(source)
+
+    assert ".repo_manager/evil.txt" in scope["details"]["outside_allowed_paths"]
+    assert ".repo_manager/evil.txt" in hygiene["details"]["unexpected_untracked_files"]
 
 
 def test_no_board_score_does_not_require_board_files(tmp_path):

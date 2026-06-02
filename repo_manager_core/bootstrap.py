@@ -37,7 +37,9 @@ def apply_template(
     if not template.get("vcs_ref"):
         raise ValueError(f"template {template_id} must declare a fixed vcs_ref")
     if not _is_immutable_ref(str(template["vcs_ref"])):
-        raise ValueError(f"template {template_id} vcs_ref must be an immutable tag or commit")
+        raise ValueError(f"template {template_id} vcs_ref must be an immutable commit SHA")
+    if allow_template_tasks and not template.get("allow_tasks"):
+        raise ValueError("template tasks are disabled by catalog policy")
     if template.get("allow_tasks") and not allow_template_tasks:
         raise ValueError("template tasks require explicit --allow-template-tasks confirmation")
     prompt = Path(prompt_file).read_text(encoding="utf-8")
@@ -169,8 +171,8 @@ def _find_template(catalog: dict[str, Any], template_id: str) -> dict[str, Any]:
 
 
 def _is_immutable_ref(value: str) -> bool:
-    """Require a commit SHA or release-like tag, not a moving branch."""
-    return bool(re.fullmatch(r"[0-9a-fA-F]{7,40}", value) or re.fullmatch(r"v?\d+(?:\.\d+)+(?:[-+._][A-Za-z0-9.-]+)?", value))
+    """Require a commit SHA; Git tags remain movable references."""
+    return bool(re.fullmatch(r"[0-9a-fA-F]{40}", value))
 
 
 def _run(command: list[str], *, cwd: Path) -> None:

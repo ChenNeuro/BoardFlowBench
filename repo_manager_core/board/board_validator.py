@@ -7,7 +7,7 @@ from typing import Any
 
 from .board_io import load_board
 from .board_sync import check_board_views
-from .evidence import validate_acceptance_evidence
+from .evidence import validate_evidence_mirror
 from .task_status import VALID_STATUSES
 
 
@@ -52,7 +52,7 @@ def check_board_consistency(repo: str | Path, task: dict[str, Any]) -> dict[str,
         # DONE tasks must carry observable evidence so the next agent/scorer is
         # not forced to trust chat history.
         evidence_violations = (
-            validate_acceptance_evidence(repo, board_task)
+            validate_evidence_mirror(repo, board_task)
             if board_task.get("require_gate_evidence")
             else []
         )

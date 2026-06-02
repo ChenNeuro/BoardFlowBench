@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
+import re
 import shlex
 import subprocess
 import sys
@@ -11,14 +13,22 @@ import time
 from pathlib import Path
 from typing import Any
 
+from repo_manager_core.benchmark.control import (
+    find_stage_snapshot,
+    load_run_state,
+    validate_external_placement,
+    write_run_state,
+)
 from repo_manager_core.benchmark.finalize import finalize_task
 from repo_manager_core.benchmark.workspace import (
     activate_task,
     commit_all,
     initialize_workspace,
+    git_status,
     load_target,
     load_task_specs,
     normalize_condition,
+    run_git,
     task_path,
 )
 from tools.benchmark_scorer import score_task, write_score
@@ -36,18 +46,22 @@ def start_run(
     agent_profile: str = "codex",
     agent_command: str | None = None,
     reviewer_command: str | None = None,
+    allow_unisolated_agent_command: bool = False,
 ) -> dict[str, Any]:
     """Initialize, validate seed, and either run all tasks or pause for an agent."""
     project = Path(project_root).resolve()
     normalized = normalize_condition(condition)
     manifest = load_target(project, target)
+    validate_external_placement(workspace, oracle_root, results_dir)
+    if agent_command and not allow_unisolated_agent_command:
+        raise ValueError("agent commands require explicit --allow-unisolated-agent-command acknowledgement")
     specs = load_task_specs(project, manifest)
     first = str(specs[0]["task_id"])
     init = initialize_workspace(
         project, target, normalized, first, workspace,
         source_repo=source_repo, agent_profile=agent_profile,
     )
-    run_id = f"{target}-{normalized}-{int(time.time())}"
+    run_id = f"{target}-{normalized}-{time.time_ns()}"
     run_dir = Path(results_dir).resolve() / run_id
     run_dir.mkdir(parents=True)
     seed_score = score_task(
@@ -59,6 +73,7 @@ def start_run(
         oracle_root=oracle_root,
         target=target,
         seed_commit=str(manifest["seed_commit"]),
+        oracle_commit=str(manifest["oracle_commit"]),
     )
     write_score(seed_score, run_dir / "seed-score.json")
     if not seed_score["hard_gate_pass"]:
@@ -70,6 +85,8 @@ def start_run(
         "condition": normalized,
         "workspace": str(Path(workspace).resolve()),
         "oracle_root": str(Path(oracle_root).resolve()),
+        "seed_commit": str(manifest["seed_commit"]),
+        "oracle_commit": str(manifest["oracle_commit"]),
         "results_dir": str(Path(results_dir).resolve()),
         "agent_profile": agent_profile,
         "agent_command": agent_command,
@@ -84,12 +101,32 @@ def start_run(
     return _advance(project, run_dir, state) if agent_command else _await_agent(project, run_dir, state)
 
 
-def resume_run(project_root: str | Path, run_manifest: str | Path) -> dict[str, Any]:
+def resume_run(
+    project_root: str | Path,
+    run_manifest: str | Path,
+    *,
+    reviewer_command: str | None = None,
+) -> dict[str, Any]:
     """Finalize the current manual checkpoint and continue to the next sticker."""
     project = Path(project_root).resolve()
     path = Path(run_manifest).resolve()
-    state = json.loads(path.read_text(encoding="utf-8"))
+    state = load_run_state(path)
+    if state["status"] not in {"awaiting_agent", "activating_task"}:
+        raise ValueError(f"run manifest cannot resume from status {state['status']}")
+    state["reviewer_command"] = reviewer_command
+    if state["status"] == "activating_task" or find_stage_snapshot(state, str(state["current_task"])):
+        return _continue_after_finalization(project, path.parent, state)
     return _finalize_and_continue(project, path.parent, state)
+
+
+def resume_activation(project_root: str | Path, run_manifest: str | Path) -> dict[str, Any]:
+    """Resume only a runner-authored signed activation transition."""
+    project = Path(project_root).resolve()
+    path = Path(run_manifest).resolve()
+    state = load_run_state(path)
+    if state["status"] != "activating_task":
+        raise ValueError("run manifest is not waiting for activation recovery")
+    return _continue_after_finalization(project, path.parent, state)
 
 
 def _advance(project: Path, run_dir: Path, state: dict[str, Any]) -> dict[str, Any]:
@@ -112,10 +149,11 @@ def _advance(project: Path, run_dir: Path, state: dict[str, Any]) -> dict[str, A
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             check=False,
+            env=_agent_environment(),
         )
         (run_dir / "agent-output").mkdir(exist_ok=True)
         (run_dir / "agent-output" / f"{state['current_task']}.json").write_text(
-            json.dumps({"argv": argv, "returncode": result.returncode, "stdout": result.stdout, "stderr": result.stderr}, indent=2) + "\n",
+            json.dumps({"adapter": _adapter_summary(argv), "returncode": result.returncode, "stdout": result.stdout, "stderr": result.stderr}, indent=2) + "\n",
             encoding="utf-8",
         )
         if result.returncode != 0:
@@ -145,22 +183,45 @@ def _finalize_and_continue(project: Path, run_dir: Path, state: dict[str, Any]) 
     started_at = state.get("stage_started_at", {}).get(task_id)
     if started_at:
         evidence["duration_seconds"] = round(time.time() - float(started_at), 3)
+    _write_json(run_dir / "stages" / task_id / "evidence.json", evidence)
+    trusted_control = _trusted_control_snapshot(run_dir)
     evidence["reviewer"] = _run_reviewer(run_dir, state, evidence)
+    _assert_trusted_control_unchanged(run_dir, trusted_control)
+    _assert_finalized_workspace(state, evidence)
     _write_json(run_dir / "stages" / task_id / "evidence.json", evidence)
     state["stages"].append(evidence)
+    _write_state(run_dir, state)
+    return _continue_after_finalization(project, run_dir, state)
+
+
+def _continue_after_finalization(project: Path, run_dir: Path, state: dict[str, Any]) -> dict[str, Any]:
+    """Advance a signed finalized stage, including interrupted activation recovery."""
+    task_id = str(state["current_task"])
     index = state["tasks"].index(task_id)
     if index == len(state["tasks"]) - 1:
+        state.pop("pending_task", None)
         state["status"] = "complete"
         _write_state(run_dir, state)
         return state
     next_task = state["tasks"][index + 1]
+    if state.get("status") == "activating_task" and state.get("pending_task") != next_task:
+        raise ValueError("run manifest pending activation differs from the next benchmark task")
+    state["status"] = "activating_task"
+    state["pending_task"] = next_task
+    _write_state(run_dir, state)
     if state["condition"] == "full_boardflow":
-        activation = activate_task(project, state["workspace"], next_task)
+        activation = activate_task(
+            project,
+            state["workspace"],
+            next_task,
+            run_manifest=run_dir / "run.json",
+        )
         baseline = activation["baseline_commit"]
     else:
         baseline = commit_all(Path(state["workspace"]), f"Checkpoint before {next_task}")
     state["current_task"] = next_task
     state["baseline_commit"] = baseline
+    state.pop("pending_task", None)
     state["status"] = "awaiting_agent"
     _write_state(run_dir, state)
     return _advance(project, run_dir, state) if state.get("agent_command") else _await_agent(project, run_dir, state)
@@ -225,8 +286,9 @@ def _run_reviewer(run_dir: Path, state: dict[str, Any], evidence: dict[str, Any]
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             check=False,
+            env=_agent_environment(),
         )
-        report.update({"argv": argv, "returncode": result.returncode, "stderr": result.stderr})
+        report.update({"adapter": _adapter_summary(argv), "returncode": result.returncode, "stderr": result.stderr})
         if result.returncode == 0:
             try:
                 parsed = json.loads(result.stdout)
@@ -263,7 +325,7 @@ def _write_prompt(project: Path, run_dir: Path, state: dict[str, Any]) -> Path:
 
 
 def _write_state(run_dir: Path, state: dict[str, Any]) -> None:
-    _write_json(run_dir / "run.json", state)
+    write_run_state(run_dir, state)
 
 
 def _expand_command(template: str, **variables: Any) -> list[str]:
@@ -271,9 +333,54 @@ def _expand_command(template: str, **variables: Any) -> list[str]:
     argv = shlex.split(template)
     for name, value in variables.items():
         argv = [part.replace("{" + name + "}", str(value)) for part in argv]
+    if any(re.search(r"\{[A-Za-z_][A-Za-z0-9_]*\}", part) for part in argv):
+        raise ValueError("adapter command contains an unresolved placeholder")
     return argv
 
 
 def _write_json(path: Path, value: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _agent_environment() -> dict[str, str]:
+    """Provide a narrow environment to explicitly enabled unsandboxed adapters."""
+    allowed = ("HOME", "LANG", "LC_ALL", "PATH", "TMPDIR")
+    return {name: os.environ[name] for name in allowed if name in os.environ}
+
+
+def _adapter_summary(argv: list[str]) -> dict[str, Any]:
+    """Record adapter shape without persisting literal arguments or secrets."""
+    return {"executable": argv[0], "argument_count": len(argv) - 1}
+
+
+def _assert_finalized_workspace(state: dict[str, Any], evidence: dict[str, Any]) -> None:
+    """Reject reviewer-side workspace mutations after deterministic acceptance."""
+    workspace = Path(state["workspace"])
+    if git_status(workspace):
+        raise ValueError("reviewer modified the workspace after deterministic acceptance")
+    head = run_git(["rev-parse", "HEAD"], cwd=workspace).stdout.strip()
+    if head != evidence.get("finalized_commit"):
+        raise ValueError("workspace HEAD changed after deterministic acceptance")
+
+
+def _trusted_control_snapshot(run_dir: Path) -> dict[str, str]:
+    """Hash trusted files that a qualitative reviewer must not modify."""
+    paths = [
+        run_dir.parent / ".boardflowbench.key",
+        run_dir / "run.json",
+        run_dir / "seed-score.json",
+        *sorted((run_dir / "stages").glob("*/score.json")),
+        *sorted((run_dir / "stages").glob("*/evidence.json")),
+    ]
+    return {
+        str(path.resolve()): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in paths
+        if path.exists()
+    }
+
+
+def _assert_trusted_control_unchanged(run_dir: Path, expected: dict[str, str]) -> None:
+    """Reject reviewer-side mutations to signed state or deterministic evidence."""
+    if _trusted_control_snapshot(run_dir) != expected:
+        raise ValueError("reviewer modified trusted control-plane files after deterministic acceptance")

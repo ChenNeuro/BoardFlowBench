@@ -26,19 +26,26 @@ REQUIRED_FIELDS = [
 
 
 def check_handoff(
-    repo: str | Path, task: dict[str, Any], changed_files: list[str] | None = None
+    repo: str | Path,
+    task: dict[str, Any],
+    changed_files: list[str] | None = None,
+    *,
+    schema_path_override: str | Path | None = None,
 ) -> dict[str, Any]:
     """Score structured handoff quality out of 15."""
     root = Path(repo)
     tid = str(task.get("task_id") or task.get("id"))
     required = _handoff_required(task)
-    handoffs = _load_handoffs(root, tid)
+    handoffs, malformed = _load_handoffs(root, tid)
     warnings: list[str] = []
     violations: list[str] = []
     details: dict[str, Any] = {
         "handoff_required": required,
         "handoff_files": [item["path"] for item in handoffs],
+        "malformed_handoff_files": malformed,
     }
+    if malformed:
+        violations.append("malformed handoff files: " + ", ".join(malformed))
 
     score = 0
 
@@ -63,7 +70,7 @@ def check_handoff(
             "details": details,
         }
 
-    schema_path = _schema_path(root, task)
+    schema_path = Path(schema_path_override) if schema_path_override else _schema_path(root, task)
     schema_violations = validate_handoff_schema(handoff, schema_path)
     details["schema_violations"] = schema_violations
     if schema_violations:
@@ -89,7 +96,12 @@ def check_handoff(
     if isinstance(handoff.get("commands_run"), list) and isinstance(
         handoff.get("tests"), list
     ):
-        score += 2
+        semantic_violations = validate_handoff_semantics(handoff, expected_task_id=tid)
+        details["semantic_violations"] = semantic_violations
+        if not semantic_violations:
+            score += 2
+        else:
+            violations.extend(semantic_violations)
     else:
         violations.append("commands_run and tests fields must both be arrays")
 
@@ -144,6 +156,9 @@ def write_handoff(
         "risks": _normalize_risks(risks),
         "next_recommended_step": next_recommended_step,
     }
+    violations = validate_handoff_semantics(data, expected_task_id=task_id)
+    if violations:
+        raise ValueError("handoff semantic violations: " + "; ".join(violations))
 
     # Generate unique filename: <task_id>_<agent_id>_<timestamp>.json
     import time
@@ -155,14 +170,22 @@ def write_handoff(
 
 def write_validated_handoff(
     repo: str | Path,
-    handoff_data: dict[str, Any],
+    handoff_data: Any,
     schema_path: str | Path,
 ) -> Path:
     """Write a caller-supplied handoff only after full schema validation."""
     root = Path(repo)
+    if not isinstance(handoff_data, dict):
+        raise ValueError("handoff JSON must contain an object")
     violations = validate_handoff_schema(handoff_data, schema_path)
     if violations:
         raise ValueError("handoff schema violations: " + "; ".join(violations))
+    semantic_violations = validate_handoff_semantics(
+        handoff_data,
+        expected_task_id=str(handoff_data.get("task_id") or ""),
+    )
+    if semantic_violations:
+        raise ValueError("handoff semantic violations: " + "; ".join(semantic_violations))
     handoff_dir = root / ".board" / "handoffs"
     handoff_dir.mkdir(parents=True, exist_ok=True)
     import time
@@ -171,7 +194,7 @@ def write_validated_handoff(
     return path
 
 
-def validate_handoff_schema(handoff_data: dict[str, Any], schema_path: str | Path) -> list[str]:
+def validate_handoff_schema(handoff_data: Any, schema_path: str | Path) -> list[str]:
     """Validate handoff data against the repository-local JSON Schema."""
     schema_path = Path(schema_path)
     if not schema_path.exists():
@@ -181,6 +204,26 @@ def validate_handoff_schema(handoff_data: dict[str, Any], schema_path: str | Pat
     return validate_json_schema(handoff_data, schema)
 
 
+def validate_handoff_semantics(
+    handoff_data: Any,
+    *,
+    expected_task_id: str | None = None,
+) -> list[str]:
+    """Validate completion claims that JSON Schema alone cannot express."""
+    if not isinstance(handoff_data, dict):
+        return ["handoff JSON must contain an object"]
+    violations = []
+    if expected_task_id and handoff_data.get("task_id") != expected_task_id:
+        violations.append("handoff task_id differs from the expected task")
+    if handoff_data.get("status") not in {"READY_FOR_REVIEW", "DONE"}:
+        violations.append("handoff status must be READY_FOR_REVIEW or DONE")
+    if not _has_pass(handoff_data.get("commands_run")):
+        violations.append("commands_run must include at least one PASS result")
+    if not _has_pass(handoff_data.get("tests")):
+        violations.append("tests must include at least one PASS result")
+    return violations
+
+
 def _handoff_required(task: dict[str, Any]) -> bool:
     value = task.get("handoff_requirement")
     if isinstance(value, dict):
@@ -188,21 +231,36 @@ def _handoff_required(task: dict[str, Any]) -> bool:
     return bool(task.get("handoff_required", False))
 
 
-def _load_handoffs(root: Path, task_id: str) -> list[dict[str, Any]]:
+def _load_handoffs(root: Path, task_id: str) -> tuple[list[dict[str, Any]], list[str]]:
     handoff_dir = root / ".board" / "handoffs"
     if not handoff_dir.exists():
-        return []
+        return [], []
 
     matches: list[dict[str, Any]] = []
-    for p in sorted(handoff_dir.glob("*.json")):
+    malformed: list[str] = []
+    for p in sorted(handoff_dir.glob("*.json"), key=handoff_sort_key):
         try:
             data = json.loads(p.read_text(encoding="utf-8"))
-        except json.JSONDecodeError:
-            # Ignore malformed handoffs rather than breaking the whole score.
+        except (json.JSONDecodeError, OSError):
+            if p.name.startswith(task_id + "_"):
+                malformed.append(str(p.relative_to(root)))
+            continue
+        if not isinstance(data, dict):
+            if p.name.startswith(task_id + "_"):
+                malformed.append(str(p.relative_to(root)))
             continue
         if data.get("task_id") == task_id:
             matches.append({"path": str(p.relative_to(root)), "data": data})
-    return matches
+    return matches, malformed
+
+
+def handoff_sort_key(path: Path) -> tuple[int, str]:
+    """Sort generated handoffs by timestamp instead of agent-id text."""
+    try:
+        timestamp = int(path.stem.rsplit("_", 1)[1])
+    except (IndexError, ValueError):
+        timestamp = path.stat().st_mtime_ns
+    return timestamp, path.name
 
 
 def _field_complete(handoff: dict[str, Any], field: str) -> bool:
@@ -227,3 +285,9 @@ def _normalize_risks(value: list[str] | str | None) -> list[str]:
     if isinstance(value, str):
         return [value]
     return list(value)
+
+
+def _has_pass(items: Any) -> bool:
+    return isinstance(items, list) and any(
+        isinstance(item, dict) and item.get("result") == "PASS" for item in items
+    )

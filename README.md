@@ -174,13 +174,10 @@ PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_status.py P004 IN_PROGRE
 PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_refresh.py \
   --phase start --agent-id codex --task-id P004 --repo .
 
-# 创建交接记录
-PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_handoff.py P004 codex first_worker \
+# 创建交接记录。handoff.json 必须包含命令、测试及其真实结果。
+PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_handoff.py \
   --repo . \
-  --status IN_PROGRESS \
-  --files src/parser.py \
-  --risks "CSV edge cases still need review" \
-  --next-step "Run parser and validator tests"
+  --input handoff.json
 
 # 学习仓库风格
 PYTHONPATH=. python3 skills/agent-bridge/scripts/bridge_learn_style.py .
@@ -316,12 +313,11 @@ PYTHONPATH=. python3 scripts/init_benchmark_workspace.py \
 本地验证尚未推送的 sibling demo 仓库时，追加
 `--source-repo ../ExpenseLiteBenchDemo`。
 
-后续阶段只在依赖完成后注入当前任务规格：
+完整 runner 会在确定性 gate 通过后自动注入下一任务规格。下面的命令只用于恢复 runner 已写入的签名 activation 过渡：
 
 ```bash
 PYTHONPATH=. python3 scripts/activate_benchmark_task.py \
-  --workspace /tmp/boardflowbench-runs/run-001 \
-  --task-id B002
+  --run-manifest /tmp/boardflowbench-results/<run-id>/run.json
 ```
 
 scorer 针对临时 workspace 运行：
@@ -332,6 +328,7 @@ PYTHONPATH=. python3 tools/benchmark_scorer.py \
   --repo /tmp/boardflowbench-runs/run-001 \
   --baseline <sticker-baseline-sha> \
   --oracle-root ../ExpenseLiteBenchOracles \
+  --oracle-commit <fixed-oracle-pack-sha> \
   --output /tmp/boardflowbench-runs/run-001-score.json \
   --fail-on-violations
 ```
@@ -348,12 +345,18 @@ PYTHONPATH=. python3 scripts/run_scenario.py \
   --source-repo ../ExpenseLiteBenchDemo
 ```
 
+完整生命周期优先使用 runner。单独的 workspace 初始化命令用于检查注入边界；`.board/run.yaml` 和 workspace 内 evidence 只是可读镜像。runner 将签名 `run.json`、可信 score 和 evidence 保存在 workspace 外部的 results 目录，并要求同样位于 workspace 外部的私有 oracle 仓库处于 target manifest 固定 commit 且没有本地改动。full BoardFlow 初始化会将 repo-local `search_rules.json` 和 `smell_rules.json` 纳入 Git 基线，后续策略改动不会绕过 scope 检查。
+
+HMAC 签名只防止 workspace 内伪造，不能替代 OS sandbox。使用 `--agent-command` 自动运行不可信 agent 时，需要外部 sandbox，并显式传入 `--allow-unisolated-agent-command` 表示已知晓该边界。
+
 恢复人工 checkpoint：
 
 ```bash
 PYTHONPATH=. python3 scripts/run_scenario.py \
   --resume /tmp/boardflowbench-results/<run-id>/run.json
 ```
+
+如需 reviewer adapter，在每次 resume 时由操作员重新传入 `--reviewer-command`。可执行 adapter 命令不会写入签名 manifest。Reviewer adapter 只能使用操作员信任的命令；runner 会在执行前后校验签名状态、key、score 和 evidence 的摘要，但这不能替代外部 OS sandbox。
 
 聚合外部结果：
 
@@ -365,7 +368,7 @@ PYTHONPATH=. python3 scripts/aggregate_benchmark_results.py \
 
 ### 6. 初始化空仓库
 
-空仓库不由 agent 凭空发明通用 scaffold。先列出 allowlist 中固定版本的成熟外部模板，再由用户明确选择：
+空仓库不由 agent 凭空发明通用 scaffold。先列出 allowlist 中固定 commit 的成熟外部模板，再由用户明确选择：
 
 ```bash
 PYTHONPATH=. python3 scripts/bootstrap_repo.py recommend \

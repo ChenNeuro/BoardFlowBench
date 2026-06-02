@@ -22,6 +22,10 @@ CACHE_NAMES = {
     ".ruff_cache",
     ".DS_Store",
 }
+GENERATED_REPO_MANAGER_PATHS = {
+    ".repo_manager/agent_context.md",
+    ".repo_manager/repo_style_profile.json",
+}
 
 
 def check_hygiene(
@@ -161,8 +165,7 @@ def _unexpected_untracked(root: Path, *, allowed_paths: list[str]) -> dict[str, 
             continue
         path = line[3:]
         if (
-            path.startswith("benchmark/results/")
-            or path.startswith(".repo_manager/")
+            path in GENERATED_REPO_MANAGER_PATHS
             or _matches_any(path, allowed_paths)
         ):
             continue

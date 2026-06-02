@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 from typing import Any
 
@@ -39,11 +40,13 @@ def finalize_task(
     normalized = normalize_condition(condition)
     run = _load_run(repo) if normalized == "full_boardflow" else {}
     if normalized == "full_boardflow":
-        target = str(run.get("target", target))
+        if run.get("target") != target:
+            raise ValueError("workspace target mirror differs from external control state")
         if run.get("assigned_task") != task_id:
             raise ValueError(f"workspace assigned task is {run.get('assigned_task')}, not {task_id}")
         baselines = run.get("stage_baselines") or {}
-        baseline = str(baselines.get(task_id, baseline or ""))
+        if not isinstance(baselines, dict) or baselines.get(task_id) != baseline:
+            raise ValueError("workspace baseline mirror differs from external control state")
     if not baseline:
         raise ValueError(f"no baseline commit recorded for {task_id}")
 
@@ -58,10 +61,13 @@ def finalize_task(
         oracle_root=oracle_root,
         target=target,
         seed_commit=str(manifest["seed_commit"]),
+        oracle_commit=str(manifest["oracle_commit"]),
+        handoff_schema=project / ".board" / "handoff.schema.json",
     )
     stage_dir = _stage_dir(results_dir, run_id or repo.name, task_id)
     stage_dir.mkdir(parents=True, exist_ok=True)
-    write_score(score, stage_dir / "score.json")
+    score_path = stage_dir / "score.json"
+    write_score(score, score_path)
     if not score["hard_gate_pass"]:
         raise ValueError(f"finalize gate failed for {task_id}; see {stage_dir / 'score.json'}")
 
@@ -75,20 +81,34 @@ def finalize_task(
         "baseline_commit": baseline,
         "evaluated_head": evaluated_head,
         "oracle_pack_commit": oracle_pack_commit(oracle_root),
-        "score_file": str(stage_dir / "score.json"),
+        "score_file": str(score_path),
+        "score_sha256": _sha256(score_path),
         "changed_files": score["scope_control"]["details"].get("changed_files", []),
     }
     if normalized == "full_boardflow":
         evidence_path = repo / ".board" / "evidence" / f"{task_id}.json"
         evidence_path.parent.mkdir(parents=True, exist_ok=True)
-        _write_json(evidence_path, evidence)
+        _write_json(
+            evidence_path,
+            {
+                "schema_version": 1,
+                "kind": "workspace_mirror",
+                "task_id": task_id,
+                "condition": normalized,
+                "gate_pass": True,
+                "seed_commit": str(manifest["seed_commit"]),
+                "baseline_commit": baseline,
+                "evaluated_head": evaluated_head,
+                "oracle_pack_commit": oracle_pack_commit(oracle_root),
+            },
+        )
         board = load_board(repo)
         board_task = _find_board_task(board, task_id)
         board_task["acceptance_evidence"] = str(evidence_path.relative_to(repo))
         handoffs = score["handoff"]["details"].get("handoff_files", [])
         board_task["current_handoff"] = handoffs[-1] if handoffs else None
         save_board(board, repo)
-        update_task_status(repo, task_id, "DONE", owner=owner)
+        update_task_status(repo, task_id, "DONE", owner=owner, completion_validated=True)
     finalized_commit = commit_all(repo, f"Finalize benchmark task {task_id}")
     evidence["finalized_commit"] = finalized_commit
     _write_json(stage_dir / "evidence.json", evidence)
@@ -124,3 +144,7 @@ def _head(repo: Path) -> str:
 def _write_json(path: Path, value: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()

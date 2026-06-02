@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from repo_manager_core.board.handoff_writer import handoff_sort_key
+
 from .learn_repo_style import write_json
 
 
@@ -206,5 +208,5 @@ def _latest_handoff(root: Path, current_task: dict[str, Any] | None) -> str | No
     handoff_dir = root / ".board" / "handoffs"
     if not handoff_dir.exists():
         return None
-    matches = sorted(handoff_dir.glob(f"{current_task.get('id', '')}_*.json"))
+    matches = sorted(handoff_dir.glob(f"{current_task.get('id', '')}_*.json"), key=handoff_sort_key)
     return str(matches[-1].relative_to(root)) if matches else None

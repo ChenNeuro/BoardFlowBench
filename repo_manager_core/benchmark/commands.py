@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 import shlex
 import subprocess
 from pathlib import Path
@@ -54,7 +55,7 @@ def normalize_command(
     """Normalize legacy command strings and structured argv mappings."""
     values = variables or {}
     if isinstance(command, str):
-        parts = shlex.split(_format(command, values))
+        parts = [_format(part, values) for part in shlex.split(command)]
         env: dict[str, str] = {}
         while parts and "=" in parts[0] and not parts[0].startswith("="):
             key, value = parts[0].split("=", 1)
@@ -80,6 +81,8 @@ def normalize_command(
 def _format(value: str, variables: dict[str, str]) -> str:
     for key, replacement in variables.items():
         value = value.replace("{" + key + "}", replacement)
+    if re.search(r"\{[A-Za-z_][A-Za-z0-9_]*\}", value):
+        raise ValueError(f"command contains an unresolved placeholder: {value}")
     return value
 
 

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import tempfile
+import subprocess
 from pathlib import Path
 
 from repo_manager_core.board.hygiene import check_hygiene
@@ -54,3 +55,19 @@ def test_cache_file_detected():
 
         result = check_hygiene(root)
         assert len(result["details"]["cache_files"]) >= 1
+
+
+def test_policy_file_is_not_hidden_from_untracked_hygiene_check(tmp_path):
+    subprocess.run(["git", "init", "-b", "main"], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(["git", "config", "user.name", "Test"], cwd=tmp_path, check=True)
+    subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=tmp_path, check=True)
+    (tmp_path / "tracked.txt").write_text("baseline\n", encoding="utf-8")
+    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True)
+    subprocess.run(["git", "commit", "-m", "baseline"], cwd=tmp_path, check=True, capture_output=True)
+    path = tmp_path / ".repo_manager" / "search_rules.json"
+    path.parent.mkdir()
+    path.write_text("{}\n", encoding="utf-8")
+
+    result = check_hygiene(tmp_path)
+
+    assert ".repo_manager/search_rules.json" in result["details"]["unexpected_untracked_files"]

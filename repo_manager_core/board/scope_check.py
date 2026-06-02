@@ -11,7 +11,8 @@ from ._git_utils import git_lines
 CONTROL_PLANE_PATHS = (
     ".board/evidence/",
     ".board/run.yaml",
-    ".repo_manager/",
+    ".repo_manager/agent_context.md",
+    ".repo_manager/repo_style_profile.json",
 )
 
 
@@ -39,6 +40,16 @@ def check_scope(
     score = 0
 
     if not changed["baseline_available"]:
+        if baseline:
+            violations.extend(warnings or [f"git baseline is unavailable: {baseline}"])
+            return {
+                "score": 0,
+                "max": 15,
+                "applicable": True,
+                "violations": violations,
+                "warnings": warnings,
+                "details": details,
+            }
         return {
             "score": 0,
             "max": 0,
@@ -143,15 +154,13 @@ def _changed_files(root: Path, *, baseline: str | None = None) -> dict[str, Any]
         if " -> " in path:
             # For renames, score the destination path as the changed file.
             path = path.split(" -> ", 1)[1]
-        if path.startswith("benchmark/results/"):
-            continue
         files.append(path)
 
     return {
         "files": sorted(
             path
             for path in set(files)
-            if not any(path == prefix.rstrip("/") or path.startswith(prefix) for prefix in CONTROL_PLANE_PATHS)
+            if not any(path == prefix.rstrip("/") or (prefix.endswith("/") and path.startswith(prefix)) for prefix in CONTROL_PLANE_PATHS)
         ),
         "baseline_available": True,
         "warnings": [],

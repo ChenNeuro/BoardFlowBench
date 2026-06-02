@@ -23,7 +23,7 @@ def _catalog(tmp_path):
     (template / "README.md").write_text("# Template\n")
     _git(template, "add", ".")
     _git(template, "commit", "-m", "template")
-    _git(template, "tag", "v1.0.0")
+    commit = _git(template, "rev-parse", "HEAD")
     catalog = tmp_path / "catalog.json"
     catalog.write_text(
         json.dumps(
@@ -33,7 +33,7 @@ def _catalog(tmp_path):
                         "id": "local",
                         "engine": "git-template",
                         "source": str(template),
-                        "vcs_ref": "v1.0.0",
+                        "vcs_ref": commit,
                         "description": "Local test template.",
                         "structure_preview": ["README.md"],
                         "allow_tasks": False,
@@ -74,8 +74,16 @@ def test_apply_rejects_moving_template_ref(tmp_path):
     catalog.write_text(json.dumps(data))
     prompt = tmp_path / "prompt.md"
     prompt.write_text("Build a package.\n")
-    with pytest.raises(ValueError, match="immutable tag or commit"):
+    with pytest.raises(ValueError, match="immutable commit SHA"):
         apply_template(tmp_path / "repo", catalog, "local", prompt)
+
+
+def test_apply_rejects_catalog_disabled_template_tasks(tmp_path):
+    catalog = _catalog(tmp_path)
+    prompt = tmp_path / "prompt.md"
+    prompt.write_text("Build a package.\n")
+    with pytest.raises(ValueError, match="disabled by catalog policy"):
+        apply_template(tmp_path / "repo", catalog, "local", prompt, allow_template_tasks=True)
 
 
 def test_apply_template_accepts_fixed_commit_sha(tmp_path):

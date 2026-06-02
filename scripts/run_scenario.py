@@ -25,11 +25,12 @@ def main() -> int:
     parser.add_argument("--source-repo", default=None)
     parser.add_argument("--agent-profile", default="codex")
     parser.add_argument("--agent-command", default=None, help="Optional argv template with {workspace}, {prompt_file}, and {task_id}.")
+    parser.add_argument("--allow-unisolated-agent-command", action="store_true", help="Acknowledge that the adapter requires an external OS sandbox for hostile agents.")
     parser.add_argument("--reviewer-command", default=None, help="Optional non-blocking reviewer argv template with {workspace}, {evidence_file}, and {task_id}.")
     args = parser.parse_args()
     try:
         if args.resume:
-            state = resume_run(ROOT, args.resume)
+            state = resume_run(ROOT, args.resume, reviewer_command=args.reviewer_command)
         else:
             for name in ("workspace", "oracle_root", "results_dir"):
                 if getattr(args, name) is None:
@@ -45,6 +46,7 @@ def main() -> int:
                 agent_profile=args.agent_profile,
                 agent_command=args.agent_command,
                 reviewer_command=args.reviewer_command,
+                allow_unisolated_agent_command=args.allow_unisolated_agent_command,
             )
     except ValueError as exc:
         print(f"Error: {exc}")

@@ -1,10 +1,12 @@
 """Tests for synchronized human and machine taskboard updates."""
 from __future__ import annotations
 
+import json
 import pytest
 
 from repo_manager_core.board.board_io import load_board, save_board
 from repo_manager_core.board.board_sync import check_board_views, update_task_status
+from .conftest import REPO_ROOT
 
 
 def _write_board(repo, *, status="TODO", owner="unassigned", notes="Human note stays exact.", evidence=None):
@@ -32,6 +34,30 @@ def _write_board(repo, *, status="TODO", owner="unassigned", notes="Human note s
         },
         repo,
     )
+    schema = repo / ".board" / "handoff.schema.json"
+    schema.write_text((REPO_ROOT / ".board" / "handoff.schema.json").read_text(encoding="utf-8"), encoding="utf-8")
+    if evidence:
+        path = repo / evidence
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(
+            json.dumps(
+                {
+                    "task_id": "P002",
+                    "agent_id": "test",
+                    "agent_role": "tester",
+                    "status": "DONE",
+                    "files_changed": [],
+                    "commands_run": [{"command": "pytest", "result": "PASS", "notes": "passed"}],
+                    "tests": [{"name": "pytest", "result": "PASS", "notes": "passed"}],
+                    "temporary_files_created": [],
+                    "temporary_files_removed": [],
+                    "decisions": [],
+                    "risks": [],
+                    "next_recommended_step": "Continue.",
+                }
+            ),
+            encoding="utf-8",
+        )
     (repo / "PROJECT_BOARD.md").write_text(
         "# Project Board\n\n"
         "## Current Milestone\n\n"

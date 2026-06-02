@@ -5,7 +5,8 @@
       "id": "python-package-copier-pdm",
       "engine": "copier",
       "source": "https://github.com/pawamoy/copier-pdm.git",
-      "vcs_ref": "1.2.6",
+      "vcs_ref": "adff9b64887d0b4c9ec0b42de1698b34858a511e",
+      "source_tag": "1.2.6",
       "description": "Mature Copier template for a Python package managed with PDM.",
       "structure_preview": [
         "pyproject.toml",

@@ -1,10 +1,10 @@
 schema_version: 1
 project: BoardFlowBench
 current_milestone:
-  id: M1
-  title: BoardFlowBench protocol separation and calibration
-  status: DONE
-  goal: Keep BoardFlowBench development separate from demo benchmark execution, then harden scorer calibration.
+  id: M2
+  title: Trusted control-plane hardening
+  status: IN_PROGRESS
+  goal: Close benchmark trust boundaries exposed by independent review before treating lifecycle results as reliable.
 status_values:
   - TODO
   - IN_PROGRESS
@@ -73,3 +73,12 @@ tasks:
     acceptance_source: project/tasks/p007_result_aggregation.yaml
     current_handoff: .board/handoffs/P007_codex_handoff.json
     notes: Aggregate external run results and keep independent reviewer findings non-blocking.
+  - id: P008
+    title: Trusted control-plane hardening
+    status: READY_FOR_REVIEW
+    owner: codex
+    dependencies:
+      - P007
+    acceptance_source: project/tasks/p008_trusted_control_plane.yaml
+    current_handoff: .board/handoffs/P008_codex_1780404303182111000.json
+    notes: Move benchmark authority outside the agent workspace and close independent-review trust boundary findings.

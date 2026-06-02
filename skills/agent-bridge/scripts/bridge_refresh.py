@@ -8,7 +8,7 @@ from pathlib import Path
 from repo_manager_core.board.board_io import load_board
 from repo_manager_core.board.board_sync import check_board_views
 from repo_manager_core.board.git_state import inspect_git_state
-from repo_manager_core.board.evidence import validate_acceptance_evidence
+from repo_manager_core.board.evidence import validate_evidence_mirror
 from repo_manager_core.board.handoff_writer import check_handoff
 from repo_manager_core.style.context_writer import write_agent_context, write_style_profile
 from repo_manager_core.style.learn_repo_style import learn_repo_style
@@ -101,7 +101,7 @@ def _start_blockers(root: Path, board: dict, current_task_id: str, git_state: di
             blockers.append(f"{dep_id} dependency is not DONE")
             continue
         if dependency.get("require_gate_evidence"):
-            blockers.extend(validate_acceptance_evidence(root, dependency))
+            blockers.extend(validate_evidence_mirror(root, dependency))
         handoff = check_handoff(root, {"task_id": dep_id, "handoff_required": True})
         blockers.extend(handoff.get("violations", []))
     return blockers

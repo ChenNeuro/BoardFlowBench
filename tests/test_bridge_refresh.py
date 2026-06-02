@@ -1,6 +1,7 @@
 """Integration tests for start and end Agent Bridge refresh."""
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import sys
@@ -158,3 +159,66 @@ def test_refresh_stops_when_taskboard_views_disagree(tmp_path):
 
     assert result.returncode == 1
     assert "taskboard views are inconsistent" in result.stdout
+
+
+def test_start_refresh_accepts_completed_dependency_evidence_mirror(tmp_path):
+    root = _workspace(tmp_path)
+    board = load_board(root)
+    board["tasks"][0]["require_gate_evidence"] = True
+    board["tasks"][0]["acceptance_evidence"] = ".board/evidence/P001.json"
+    board["tasks"][0]["current_handoff"] = ".board/handoffs/P001_test.json"
+    board["tasks"][1]["dependencies"] = ["P001"]
+    save_board(board, root)
+    project_board = root / "PROJECT_BOARD.md"
+    project_board.write_text(
+        project_board.read_text(encoding="utf-8").replace(
+            "| P002 | Bridge lifecycle refresh | TODO | unassigned | none |",
+            "| P002 | Bridge lifecycle refresh | TODO | unassigned | P001 |",
+        ),
+        encoding="utf-8",
+    )
+    (root / ".board" / "evidence").mkdir()
+    (root / ".board" / "evidence" / "P001.json").write_text(
+        json.dumps(
+            {
+                "kind": "workspace_mirror",
+                "task_id": "P001",
+                "condition": "full_boardflow",
+                "gate_pass": True,
+                "baseline_commit": "1" * 40,
+                "evaluated_head": "2" * 40,
+                "seed_commit": "3" * 40,
+                "oracle_pack_commit": "4" * 40,
+            }
+        ),
+        encoding="utf-8",
+    )
+    (root / ".board" / "handoff.schema.json").write_text(
+        (REPO_ROOT / ".board" / "handoff.schema.json").read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+    (root / ".board" / "handoffs" / "P001_test.json").write_text(
+        json.dumps(
+            {
+                "task_id": "P001",
+                "agent_id": "test",
+                "agent_role": "tester",
+                "status": "DONE",
+                "files_changed": [],
+                "commands_run": [{"command": "pytest", "result": "PASS", "notes": "passed"}],
+                "tests": [{"name": "pytest", "result": "PASS", "notes": "passed"}],
+                "temporary_files_created": [],
+                "temporary_files_removed": [],
+                "decisions": [],
+                "risks": [],
+                "next_recommended_step": "Continue.",
+            }
+        ),
+        encoding="utf-8",
+    )
+    _git(root, "add", ".")
+    _git(root, "commit", "-m", "accepted dependency mirror")
+
+    result = _refresh(root, "start")
+
+    assert result.returncode == 0

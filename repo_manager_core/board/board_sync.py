@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 from typing import Any
 
 from .board_io import _dump_yaml, load_board
 from .evidence import has_valid_acceptance_evidence
+from .handoff_writer import validate_handoff_schema, validate_handoff_semantics
 from .task_status import VALID_STATUSES
 
 PROJECT_BOARD_PATH = "PROJECT_BOARD.md"
@@ -46,6 +48,7 @@ def update_task_status(
     status: str,
     *,
     owner: str | None = None,
+    completion_validated: bool = False,
 ) -> None:
     """Update status and owner in both taskboard views after consistency checks."""
     root = Path(repo)
@@ -59,7 +62,7 @@ def update_task_status(
     task = _find_task(board, task_id)
     if task is None:
         raise ValueError(f"task {task_id} not found")
-    if status == "DONE" and not _has_completion_evidence(root, task):
+    if status == "DONE" and not completion_validated and not _has_completion_evidence(root, task):
         raise ValueError(f"task {task_id} cannot be marked DONE without handoff or acceptance evidence")
 
     task["status"] = status
@@ -127,10 +130,21 @@ def _find_task(board: dict[str, Any], task_id: str) -> dict[str, Any] | None:
 def _has_completion_evidence(root: Path, task: dict[str, Any]) -> bool:
     if task.get("require_gate_evidence"):
         return has_valid_acceptance_evidence(root, task)
-    if task.get("acceptance_evidence"):
-        return True
-    handoff = task.get("current_handoff")
-    return bool(handoff and (root / str(handoff)).exists())
+    handoff = task.get("current_handoff") or task.get("acceptance_evidence")
+    if not handoff:
+        return False
+    path = root / str(handoff)
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return False
+    if not isinstance(data, dict):
+        return False
+    schema = root / ".board" / "handoff.schema.json"
+    return not validate_handoff_schema(data, schema) and not validate_handoff_semantics(
+        data,
+        expected_task_id=str(task.get("id") or ""),
+    )
 
 
 def _update_markdown_task(text: str, task_id: str, status: str, owner: str | None) -> str:
