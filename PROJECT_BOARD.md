@@ -10,7 +10,7 @@ Milestone: M2 - Trusted control-plane hardening
 
 Goal: close benchmark trust boundaries exposed by independent review before treating lifecycle results as reliable.
 
-Status: IN_PROGRESS
+Status: DONE
 
 ## Task Board
 
@@ -23,7 +23,7 @@ Status: IN_PROGRESS
 | P005 | Trusted repository bootstrap | DONE | codex | P004 | Recommend allowlisted Copier or Git templates for empty repositories. |
 | P006 | Scenario runner and oracle isolation | DONE | codex | P004 | Add four experiment conditions, isolated oracle packs, adapters, and checkpoints. |
 | P007 | Result aggregation and reviewer reporting | DONE | codex | P006 | Aggregate external run results and keep independent reviewer findings non-blocking. |
-| P008 | Trusted control-plane hardening | READY_FOR_REVIEW | codex | P007 | Move benchmark authority outside the agent workspace and close independent-review trust boundary findings. |
+| P008 | Trusted control-plane hardening | DONE | codex | P007 | Move benchmark authority outside the agent workspace and close independent-review trust boundary findings. |
 
 ## Status Values
 
@@ -45,7 +45,7 @@ Latest P006 handoff: `.board/handoffs/P006_codex_handoff.json`
 
 Latest P007 handoff: `.board/handoffs/P007_codex_handoff.json`
 
-Latest P008 handoff: `.board/handoffs/P008_codex_1780404303182111000.json`
+Latest P008 handoff: `.board/handoffs/P008_codex_1780411029751578000.json`
 
 ## Consistency Checks
 

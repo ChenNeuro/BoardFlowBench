@@ -17,7 +17,7 @@ Two read-only reviewers audited the pre-P008 implementation and reported blockin
 - Rejected non-object or empty handoff JSON and selected latest handoffs by timestamp.
 - Added mutation tests for the reviewed failure modes.
 
-## Final Rereview Attempt
+## Final Rereview Attempt 1
 
 Final independent rereview was attempted with two read-only reviewer agents after remediation:
 
@@ -25,6 +25,45 @@ Final independent rereview was attempted with two read-only reviewer agents afte
 - Architecture lifecycle rereview agent: errored because the session hit the Codex subagent usage limit.
 
 No final independent reviewer report was produced. This file intentionally does not claim that the final independent rereview passed.
+
+## Final Rereview Attempt 2
+
+After subagent quota became available again, two new read-only reviewer agents audited the current `yihao/feature` branch.
+
+### Protocol Security Reviewer
+
+Verdict: no blocking findings.
+
+The reviewer confirmed that signed manifests, external placement, HMAC tamper rejection, resume and activation trust checks, evidence and score digest validation, oracle pinning, reviewer mutation protection, scope and hygiene boundaries, handoff fail-closed behavior, and aggregation semantic binding are all in place.
+
+Validation reported by reviewer:
+
+- `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 -m pytest -p no:cacheprovider`: PASS, 111 passed.
+- `git diff --check`: PASS.
+- board sync check: PASS, `[]`.
+
+Residual risks:
+
+- HMAC protects control-plane integrity but does not replace OS sandboxing.
+- Agent and reviewer subprocesses still do not have built-in timeouts.
+
+### Architecture Lifecycle Reviewer
+
+Verdict: no blocking findings.
+
+The reviewer confirmed that finalize and activation crash recovery, recovery-only activation CLI behavior, signed state completeness, activation evidence checks, aggregation binding, latest handoff ordering, non-object handoff handling, tracked strategy baselines, and documentation consistency are closed.
+
+Validation reported by reviewer:
+
+- `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 -m pytest -p no:cacheprovider`: PASS, 111 passed.
+- `git diff --check`: PASS.
+- board sync check: PASS, `[]`.
+
+Residual risks:
+
+- Agent and reviewer subprocesses still do not have built-in timeouts.
+- HMAC and digest checks do not replace OS sandboxing for hostile same-user processes.
+- The final architecture pass was read-only and did not rerun the sibling-repo Expense Lite smoke; the earlier P008 handoff records that smoke as passed.
 
 ## Local Validation
 
@@ -42,4 +81,4 @@ No final independent reviewer report was produced. This file intentionally does 
 
 ## Release Risk
 
-P008 implementation is ready for PR review, but final independent rereview remains pending because reviewer agents were unavailable. Keep P008 at `READY_FOR_REVIEW` until an independent reviewer confirms the remediation.
+The final independent rereview is complete and found no blocking findings. Remaining risks are non-blocking and should be tracked as follow-up hardening rather than blocking P008 completion.
