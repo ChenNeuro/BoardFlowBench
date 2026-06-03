@@ -13,6 +13,39 @@ Findings are suspicious signals, not absolute defects.
 
 <!-- Populated automatically -->
 
+## Smell Taxonomy
+
+### Level 1: Agent Debt Multipliers
+
+- Patch: patch-like functions, temporary files, and fix/workaround naming.
+- Helper Explosion: many small generic helpers, thin wrappers, and utility clusters.
+- Shadow Implementation: duplicate-like functions or parallel helper implementations.
+
+### Level 2: Maintenance Error Sources
+
+- Mirror Logic: copied logic that may evolve inconsistently.
+- Dead Zone: unused functions, abandoned directories, and source files under output/artifact areas.
+- Knowledge Duplication: repeated configuration, constants, schemas, prompts, or docs that compete as sources of truth.
+
+### Level 3: Architecture Consistency Risks
+
+- Abandoned Abstraction: wrapper layers or abstractions that no longer add meaning.
+- Configuration Drift: scan, smell, style, runtime, or generated configuration split across competing sources.
+
+### Level 4: Repo-Specific Learning
+
+- User Rejection Patterns: learned feedback from `.repo_manager/user_feedback.jsonl` and `.repo_manager/smell_rules.json`.
+- Style Violations: deviations from the learned repository style profile.
+
+## Health Capabilities
+
+- AST-based function indexing.
+- Repo-local search scope and smell keyword policies.
+- Structure warnings for suspicious files, directories, root-level scripts, and output/artifact source.
+- Style profiling for naming, docstrings, function length, and patch-like vocabulary.
+- Learned policy and feedback question reporting.
+- Before/after diff reporting for new warnings, resolved warnings, and style drift.
+
 ## Findings
 
 <!-- Populated automatically -->

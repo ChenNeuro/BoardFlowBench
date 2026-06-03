@@ -1,0 +1,26 @@
+{
+  "exclude_dirs": [
+    ".git",
+    ".hg",
+    ".svn",
+    ".venv",
+    "venv",
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    "dist",
+    "build",
+    "node_modules",
+    "repo_manager_report"
+  ],
+  "exclude_files": [],
+  "exclude_globs": [],
+  "file_suffixes": [
+    ".py"
+  ],
+  "include_paths": [
+    "."
+  ],
+  "schema_version": 1
+}

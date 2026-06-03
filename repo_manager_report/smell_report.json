@@ -1,0 +1,1048 @@
+{
+  "feedback_questions": [
+    {
+      "category": "helper_keywords",
+      "keyword": "format",
+      "observed": [
+        "format_money",
+        "test_parse_date_supports_common_formats"
+      ],
+      "options": [
+        {
+          "decision": "always_suspicious",
+          "label": "Always suspicious",
+          "policy": "suspicious"
+        },
+        {
+          "decision": "contextual",
+          "label": "Suspicious only when unused or untested",
+          "policy": "contextual"
+        },
+        {
+          "decision": "allowed",
+          "label": "Allowed naming convention",
+          "policy": "allowed"
+        },
+        {
+          "decision": "case_by_case",
+          "label": "Decide case by case",
+          "policy": "case_by_case"
+        }
+      ],
+      "question": "Should \"format\" be considered suspicious in this repository?"
+    },
+    {
+      "category": "helper_keywords",
+      "keyword": "helper",
+      "observed": [
+        "helper"
+      ],
+      "options": [
+        {
+          "decision": "always_suspicious",
+          "label": "Always suspicious",
+          "policy": "suspicious"
+        },
+        {
+          "decision": "contextual",
+          "label": "Suspicious only when unused or untested",
+          "policy": "contextual"
+        },
+        {
+          "decision": "allowed",
+          "label": "Allowed naming convention",
+          "policy": "allowed"
+        },
+        {
+          "decision": "case_by_case",
+          "label": "Decide case by case",
+          "policy": "case_by_case"
+        }
+      ],
+      "question": "Should \"helper\" be considered suspicious in this repository?"
+    },
+    {
+      "category": "helper_keywords",
+      "keyword": "normalize",
+      "observed": [
+        "normalize_header"
+      ],
+      "options": [
+        {
+          "decision": "always_suspicious",
+          "label": "Always suspicious",
+          "policy": "suspicious"
+        },
+        {
+          "decision": "contextual",
+          "label": "Suspicious only when unused or untested",
+          "policy": "contextual"
+        },
+        {
+          "decision": "allowed",
+          "label": "Allowed naming convention",
+          "policy": "allowed"
+        },
+        {
+          "decision": "case_by_case",
+          "label": "Decide case by case",
+          "policy": "case_by_case"
+        }
+      ],
+      "question": "Should \"normalize\" be considered suspicious in this repository?"
+    },
+    {
+      "category": "helper_keywords",
+      "keyword": "parse",
+      "observed": [
+        "test_parse_amount_supports_currency_commas_and_parentheses",
+        "test_parse_date_supports_common_formats"
+      ],
+      "options": [
+        {
+          "decision": "always_suspicious",
+          "label": "Always suspicious",
+          "policy": "suspicious"
+        },
+        {
+          "decision": "contextual",
+          "label": "Suspicious only when unused or untested",
+          "policy": "contextual"
+        },
+        {
+          "decision": "allowed",
+          "label": "Allowed naming convention",
+          "policy": "allowed"
+        },
+        {
+          "decision": "case_by_case",
+          "label": "Decide case by case",
+          "policy": "case_by_case"
+        }
+      ],
+      "question": "Should \"parse\" be considered suspicious in this repository?"
+    },
+    {
+      "category": "patch_keywords",
+      "keyword": "fix",
+      "observed": [
+        "_normalise_suffixes"
+      ],
+      "options": [
+        {
+          "decision": "always_suspicious",
+          "label": "Always suspicious",
+          "policy": "suspicious"
+        },
+        {
+          "decision": "contextual",
+          "label": "Suspicious only when unused or untested",
+          "policy": "contextual"
+        },
+        {
+          "decision": "allowed",
+          "label": "Allowed naming convention",
+          "policy": "allowed"
+        },
+        {
+          "decision": "case_by_case",
+          "label": "Decide case by case",
+          "policy": "case_by_case"
+        }
+      ],
+      "question": "Should \"fix\" be considered suspicious in this repository?"
+    },
+    {
+      "category": "patch_keywords",
+      "keyword": "patch",
+      "observed": [
+        "_matches_patch_policy",
+        "test_detects_patch_name_smell",
+        "test_learned_allowed_policy_suppresses_patch_keyword"
+      ],
+      "options": [
+        {
+          "decision": "always_suspicious",
+          "label": "Always suspicious",
+          "policy": "suspicious"
+        },
+        {
+          "decision": "contextual",
+          "label": "Suspicious only when unused or untested",
+          "policy": "contextual"
+        },
+        {
+          "decision": "allowed",
+          "label": "Allowed naming convention",
+          "policy": "allowed"
+        },
+        {
+          "decision": "case_by_case",
+          "label": "Decide case by case",
+          "policy": "case_by_case"
+        }
+      ],
+      "question": "Should \"patch\" be considered suspicious in this repository?"
+    },
+    {
+      "category": "suspicious_directory_keywords",
+      "keyword": "temp",
+      "observed": [
+        "skills\\agent-bridge\\templates",
+        "skills\\code-health-review\\templates",
+        "skills\\style-record\\templates"
+      ],
+      "options": [
+        {
+          "decision": "always_suspicious",
+          "label": "Always suspicious",
+          "policy": "suspicious"
+        },
+        {
+          "decision": "contextual",
+          "label": "Suspicious only when unused or untested",
+          "policy": "contextual"
+        },
+        {
+          "decision": "allowed",
+          "label": "Allowed naming convention",
+          "policy": "allowed"
+        },
+        {
+          "decision": "case_by_case",
+          "label": "Decide case by case",
+          "policy": "case_by_case"
+        }
+      ],
+      "question": "Should \"temp\" be considered suspicious in this repository?"
+    }
+  ],
+  "learned_policies": [],
+  "smell_rules": {
+    "helper_keywords": {
+      "convert": {
+        "policy": "suspicious",
+        "source": "default_config"
+      },
+      "format": {
+        "policy": "suspicious",
+        "source": "default_config"
+      },
+      "helper": {
+        "policy": "suspicious",
+        "source": "default_config"
+      },
+      "normalize": {
+        "policy": "suspicious",
+        "source": "default_config"
+      },
+      "parse": {
+        "policy": "suspicious",
+        "source": "default_config"
+      },
+      "util": {
+        "policy": "suspicious",
+        "source": "default_config"
+      }
+    },
+    "patch_keywords": {
+      "debug": {
+        "policy": "suspicious",
+        "source": "default_config"
+      },
+      "fix": {
+        "policy": "suspicious",
+        "source": "default_config"
+      },
+      "hack": {
+        "policy": "suspicious",
+        "source": "default_config"
+      },
+      "patch": {
+        "policy": "suspicious",
+        "source": "default_config"
+      },
+      "quick": {
+        "policy": "suspicious",
+        "source": "default_config"
+      },
+      "safe": {
+        "policy": "suspicious",
+        "source": "default_config"
+      },
+      "temp": {
+        "policy": "suspicious",
+        "source": "default_config"
+      },
+      "workaround": {
+        "policy": "suspicious",
+        "source": "default_config"
+      }
+    },
+    "schema_version": 1,
+    "suspicious_directory_keywords": {
+      "backup": {
+        "policy": "suspicious",
+        "source": "default_config"
+      },
+      "final": {
+        "policy": "suspicious",
+        "source": "default_config"
+      },
+      "old": {
+        "policy": "suspicious",
+        "source": "default_config"
+      },
+      "temp": {
+        "policy": "suspicious",
+        "source": "default_config"
+      }
+    },
+    "suspicious_file_keywords": {
+      "backup": {
+        "policy": "suspicious",
+        "source": "default_config"
+      },
+      "debug": {
+        "policy": "suspicious",
+        "source": "default_config"
+      },
+      "final": {
+        "policy": "suspicious",
+        "source": "default_config"
+      },
+      "fixed": {
+        "policy": "suspicious",
+        "source": "default_config"
+      },
+      "old": {
+        "policy": "suspicious",
+        "source": "default_config"
+      },
+      "patch": {
+        "policy": "suspicious",
+        "source": "default_config"
+      },
+      "temp": {
+        "policy": "suspicious",
+        "source": "default_config"
+      }
+    }
+  },
+  "summary": {
+    "called_name_count": 219,
+    "function_count": 178,
+    "warning_count": 86
+  },
+  "warnings": [
+    {
+      "file": "repo_manager_core\\search_rules.py",
+      "function": "_normalise_suffixes",
+      "keyword": "fix",
+      "policy": "suspicious",
+      "policy_source": "default_config",
+      "reason": "Function name '_normalise_suffixes' contains keyword 'fix'.",
+      "severity": "medium",
+      "suggestion": "Review whether this function is a durable abstraction or a temporary patch that should be merged.",
+      "type": "patch_name_smell"
+    },
+    {
+      "file": "repo_manager_core\\style\\learn_repo_style.py",
+      "function": "_matches_patch_policy",
+      "keyword": "patch",
+      "policy": "suspicious",
+      "policy_source": "default_config",
+      "reason": "Function name '_matches_patch_policy' contains keyword 'patch'.",
+      "severity": "medium",
+      "suggestion": "Review whether this function is a durable abstraction or a temporary patch that should be merged.",
+      "type": "patch_name_smell"
+    },
+    {
+      "file": "tests\\test_detect_smells.py",
+      "function": "test_detects_patch_name_smell",
+      "keyword": "patch",
+      "policy": "suspicious",
+      "policy_source": "default_config",
+      "reason": "Function name 'test_detects_patch_name_smell' contains keyword 'patch'.",
+      "severity": "medium",
+      "suggestion": "Review whether this function is a durable abstraction or a temporary patch that should be merged.",
+      "type": "patch_name_smell"
+    },
+    {
+      "file": "tests\\test_smell_learning.py",
+      "function": "test_learned_allowed_policy_suppresses_patch_keyword",
+      "keyword": "patch",
+      "policy": "suspicious",
+      "policy_source": "default_config",
+      "reason": "Function name 'test_learned_allowed_policy_suppresses_patch_keyword' contains keyword 'patch'.",
+      "severity": "medium",
+      "suggestion": "Review whether this function is a durable abstraction or a temporary patch that should be merged.",
+      "type": "patch_name_smell"
+    },
+    {
+      "file": "repo_manager_core\\board\\review_writer.py",
+      "function": "write_review",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "repo_manager_core\\health\\analyze_repo_structure.py",
+      "function": "_default_structure_rules",
+      "reason": "Very short function mostly delegates to 'load_default_smell_rules'.",
+      "severity": "low",
+      "suggestion": "Inline the wrapper or keep it only if it provides a meaningful public API boundary.",
+      "type": "wrapper_function"
+    },
+    {
+      "file": "repo_manager_core\\health\\analyze_repo_structure.py",
+      "function": "_feedback_questions",
+      "reason": "Function name '_feedback_questions' appears 2 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "repo_manager_core\\health\\analyze_repo_structure.py",
+      "function": "_matching_keywords",
+      "reason": "Function name '_matching_keywords' appears 2 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "repo_manager_core\\health\\analyze_repo_structure.py",
+      "function": "_maybe_request_feedback",
+      "reason": "Function name '_maybe_request_feedback' appears 2 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "repo_manager_core\\health\\analyze_repo_structure.py",
+      "function": "_should_warn",
+      "reason": "Function name '_should_warn' appears 2 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "repo_manager_core\\health\\call_agent.py",
+      "function": "call_agent",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "repo_manager_core\\health\\detect_function_smells.py",
+      "function": "_feedback_questions",
+      "reason": "Function name '_feedback_questions' appears 2 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "repo_manager_core\\health\\detect_function_smells.py",
+      "function": "_matching_keywords",
+      "reason": "Very short function mostly delegates to 'active_keywords'.",
+      "severity": "low",
+      "suggestion": "Inline the wrapper or keep it only if it provides a meaningful public API boundary.",
+      "type": "wrapper_function"
+    },
+    {
+      "file": "repo_manager_core\\health\\detect_function_smells.py",
+      "function": "_matching_keywords",
+      "reason": "Function name '_matching_keywords' appears 2 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "repo_manager_core\\health\\detect_function_smells.py",
+      "function": "_maybe_request_feedback",
+      "reason": "Function name '_maybe_request_feedback' appears 2 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "repo_manager_core\\health\\detect_function_smells.py",
+      "function": "_should_warn",
+      "reason": "Function name '_should_warn' appears 2 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "repo_manager_core\\health\\scan_file_functions.py",
+      "function": "visit_Call",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "repo_manager_core\\style\\context_writer.py",
+      "function": "write_style_profile",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "skills\\agent-bridge\\scripts\\bridge_handoff.py",
+      "function": "main",
+      "reason": "Function name 'main' appears 11 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "skills\\agent-bridge\\scripts\\bridge_init_board.py",
+      "function": "main",
+      "reason": "Function name 'main' appears 11 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "skills\\agent-bridge\\scripts\\bridge_learn_style.py",
+      "function": "main",
+      "reason": "Function name 'main' appears 11 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "skills\\agent-bridge\\scripts\\bridge_status.py",
+      "function": "main",
+      "reason": "Function name 'main' appears 11 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "skills\\agent-bridge\\scripts\\bridge_update_context.py",
+      "function": "main",
+      "reason": "Function name 'main' appears 11 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "skills\\code-health-review\\scripts\\_bootstrap.py",
+      "function": "bootstrap_repo_manager_core",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "skills\\code-health-review\\scripts\\health_detect_smells.py",
+      "function": "main",
+      "reason": "Function name 'main' appears 11 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "skills\\code-health-review\\scripts\\health_generate_report.py",
+      "function": "main",
+      "reason": "Function name 'main' appears 11 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "skills\\code-health-review\\scripts\\health_review_diff.py",
+      "function": "_warning_key",
+      "reason": "Very short function mostly delegates to 'get'.",
+      "severity": "low",
+      "suggestion": "Inline the wrapper or keep it only if it provides a meaningful public API boundary.",
+      "type": "wrapper_function"
+    },
+    {
+      "file": "skills\\code-health-review\\scripts\\health_review_diff.py",
+      "function": "main",
+      "reason": "Function name 'main' appears 11 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "skills\\code-health-review\\scripts\\health_scan.py",
+      "function": "main",
+      "reason": "Function name 'main' appears 11 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "tests\\data_process\\expense_report.py",
+      "function": "main",
+      "reason": "Function name 'main' appears 11 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "tests\\data_process\\test_expense_report.py",
+      "function": "test_generate_monthly_report_writes_csv",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\data_process\\test_expense_report.py",
+      "function": "test_parse_amount_supports_currency_commas_and_parentheses",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\data_process\\test_expense_report.py",
+      "function": "test_parse_date_supports_common_formats",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\data_process\\test_expense_report.py",
+      "function": "test_read_expenses_reports_bad_rows",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\data_process\\test_expense_report.py",
+      "function": "test_summarize_by_month_category",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\fixtures\\sample.py",
+      "function": "helper",
+      "reason": "Very short function mostly delegates to 'strip'.",
+      "severity": "low",
+      "suggestion": "Inline the wrapper or keep it only if it provides a meaningful public API boundary.",
+      "type": "wrapper_function"
+    },
+    {
+      "file": "tests\\fixtures\\sample.py",
+      "function": "helper",
+      "reason": "Function name 'helper' appears 2 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "tests\\fixtures\\sample.py",
+      "function": "outer",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\fixtures\\sample.py",
+      "function": "outer",
+      "reason": "Very short function mostly delegates to 'helper'.",
+      "severity": "low",
+      "suggestion": "Inline the wrapper or keep it only if it provides a meaningful public API boundary.",
+      "type": "wrapper_function"
+    },
+    {
+      "file": "tests\\fixtures\\sample.py",
+      "function": "outer",
+      "reason": "Function name 'outer' appears 2 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "tests\\fixtures\\sample_repo\\pkg\\sample.py",
+      "function": "helper",
+      "reason": "Very short function mostly delegates to 'strip'.",
+      "severity": "low",
+      "suggestion": "Inline the wrapper or keep it only if it provides a meaningful public API boundary.",
+      "type": "wrapper_function"
+    },
+    {
+      "file": "tests\\fixtures\\sample_repo\\pkg\\sample.py",
+      "function": "helper",
+      "reason": "Function name 'helper' appears 2 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "tests\\fixtures\\sample_repo\\pkg\\sample.py",
+      "function": "outer",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\fixtures\\sample_repo\\pkg\\sample.py",
+      "function": "outer",
+      "reason": "Very short function mostly delegates to 'helper'.",
+      "severity": "low",
+      "suggestion": "Inline the wrapper or keep it only if it provides a meaningful public API boundary.",
+      "type": "wrapper_function"
+    },
+    {
+      "file": "tests\\fixtures\\sample_repo\\pkg\\sample.py",
+      "function": "outer",
+      "reason": "Function name 'outer' appears 2 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "tests\\test_board_io.py",
+      "function": "test_load_board_from_dot_board",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_board_io.py",
+      "function": "test_load_yaml_fallback",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_board_io.py",
+      "function": "test_save_and_load_board_roundtrip",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_board_io.py",
+      "function": "test_task_id_extraction",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_board_io.py",
+      "function": "test_task_id_extraction",
+      "reason": "Very short function mostly delegates to 'task_id'.",
+      "severity": "low",
+      "suggestion": "Inline the wrapper or keep it only if it provides a meaningful public API boundary.",
+      "type": "wrapper_function"
+    },
+    {
+      "file": "tests\\test_board_validator.py",
+      "function": "test_board_consistency_finds_t001",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_board_validator.py",
+      "function": "test_board_consistency_missing_task",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_board_validator.py",
+      "function": "test_board_consistency_missing_task",
+      "reason": "Very short function mostly delegates to 'check_board_consistency'.",
+      "severity": "low",
+      "suggestion": "Inline the wrapper or keep it only if it provides a meaningful public API boundary.",
+      "type": "wrapper_function"
+    },
+    {
+      "file": "tests\\test_detect_smells.py",
+      "function": "_fn",
+      "reason": "Function name '_fn' appears 2 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "tests\\test_detect_smells.py",
+      "function": "test_detects_patch_name_smell",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_detect_smells.py",
+      "function": "test_detects_unused_function",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_handoff.py",
+      "function": "test_check_handoff_finds_t001_handoffs",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_handoff.py",
+      "function": "test_write_and_check_handoff_roundtrip",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_health_report.py",
+      "function": "test_generate_review_prompt_includes_profile",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_health_report.py",
+      "function": "test_generate_review_prompt_with_question",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_health_report.py",
+      "function": "test_group_warning_counts",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_health_report.py",
+      "function": "test_render_review_report_contains_expected_sections",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_health_report.py",
+      "function": "test_render_review_report_with_warnings",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_hygiene.py",
+      "function": "test_cache_file_detected",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_hygiene.py",
+      "function": "test_clean_repo_scores_full",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_hygiene.py",
+      "function": "test_forbidden_root_file_detected",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_scan_functions.py",
+      "function": "test_scan_file_extracts_function_metadata",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_scan_functions.py",
+      "function": "test_scan_repo_excludes_globbed_files",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_scan_functions.py",
+      "function": "test_scan_repo_excludes_specific_files",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_scan_functions.py",
+      "function": "test_scan_repo_skips_ignored_directories",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_scan_functions.py",
+      "function": "test_scan_repo_uses_repo_local_search_rules",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_scan_functions.py",
+      "function": "test_structure_scan_respects_search_rules",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_skill_scripts.py",
+      "function": "test_health_generate_report_defaults_to_current_workspace",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_skill_scripts.py",
+      "function": "test_health_generate_report_records_explicit_feedback",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_skill_scripts.py",
+      "function": "test_health_generate_report_writes_expected_outputs",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_skill_scripts.py",
+      "function": "test_style_module_builds_profile_smells_and_style",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_smell_learning.py",
+      "function": "_fn",
+      "reason": "Function name '_fn' appears 2 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "tests\\test_smell_learning.py",
+      "function": "test_contextual_policy_warns_only_when_unused",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_smell_learning.py",
+      "function": "test_default_rules_are_loaded_from_json",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_smell_learning.py",
+      "function": "test_feedback_is_recorded_and_loaded_as_rules",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_smell_learning.py",
+      "function": "test_learned_allowed_policy_suppresses_patch_keyword",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tests\\test_smell_learning.py",
+      "function": "test_missing_rule_files_are_created_from_defaults",
+      "reason": "The function is defined but not called by another scanned function.",
+      "severity": "low",
+      "suggestion": "Confirm whether it is an external entry point; otherwise remove it or add a clear call path.",
+      "type": "unused_function"
+    },
+    {
+      "file": "tools\\benchmark_scorer.py",
+      "function": "main",
+      "reason": "Function name 'main' appears 11 times in the scanned repo.",
+      "severity": "low",
+      "suggestion": "Check for duplicate-like helpers and consolidate behavior when practical.",
+      "type": "duplicate_function_name"
+    },
+    {
+      "file": "skills\\agent-bridge\\templates",
+      "function": "",
+      "keyword": "temp",
+      "policy": "suspicious",
+      "policy_source": "default_config",
+      "reason": "Directory name 'templates' contains keyword 'temp'.",
+      "severity": "medium",
+      "suggestion": "Move archived code outside the active repo or rename the directory to reflect its purpose.",
+      "type": "suspicious_directory_name"
+    },
+    {
+      "file": "skills\\code-health-review\\templates",
+      "function": "",
+      "keyword": "temp",
+      "policy": "suspicious",
+      "policy_source": "default_config",
+      "reason": "Directory name 'templates' contains keyword 'temp'.",
+      "severity": "medium",
+      "suggestion": "Move archived code outside the active repo or rename the directory to reflect its purpose.",
+      "type": "suspicious_directory_name"
+    },
+    {
+      "file": "skills\\style-record\\templates",
+      "function": "",
+      "keyword": "temp",
+      "policy": "suspicious",
+      "policy_source": "default_config",
+      "reason": "Directory name 'templates' contains keyword 'temp'.",
+      "severity": "medium",
+      "suggestion": "Move archived code outside the active repo or rename the directory to reflect its purpose.",
+      "type": "suspicious_directory_name"
+    }
+  ]
+}

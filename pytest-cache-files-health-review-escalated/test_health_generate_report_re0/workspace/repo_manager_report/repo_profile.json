@@ -1,0 +1,202 @@
+{
+  "failed_file_count": 0,
+  "files": [
+    {
+      "error": "",
+      "file_path": "D:\\chunyangluo\\BoardFlowBench\\pytest-cache-files-health-review-escalated\\test_health_generate_report_re0\\workspace\\sample.py",
+      "functions": [
+        {
+          "argument_names": [
+            "value"
+          ],
+          "called_function_names": [],
+          "docstring": "",
+          "end_line": 2,
+          "file_path": "D:\\chunyangluo\\BoardFlowBench\\pytest-cache-files-health-review-escalated\\test_health_generate_report_re0\\workspace\\sample.py",
+          "function_length": 2,
+          "function_name": "fix_timezone_offset",
+          "leading_comments": "",
+          "parse_succeeded": true,
+          "start_line": 1
+        }
+      ],
+      "parse_succeeded": true
+    }
+  ],
+  "function_count": 1,
+  "functions": [
+    {
+      "argument_names": [
+        "value"
+      ],
+      "called_function_names": [],
+      "docstring": "",
+      "end_line": 2,
+      "file_path": "D:\\chunyangluo\\BoardFlowBench\\pytest-cache-files-health-review-escalated\\test_health_generate_report_re0\\workspace\\sample.py",
+      "function_length": 2,
+      "function_name": "fix_timezone_offset",
+      "leading_comments": "",
+      "parse_succeeded": true,
+      "start_line": 1
+    }
+  ],
+  "parsed_file_count": 1,
+  "python_file_count": 1,
+  "repo_path": "D:\\chunyangluo\\BoardFlowBench\\pytest-cache-files-health-review-escalated\\test_health_generate_report_re0\\workspace",
+  "search_rules": {
+    "exclude_dirs": [
+      ".git",
+      ".hg",
+      ".svn",
+      ".venv",
+      "venv",
+      "__pycache__",
+      ".pytest_cache",
+      ".mypy_cache",
+      ".ruff_cache",
+      "dist",
+      "build",
+      "node_modules",
+      "repo_manager_report"
+    ],
+    "exclude_files": [],
+    "exclude_globs": [],
+    "file_suffixes": [
+      ".py"
+    ],
+    "include_paths": [
+      "."
+    ],
+    "schema_version": 1
+  },
+  "structure": {
+    "feedback_questions": [],
+    "learned_policies": [
+      {
+        "category": "patch_keywords",
+        "keyword": "fix",
+        "policy": "contextual",
+        "reason": "Used in public APIs",
+        "source": "user_feedback"
+      }
+    ],
+    "python_file_count": 1,
+    "repo_path": "D:\\chunyangluo\\BoardFlowBench\\pytest-cache-files-health-review-escalated\\test_health_generate_report_re0\\workspace",
+    "smell_rules": {
+      "helper_keywords": {
+        "convert": {
+          "policy": "suspicious",
+          "source": "default_config"
+        },
+        "format": {
+          "policy": "suspicious",
+          "source": "default_config"
+        },
+        "helper": {
+          "policy": "suspicious",
+          "source": "default_config"
+        },
+        "normalize": {
+          "policy": "suspicious",
+          "source": "default_config"
+        },
+        "parse": {
+          "policy": "suspicious",
+          "source": "default_config"
+        },
+        "util": {
+          "policy": "suspicious",
+          "source": "default_config"
+        }
+      },
+      "patch_keywords": {
+        "debug": {
+          "policy": "suspicious",
+          "source": "default_config"
+        },
+        "fix": {
+          "policy": "contextual",
+          "reason": "Used in public APIs",
+          "source": "user_feedback"
+        },
+        "hack": {
+          "policy": "suspicious",
+          "source": "default_config"
+        },
+        "patch": {
+          "policy": "suspicious",
+          "source": "default_config"
+        },
+        "quick": {
+          "policy": "suspicious",
+          "source": "default_config"
+        },
+        "safe": {
+          "policy": "suspicious",
+          "source": "default_config"
+        },
+        "temp": {
+          "policy": "suspicious",
+          "source": "default_config"
+        },
+        "workaround": {
+          "policy": "suspicious",
+          "source": "default_config"
+        }
+      },
+      "schema_version": 1,
+      "suspicious_directory_keywords": {
+        "backup": {
+          "policy": "suspicious",
+          "source": "default_config"
+        },
+        "final": {
+          "policy": "suspicious",
+          "source": "default_config"
+        },
+        "old": {
+          "policy": "suspicious",
+          "source": "default_config"
+        },
+        "temp": {
+          "policy": "suspicious",
+          "source": "default_config"
+        }
+      },
+      "suspicious_file_keywords": {
+        "backup": {
+          "policy": "suspicious",
+          "source": "default_config"
+        },
+        "debug": {
+          "policy": "suspicious",
+          "source": "default_config"
+        },
+        "final": {
+          "policy": "suspicious",
+          "source": "default_config"
+        },
+        "fixed": {
+          "policy": "suspicious",
+          "source": "default_config"
+        },
+        "old": {
+          "policy": "suspicious",
+          "source": "default_config"
+        },
+        "patch": {
+          "policy": "suspicious",
+          "source": "default_config"
+        },
+        "temp": {
+          "policy": "suspicious",
+          "source": "default_config"
+        }
+      }
+    },
+    "top_level_python_file_count": 1,
+    "warnings": []
+  },
+  "structure_feedback_questions": [],
+  "structure_warnings": []
+}

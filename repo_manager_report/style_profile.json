@@ -1,0 +1,61 @@
+{
+  "average_function_length": 18.5,
+  "common_name_prefixes": [
+    [
+      "",
+      67
+    ],
+    [
+      "test",
+      38
+    ],
+    [
+      "load",
+      7
+    ],
+    [
+      "write",
+      6
+    ],
+    [
+      "check",
+      4
+    ],
+    [
+      "generate",
+      3
+    ],
+    [
+      "build",
+      3
+    ],
+    [
+      "scan",
+      2
+    ],
+    [
+      "read",
+      2
+    ],
+    [
+      "parse",
+      2
+    ]
+  ],
+  "docstring_function_count": 56,
+  "function_count": 178,
+  "max_function_length": 193,
+  "median_function_length": 12.0,
+  "module_count": 11,
+  "patch_like_function_count": 4,
+  "repo_path": ".",
+  "snake_case_function_count": 177,
+  "style_warnings": [
+    {
+      "reason": "Found 4 function names with patch-like words.",
+      "severity": "medium",
+      "suggestion": "Replace temporary fix names with stable domain names after behavior is validated.",
+      "type": "patch_like_naming_style"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "average_function_length": 2.0,
+  "common_name_prefixes": [
+    [
+      "parse",
+      1
+    ]
+  ],
+  "docstring_function_count": 0,
+  "function_count": 1,
+  "max_function_length": 2,
+  "median_function_length": 2,
+  "module_count": 1,
+  "patch_like_function_count": 1,
+  "repo_path": ".",
+  "snake_case_function_count": 1,
+  "style_warnings": [
+    {
+      "reason": "Found 1 function names with patch-like words.",
+      "severity": "medium",
+      "suggestion": "Replace temporary fix names with stable domain names after behavior is validated.",
+      "type": "patch_like_naming_style"
+    }
+  ]
+}

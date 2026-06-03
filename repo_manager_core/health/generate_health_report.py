@@ -40,12 +40,11 @@ You are Repo Manager Code Health Review, a reviewer for AI-generated Python repo
 Write a concise, human-readable review. Treat findings as suspicious signals, not absolute errors.
 
 Focus on:
-- patch function bloat
-- duplicate-like helper functions
-- unused functions
-- wrapper functions
-- messy repository structure
-- a practical cleanup plan
+- Level 1 agent debt multipliers: Patch, Helper Explosion, Shadow Implementation
+- Level 2 maintenance error sources: Mirror Logic, Dead Zone, Knowledge Duplication
+- Level 3 architecture consistency risks: Abandoned Abstraction, Configuration Drift
+- Level 4 repo-specific learning: User Rejection Patterns, Style Violations
+- a practical cleanup plan that separates automated findings from manual review targets
 
 Repository profile:
 {json.dumps(compact_profile, indent=2)}
@@ -68,6 +67,95 @@ Feedback questions:
 
 def _group_warning_counts(warnings: list[dict[str, Any]]) -> dict[str, int]:
     return dict(sorted(Counter(warning.get("type", "unknown") for warning in warnings).items()))
+
+
+SMELL_TAXONOMY: list[dict[str, Any]] = [
+    {
+        "level": "Level 1",
+        "title": "Agent Debt Multipliers",
+        "smells": [
+            {
+                "name": "Patch",
+                "signals": {"patch_name_smell", "suspicious_file_name"},
+                "description": "Temporary fix names, patch files, debug files, or workaround vocabulary that can become permanent code.",
+            },
+            {
+                "name": "Helper Explosion",
+                "signals": {"fragmented_helpers", "wrapper_function"},
+                "description": "Many small generic helpers or thin wrappers that make the codebase harder to reason about.",
+            },
+            {
+                "name": "Shadow Implementation",
+                "signals": {"duplicate_function_name"},
+                "description": "Parallel implementations or duplicate-like helper names that may hide repeated behavior.",
+            },
+        ],
+    },
+    {
+        "level": "Level 2",
+        "title": "Maintenance Error Sources",
+        "smells": [
+            {
+                "name": "Mirror Logic",
+                "signals": {"duplicate_function_name", "fragmented_helpers"},
+                "description": "Copied logic that may diverge across files; current detection is partial and needs manual confirmation.",
+            },
+            {
+                "name": "Dead Zone",
+                "signals": {
+                    "unused_function",
+                    "suspicious_directory_name",
+                    "suspicious_file_name",
+                    "python_file_inside_output_directory",
+                },
+                "description": "Unused functions, abandoned directories, temporary files, or source under output/artifact areas.",
+            },
+            {
+                "name": "Knowledge Duplication",
+                "signals": set(),
+                "description": "Repeated constants, schemas, prompts, docs, or config sources; currently a manual review target.",
+            },
+        ],
+    },
+    {
+        "level": "Level 3",
+        "title": "Architecture Consistency Risks",
+        "smells": [
+            {
+                "name": "Abandoned Abstraction",
+                "signals": {"wrapper_function", "unused_function", "fragmented_helpers"},
+                "description": "Wrapper layers, facades, or helper abstractions that no longer add a stable boundary.",
+            },
+            {
+                "name": "Configuration Drift",
+                "signals": {"too_many_top_level_python_files", "python_file_inside_output_directory"},
+                "description": "Search, smell, style, runtime, or generated config split across competing sources; current detection is partial.",
+            },
+        ],
+    },
+    {
+        "level": "Level 4",
+        "title": "Repo-Specific Learning",
+        "smells": [
+            {
+                "name": "User Rejection Patterns",
+                "signals": set(),
+                "description": "Explicit feedback and learned keyword policies from .repo_manager/user_feedback.jsonl and smell_rules.json.",
+            },
+            {
+                "name": "Style Violations",
+                "signals": set(),
+                "description": "Deviations from learned naming, docstring, length, and patch-like vocabulary style.",
+            },
+        ],
+    },
+]
+
+
+def _warning_count_for_signals(warnings: list[dict[str, Any]], signals: set[str]) -> int:
+    if not signals:
+        return 0
+    return sum(1 for warning in warnings if warning.get("type") in signals)
 
 
 def render_review_report(
@@ -112,6 +200,17 @@ def render_review_report(
         lines.extend(f"- {name}: {count}" for name, count in warning_counts.items())
     else:
         lines.append("- No suspicious signals found.")
+
+    lines.extend(["", "## Smell Taxonomy", ""])
+    lines.append(
+        "Automated counts are signal counts, not defect counts. Smells with no automated signals remain manual review targets."
+    )
+    for group in SMELL_TAXONOMY:
+        lines.extend(["", f"### {group['level']}: {group['title']}", ""])
+        for smell in group["smells"]:
+            count = _warning_count_for_signals(warnings, smell["signals"])
+            support = "manual review target" if not smell["signals"] else f"{count} automated signal(s)"
+            lines.append(f"- {smell['name']}: {support}. {smell['description']}")
 
     lines.extend(["", "## Learned Repository Policies", ""])
     # 中文说明：
@@ -180,6 +279,21 @@ def render_review_report(
         lines.append("- Style warnings:")
         for warning in style_warnings:
             lines.append(f"  - {warning.get('type')}: {warning.get('reason')}")
+
+    lines.extend(
+        [
+            "",
+            "## Health Capabilities",
+            "",
+            "- AST-based function indexing with arguments, docstrings, leading comments, calls, and function lengths.",
+            "- Repo-local scan scope through `.repo_manager/search_rules.json`.",
+            "- Repo-local keyword policies through `.repo_manager/smell_rules.json`.",
+            "- Repository structure checks for suspicious files, directories, root-level scripts, and output/artifact source.",
+            "- Style profiling for naming, docstring coverage, function length, and patch-like vocabulary.",
+            "- Learned policy reporting and explicit feedback capture through `.repo_manager/user_feedback.jsonl`.",
+            "- Before/after review diffing through `health_review_diff.py` for new warnings, resolved warnings, and style drift.",
+        ]
+    )
 
     lines.extend(
         [
