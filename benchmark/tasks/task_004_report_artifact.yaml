@@ -1,0 +1,18 @@
+id: task_004
+title: Report artifact
+stage: demo_repo_template
+intent: Generate a stable Markdown report artifact from monthly summaries.
+depends_on:
+  - task_003
+allowed_paths:
+  - demo_repo_template/src/expense_lite/report.py
+  - demo_repo_template/src/expense_lite/cli.py
+  - demo_repo_template/tests/test_report.py
+  - demo_repo_template/artifacts/
+acceptance_criteria:
+  - Render a Markdown report with deterministic headings and totals.
+  - Write generated reports only under demo_repo_template/artifacts/.
+  - Do not leave scratch files in the repository root.
+  - Add focused tests for report rendering.
+handoff_required: true
+validation_hint: Run report tests from demo_repo_template.

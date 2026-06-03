@@ -1,0 +1,18 @@
+id: task_002
+title: CSV import
+stage: demo_repo_template
+intent: Add CSV expense import after date parsing exists.
+depends_on:
+  - task_001
+allowed_paths:
+  - demo_repo_template/src/expense_lite/parser.py
+  - demo_repo_template/src/expense_lite/validator.py
+  - demo_repo_template/tests/test_parser.py
+  - demo_repo_template/tests/test_validator.py
+acceptance_criteria:
+  - Read CSV rows with date, description, category, and amount fields.
+  - Reuse the date parser instead of duplicating date logic.
+  - Report missing required columns clearly.
+  - Add focused tests for valid CSV and malformed CSV.
+handoff_required: true
+validation_hint: Run parser and validator tests from demo_repo_template.
