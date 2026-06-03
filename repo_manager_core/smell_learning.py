@@ -21,6 +21,7 @@ RULE_CATEGORIES = (
     "suspicious_file_keywords",
     "suspicious_directory_keywords",
 )
+CONTENT_RULE_CATEGORIES = ("default_parameter_values",)
 
 POLICY_SUSPICIOUS = "suspicious"
 POLICY_CONTEXTUAL = "contextual"
@@ -32,6 +33,7 @@ VALID_POLICIES = {
     POLICY_ALLOWED,
     POLICY_CASE_BY_CASE,
 }
+VALID_SEVERITIES = {"low", "medium", "high"}
 
 DECISION_TO_POLICY = {
     "always_suspicious": POLICY_SUSPICIOUS,
@@ -139,6 +141,20 @@ def generate_learned_policy_summary(rules: dict[str, Any]) -> list[dict[str, str
                     "reason": str(rule.get("reason", "")),
                 }
             )
+    for rule_name in CONTENT_RULE_CATEGORIES:
+        rule = configured_rule(rules, rule_name)
+        source = rule["source"]
+        if source in {"default_bootstrap", "default_config"}:
+            continue
+        summary.append(
+            {
+                "category": "content_rules",
+                "keyword": rule_name,
+                "policy": rule["policy"],
+                "source": source,
+                "reason": rule["reason"],
+            }
+        )
     return summary
 
 
@@ -155,6 +171,23 @@ def keyword_rule(rules: dict[str, Any], category: str, keyword: str) -> dict[str
 def active_keywords(rules: dict[str, Any], category: str) -> list[str]:
     """Return deterministic keywords for a rule category."""
     return sorted(rules.get(category, {}))
+
+
+def configured_rule(rules: dict[str, Any], rule_name: str) -> dict[str, Any]:
+    """Return a normalized non-keyword rule."""
+    raw = rules.get(rule_name, {})
+    if not isinstance(raw, dict):
+        raw = {}
+    severity = str(raw.get("severity", "medium"))
+    if severity not in VALID_SEVERITIES:
+        severity = "medium"
+    return {
+        "enabled": bool(raw.get("enabled", False)),
+        "policy": _policy_from_decision(str(raw.get("policy", POLICY_ALLOWED))),
+        "severity": severity,
+        "source": str(raw.get("source", "default_config")),
+        "reason": str(raw.get("reason", "")),
+    }
 
 
 def feedback_question(
@@ -213,6 +246,9 @@ def _merge_rules(base: dict[str, Any], overrides: dict[str, Any]) -> dict[str, A
     for category in RULE_CATEGORIES:
         merged.setdefault(category, {})
         merged[category].update(overrides.get(category, {}))
+    for category in CONTENT_RULE_CATEGORIES:
+        if category in overrides:
+            merged[category] = overrides[category]
     return _normalise_rules(merged, default_source="default_config")
 
 
@@ -237,6 +273,23 @@ def _normalise_rules(raw: dict[str, Any], *, default_source: str) -> dict[str, A
             }
             if value.get("reason"):
                 rules[category][str(keyword)]["reason"] = str(value["reason"])
+    for category in CONTENT_RULE_CATEGORIES:
+        if category not in raw:
+            continue
+        values = raw.get(category, {})
+        if not isinstance(values, dict):
+            continue
+        severity = str(values.get("severity", "medium"))
+        if severity not in VALID_SEVERITIES:
+            severity = "medium"
+        rules[category] = {
+            "enabled": bool(values.get("enabled", True)),
+            "policy": _policy_from_decision(str(values.get("policy", POLICY_SUSPICIOUS))),
+            "severity": severity,
+            "source": str(values.get("source", default_source)),
+        }
+        if values.get("reason"):
+            rules[category]["reason"] = str(values["reason"])
     return rules
 
 

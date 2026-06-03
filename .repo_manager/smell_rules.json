@@ -1,4 +1,10 @@
 {
+  "default_parameter_values": {
+    "enabled": true,
+    "policy": "suspicious",
+    "severity": "medium",
+    "source": "default_config"
+  },
   "helper_keywords": {
     "convert": {
       "policy": "suspicious",

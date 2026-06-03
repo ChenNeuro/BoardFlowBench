@@ -12,6 +12,7 @@ from repo_manager_core.smell_learning import (
     POLICY_CASE_BY_CASE,
     POLICY_CONTEXTUAL,
     active_keywords,
+    configured_rule,
     feedback_question,
     generate_learned_policy_summary,
     keyword_rule,
@@ -124,6 +125,26 @@ def detect_function_smells(
                     severity=severity,
                 ),
             )
+
+        default_argument_names = fn.get("default_argument_names", [])
+        default_parameter_rule = configured_rule(rules, "default_parameter_values")
+        if default_argument_names and _should_warn(
+            default_parameter_rule,
+            unused_by_scan=unused_by_scan,
+        ):
+            parameter_names = [str(argument_name) for argument_name in default_argument_names]
+            warning = _warning(
+                default_parameter_rule["severity"],
+                "default_parameter_value",
+                file_path,
+                name,
+                f"Function defines default values for parameters: {', '.join(parameter_names)}.",
+                "Review whether these defaults should be explicit at call sites, named constants, or repository configuration.",
+            )
+            warning["parameter_names"] = parameter_names
+            warning["policy"] = default_parameter_rule["policy"]
+            warning["policy_source"] = default_parameter_rule["source"]
+            warnings.append(warning)
 
         if unused_by_scan:
             # This cannot prove a function is dead: frameworks, CLIs, tests, and
@@ -260,13 +281,15 @@ def _matching_keywords(rules: dict[str, Any], category: str, value: str) -> list
     return [keyword for keyword in active_keywords(rules, category) if keyword in value]
 
 
-def _should_warn(rule: dict[str, str], *, unused_by_scan: bool) -> bool:
+def _should_warn(rule: dict[str, Any], *, unused_by_scan: bool) -> bool:
     # 中文说明：
     # policy 是自适应学习的核心：
     # allowed：仓库约定允许，不报警；
     # case_by_case：不自动报警，但保留人工判断入口；
     # contextual：只有上下文更可疑时报警；
     # suspicious：默认可疑，命中就报警。
+    if not rule.get("enabled", True):
+        return False
     if rule["policy"] == POLICY_ALLOWED:
         return False
     if rule["policy"] == POLICY_CASE_BY_CASE:

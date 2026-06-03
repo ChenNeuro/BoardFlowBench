@@ -86,6 +86,7 @@ def test_feedback_is_recorded_and_loaded_as_rules(tmp_path):
 def test_default_rules_are_loaded_from_json():
     rules = load_default_smell_rules()
 
+    assert rules["default_parameter_values"]["enabled"] is True
     assert "safe" in rules["patch_keywords"]
     assert "parse" in rules["helper_keywords"]
     assert "old" in rules["suspicious_file_keywords"]

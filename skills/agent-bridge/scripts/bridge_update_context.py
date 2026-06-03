@@ -5,6 +5,10 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from _bootstrap import bootstrap_repo_manager_core
+
+bootstrap_repo_manager_core()
+
 from repo_manager_core.board.board_io import load_board
 from repo_manager_core.style.learn_repo_style import read_json
 from repo_manager_core.style.style_profile import build_profile

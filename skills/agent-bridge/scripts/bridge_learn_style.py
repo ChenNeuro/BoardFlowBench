@@ -5,6 +5,10 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from _bootstrap import bootstrap_repo_manager_core
+
+bootstrap_repo_manager_core()
+
 from repo_manager_core.style.learn_repo_style import learn_repo_style, write_json, resolve_output_path
 from repo_manager_core.style.style_profile import build_profile
 

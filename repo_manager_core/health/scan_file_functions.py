@@ -82,6 +82,18 @@ def _argument_names(node: ast.FunctionDef | ast.AsyncFunctionDef) -> list[str]:
     return args
 
 
+def _default_argument_names(node: ast.FunctionDef | ast.AsyncFunctionDef) -> list[str]:
+    names: list[str] = []
+    positional_args = [*node.args.posonlyargs, *node.args.args]
+    default_start = len(positional_args) - len(node.args.defaults)
+    for arg in positional_args[default_start:]:
+        names.append(arg.arg)
+    for arg, default in zip(node.args.kwonlyargs, node.args.kw_defaults):
+        if default is not None:
+            names.append(arg.arg)
+    return names
+
+
 def _function_info(
     file_path: Path,
     node: ast.FunctionDef | ast.AsyncFunctionDef,
@@ -103,6 +115,7 @@ def _function_info(
         "file_path": str(file_path),
         "function_name": node.name,
         "argument_names": _argument_names(node),
+        "default_argument_names": _default_argument_names(node),
         "start_line": start_line,
         "end_line": end_line,
         "docstring": ast.get_docstring(node) or "",

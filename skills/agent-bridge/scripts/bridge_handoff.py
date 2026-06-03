@@ -5,6 +5,10 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from _bootstrap import bootstrap_repo_manager_core
+
+bootstrap_repo_manager_core()
+
 from repo_manager_core.board.handoff_writer import write_handoff, validate_handoff_schema
 from repo_manager_core.board.task_status import VALID_STATUSES
 

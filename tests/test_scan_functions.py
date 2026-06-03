@@ -40,6 +40,21 @@ def test_scan_file_extracts_function_metadata():
     assert outer["called_function_names"] == ["helper"]
 
 
+def test_scan_file_records_default_argument_names(tmp_path):
+    sample = tmp_path / "defaults.py"
+    sample.write_text(
+        "def configure(path, retries=3, *, timeout=None, required):\n"
+        "    return path, retries, timeout, required\n",
+        encoding="utf-8",
+    )
+
+    result = scan_file_functions(sample)
+
+    assert result["parse_succeeded"] is True
+    assert result["functions"][0]["argument_names"] == ["path", "retries", "timeout", "required"]
+    assert result["functions"][0]["default_argument_names"] == ["retries", "timeout"]
+
+
 def test_scan_repo_skips_ignored_directories(tmp_path):
     _write_sample_repo(tmp_path)
     ignored_dir = tmp_path / ".venv"

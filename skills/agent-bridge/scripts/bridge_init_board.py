@@ -5,6 +5,10 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from _bootstrap import bootstrap_repo_manager_core
+
+bootstrap_repo_manager_core()
+
 from repo_manager_core.board.board_io import save_board
 
 DEFAULT_BOARD = {
