@@ -10,12 +10,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
 import urllib.parse
 import urllib.request
+import zipfile
 from pathlib import Path
 from typing import Any
 
@@ -44,7 +47,7 @@ def main() -> int:
         tempfile.mkdtemp(prefix=f"swe-lite-{safe_name(args.instance_id)}-")
     )
     if control_dir.exists() and args.force:
-        shutil.rmtree(control_dir)
+        remove_tree(control_dir)
     control_dir.mkdir(parents=True, exist_ok=True)
 
     instance = fetch_instance(args.dataset, args.instance_id)
@@ -136,10 +139,8 @@ def prepare_workspace(workspace: Path, control_dir: Path, instance: dict[str, An
     if workspace.exists():
         if not force:
             raise ValueError(f"workspace already exists: {workspace}")
-        shutil.rmtree(workspace)
-    repo_url = f"https://github.com/{instance['repo']}.git"
-    run(["git", "clone", "--quiet", repo_url, str(workspace)], cwd=workspace.parent)
-    run(["git", "switch", "--quiet", "--detach", str(instance["base_commit"])], cwd=workspace)
+        remove_tree(workspace)
+    checkout_repo(workspace, str(instance["repo"]), str(instance["base_commit"]))
 
     repoflow = workspace / ".repoflow"
     (repoflow / "handoffs").mkdir(parents=True, exist_ok=True)
@@ -157,6 +158,71 @@ def prepare_workspace(workspace: Path, control_dir: Path, instance: dict[str, An
         "warning": "Control dir contains evaluator material. Do not expose gold_patch.diff or test_patch.diff to the agent.",
     }
     (repoflow / "control_note.json").write_text(json.dumps(copy_note, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def checkout_repo(workspace: Path, repo: str, base_commit: str) -> None:
+    """Create a source workspace at base_commit without requiring a full clone."""
+    workspace.mkdir(parents=True)
+    run(["git", "init", "--quiet"], cwd=workspace)
+    run(["git", "remote", "add", "origin", f"https://github.com/{repo}.git"], cwd=workspace)
+    fetch = run(
+        [
+            "git",
+            "-c",
+            "http.version=HTTP/1.1",
+            "fetch",
+            "--quiet",
+            "--depth=1",
+            "--filter=blob:none",
+            "origin",
+            base_commit,
+        ],
+        cwd=workspace,
+        check=False,
+    )
+    if fetch.returncode == 0:
+        run(["git", "checkout", "--quiet", "--detach", "FETCH_HEAD"], cwd=workspace)
+        return
+
+    # Codeload is substantially smaller and more reliable than a full clone for
+    # large repositories. The local commit is only a smoke-workspace baseline.
+    remove_tree(workspace)
+    archive_url = f"https://codeload.github.com/{repo}/zip/{base_commit}"
+    with tempfile.TemporaryDirectory(prefix="swe-lite-archive-") as temp_dir_name:
+        temp_dir = Path(temp_dir_name)
+        archive_path = temp_dir / "source.zip"
+        urllib.request.urlretrieve(archive_url, archive_path)
+        with zipfile.ZipFile(archive_path) as archive:
+            archive.extractall(temp_dir / "extracted")
+        roots = [path for path in (temp_dir / "extracted").iterdir() if path.is_dir()]
+        if len(roots) != 1:
+            raise RuntimeError(f"unexpected codeload archive layout for {repo}@{base_commit}")
+        shutil.move(str(roots[0]), workspace)
+
+    run(["git", "init", "--quiet"], cwd=workspace)
+    run(["git", "add", "-A"], cwd=workspace)
+    run(
+        [
+            "git",
+            "-c",
+            "user.name=BoardFlowBench",
+            "-c",
+            "user.email=boardflowbench@localhost",
+            "commit",
+            "--quiet",
+            "-m",
+            f"Archive baseline for {repo}@{base_commit}",
+        ],
+        cwd=workspace,
+    )
+
+
+def remove_tree(path: Path) -> None:
+    def clear_readonly_and_retry(function: Any, target: str, _exc_info: Any) -> None:
+        os.chmod(target, stat.S_IWRITE)
+        function(target)
+
+    shutil.rmtree(path, onerror=clear_readonly_and_retry)
 
 
 def render_agents_md(instance: dict[str, Any]) -> str:
@@ -218,6 +284,14 @@ Use this packet before editing `{instance['repo']}` for `{instance['instance_id'
 5. Run focused tests if available. If not available, run import or unit-level checks that are cheap and relevant.
 6. Write a handoff under `.repoflow/handoffs/` with changed files, commands, results, risks, and next step.
 
+For failures that appear only after nesting composable objects:
+
+1. Translate the expected result into a small block or tree composition.
+2. Trace the recursive call path through the operator at the failing nesting level.
+3. Compare primitive-object branches with already-computed/intermediate-result branches.
+4. Preserve values in intermediate dependency matrices when repositioning them; do not replace them with an all-ones/default structure unless full coupling is intentional.
+5. Check left/right branch symmetry and run one nested regression case.
+
 Failure categories to record separately:
 
 - model output or patch format failure;
@@ -227,9 +301,9 @@ Failure categories to record separately:
 """
 
 
-def run(arguments: list[str], *, cwd: Path) -> subprocess.CompletedProcess[str]:
+def run(arguments: list[str], *, cwd: Path, check: bool = True) -> subprocess.CompletedProcess[str]:
     result = subprocess.run(arguments, cwd=cwd, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
-    if result.returncode != 0:
+    if check and result.returncode != 0:
         raise RuntimeError(f"command failed: {' '.join(arguments)}\n{result.stderr or result.stdout}")
     return result
 

@@ -1,0 +1,57 @@
+{
+  "docker_used": false,
+  "instance_id": "astropy__astropy-12907",
+  "model": "qwen3.5:9b",
+  "official_score": false,
+  "schema_version": 1,
+  "variants": [
+    {
+      "apply_check": {
+        "command": "git apply --check C:\\Users\\chenyihao\\Documents\\GitHub\\BoardFlowBench\\docs\\evidence\\swe_lite_qwen35_9b_skill_pilot_20260704\\plain\\model.patch",
+        "returncode": 1,
+        "stderr": "error: patch failed: astropy/modeling/separable.py:19\nerror: astropy/modeling/separable.py: patch does not apply\n",
+        "stdout": ""
+      },
+      "context_sha256": {
+        "astropy/modeling/separable.py": "cac38fe9744203c720d50d6c88dcdcb0d93a7b2326fe89911e83640ad5676b0f",
+        "astropy/modeling/tests/test_separable.py": "25e72c604c7c28afbb71afd4b5c65f8ab1f762e5f16fc96bab06b56a8cde83db"
+      },
+      "failure_category": "model_output_or_patch_format_failure",
+      "patch_status": "apply_failure",
+      "prompt_sha256": "71d3b662bf19e058d2e508671b7769ecffff9ef0261d064874eb4da5d0d0f15e",
+      "response_attempts": [
+        {
+          "attempt": 0,
+          "status": "accepted"
+        }
+      ],
+      "skill_invocation_required": "none",
+      "validation_status": "not_run",
+      "variant": "plain"
+    },
+    {
+      "apply_check": {
+        "command": "git apply --check C:\\Users\\chenyihao\\Documents\\GitHub\\BoardFlowBench\\docs\\evidence\\swe_lite_qwen35_9b_skill_pilot_20260704\\repoflow_skill\\model.patch",
+        "returncode": 128,
+        "stderr": "error: corrupt patch at line 29\n",
+        "stdout": ""
+      },
+      "context_sha256": {
+        "astropy/modeling/separable.py": "cac38fe9744203c720d50d6c88dcdcb0d93a7b2326fe89911e83640ad5676b0f",
+        "astropy/modeling/tests/test_separable.py": "25e72c604c7c28afbb71afd4b5c65f8ab1f762e5f16fc96bab06b56a8cde83db"
+      },
+      "failure_category": "model_output_or_patch_format_failure",
+      "patch_status": "apply_failure",
+      "prompt_sha256": "24de518647342762a7c02e808ba969f39328abb11b589355e13bc69a94e72819",
+      "response_attempts": [
+        {
+          "attempt": 0,
+          "status": "accepted"
+        }
+      ],
+      "skill_invocation_required": "repoflow-task-agent",
+      "validation_status": "not_run",
+      "variant": "repoflow_skill"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "client_elapsed_seconds": 7.667,
+  "created_at": "2026-07-04T05:00:07.9874324Z",
+  "done": true,
+  "done_reason": "stop",
+  "eval_count": 623,
+  "eval_duration": 6804174000,
+  "load_duration": 213873000,
+  "model": "qwen3.5:9b",
+  "prompt_eval_count": 5039,
+  "prompt_eval_duration": 421161000,
+  "response": "SKILL_INVOCATION: repoflow-task-agent\ndiff --git a/astropy/modeling/separable.py b/astropy/modeling/separable.py\nindex 8c5e3f1..a7b2d40 100644\n--- a/astropy/modeling/separable.py\n+++ b/astropy/modeling/separable.py\n@@ -19,7 +19,7 @@ def is_separable(transform):\n         return is_separable\n \n \n-def separability_matrix(transform):\n+def _separability_matrix(transform):\n     \"\"\"\n     Compute the correlation between outputs and inputs.\n \n@@ -35,6 +35,20 @@ def separability_matrix(transform):\n       independent outputs, the diagonal elements are True and\n       off-diagonal elements are False.\n \n+    Returns\n+    -------\n+    matrix : ndarray of dtype np.bool_\n+        A boolean correlation matrix of shape (n_outputs, n_inputs).\n+        Indicates the dependence of outputs on inputs. For completely\n+        independent outputs, the diagonal elements are True and\n+        off-diagonal elements are False.\n+\n     Examples\n     --------\n     >>> from astropy.modeling.models import Shift, Scale, Rotation2D, Polynomial2D\n@@ -46,10 +60,7 @@ def separability_matrix(transform):\n       array([[ True,  True], [ True,  True]]...)\n \n     \"\"\"\n-    if transform.n_inputs == 1 and transform.n_outputs > 1:\n-        return np.ones((transform.n_outputs, transform.n_inputs),\n-                       dtype=np.bool_)\n+    matrix = _separability_matrix(transform)\n+    separable_matrix = np.where(matrix != 0, True, False)\n     separable_matrix = _separable(transform)\n-    separable_matrix = np.where(separable_matrix != 0, True, False)\n     return separable_matrix\n \n \n@@ -138,7 +149,6 @@ def _cstack(left, right):\n         cright[-right.shape[0]:, -right.shape[1]:] = 1\n \n-    if left.n_inputs != right.n_inputs:\n-        raise ModelDefinitionError(\n-            \"Unsupported operands for '&' operator; models must have the same n_inputs.\")\n     return np.hstack([cleft, cright])\n \n \n@@ -203,7 +213,6 @@ def _separable(transform):\n         is_separable : ndarray of dtype np.bool\n             An array of shape (transform.n_outputs,) of boolean type\n             Each element represents the separablity of the corresponding output.\n-    \"\"\"\n+    Returns:\n     if (transform_matrix := transform._calculate_separability_matrix()) is not NotImplemented:\n         return transform_matrix\n     elif isinstance(transform, CompoundModel):",
+  "total_duration": 7644043200
+}

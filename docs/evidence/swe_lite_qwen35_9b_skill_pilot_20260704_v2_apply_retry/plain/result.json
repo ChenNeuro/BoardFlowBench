@@ -1,0 +1,25 @@
+{
+  "context_sha256": {
+    "astropy/modeling/separable.py": "cac38fe9744203c720d50d6c88dcdcb0d93a7b2326fe89911e83640ad5676b0f",
+    "astropy/modeling/tests/test_separable.py": "25e72c604c7c28afbb71afd4b5c65f8ab1f762e5f16fc96bab06b56a8cde83db"
+  },
+  "failure_category": "model_output_or_patch_format_failure",
+  "format_error": "git apply --check failed: error: patch failed: astropy/modeling/separable.py:19\nerror: astropy/modeling/separable.py: patch does not apply\n",
+  "patch_status": "format_failure",
+  "prompt_sha256": "71d3b662bf19e058d2e508671b7769ecffff9ef0261d064874eb4da5d0d0f15e",
+  "response_attempts": [
+    {
+      "attempt": 0,
+      "error": "git apply --check failed: error: patch failed: astropy/modeling/separable.py:19\nerror: astropy/modeling/separable.py: patch does not apply\n",
+      "status": "rejected"
+    },
+    {
+      "attempt": 1,
+      "error": "git apply --check failed: error: patch failed: astropy/modeling/separable.py:19\nerror: astropy/modeling/separable.py: patch does not apply\n",
+      "status": "rejected"
+    }
+  ],
+  "skill_invocation_required": "none",
+  "validation_status": "not_run",
+  "variant": "plain"
+}

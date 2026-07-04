@@ -1,0 +1,14 @@
+{
+  "client_elapsed_seconds": 2.88,
+  "created_at": "2026-07-04T04:59:51.1622754Z",
+  "done": true,
+  "done_reason": "stop",
+  "eval_count": 198,
+  "eval_duration": 1972171000,
+  "load_duration": 226110600,
+  "model": "qwen3.5:9b",
+  "prompt_eval_count": 4827,
+  "prompt_eval_duration": 382144000,
+  "response": "SKILL_INVOCATION: none\ndiff --git a/astropy/modeling/separable.py b/astropy/modeling/separable.py\nindex 8c0e5f1..a3b2d47 100644\n--- a/astropy/modeling/separable.py\n+++ b/astropy/modeling/separable.py\n@@ -19,7 +19,7 @@ def is_separable(transform):\n     if transform.n_inputs == 1 and transform.n_outputs > 1:\n         is_separable = np.array([False] * transform.n_outputs).T\n         return is_separable\n-    separable_matrix = _separable(transform)\n+    separability_matrix = _separable(transform)\n     is_separable = separable_matrix.sum(1)\n     is_separable = np.where(is_separable != 1, False, True)\n     return is_separable",
+  "total_duration": 2855632100
+}

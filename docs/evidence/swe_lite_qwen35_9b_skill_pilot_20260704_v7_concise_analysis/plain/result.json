@@ -1,0 +1,31 @@
+{
+  "analysis": {
+    "prompt_sha256": "4911dd2681b71d1a85707db7aba3c4f55799f7680dcca3f66925ea65083c3082",
+    "response_chars": 563,
+    "response_sha256": "36634445bf59e8c83329f28dd78994e34a61bb17767a25d0fbac99c76e82414c"
+  },
+  "base_prompt_sha256": "7d2520b6cf367eb32f408104dbc97537c6007f19804f78db34a5a14bc06f5db1",
+  "context_sha256": {
+    "astropy/modeling/separable.py": "5852f613d945289bd3d7bde10fc1630d3b9479d48f1a2c332423273573e362cb",
+    "astropy/modeling/tests/test_separable.py": "31c1d22bd9a17fccc28bc72888e9db96886a03b149ddae52b0ca8fcdc86f8752"
+  },
+  "failure_category": "model_output_or_patch_format_failure",
+  "format_error": "edit 0 old value occurs 0 times in astropy/modeling/separable.py; expected exactly once",
+  "patch_status": "format_failure",
+  "prompt_sha256": "de984f6e8e92c29f1a22f300648602fac563fe5821ae00936e93df55930103cf",
+  "response_attempts": [
+    {
+      "attempt": 0,
+      "error": "Unterminated string starting at: line 7 column 14 (char 862)",
+      "status": "rejected"
+    },
+    {
+      "attempt": 1,
+      "error": "edit 0 old value occurs 0 times in astropy/modeling/separable.py; expected exactly once",
+      "status": "rejected"
+    }
+  ],
+  "skill_invocation_required": "none",
+  "validation_status": "not_run",
+  "variant": "plain"
+}

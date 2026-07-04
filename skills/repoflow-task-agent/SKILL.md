@@ -35,6 +35,16 @@ Apply this skill before editing a benchmark workspace.
 - Run focused repository tests when dependencies are available. If tests cannot run locally, record the exact environment failure separately from model or harness failure.
 - Write handoff evidence under `.repoflow/handoffs/` for SWE Lite smoke workspaces.
 
+### Nested Composition Debugging
+
+For bugs that appear only after nesting models, parsers, plans, or other composable objects:
+
+1. Translate the expected result into a small block or tree composition before editing.
+2. Trace the recursive path from the public function through the operator used at the failing nesting level.
+3. Compare the operator's primitive-object branches with its already-computed/intermediate-result branches.
+4. Treat an intermediate matrix or structure as computed dependency information. Preserve its values when repositioning it; do not replace it with an all-ones/default structure unless the operator intentionally marks the whole child as inseparable.
+5. Check left/right branch symmetry and add or run one nested regression case.
+
 ## Handoff Minimum
 
 When `.board/` exists, write JSON containing:

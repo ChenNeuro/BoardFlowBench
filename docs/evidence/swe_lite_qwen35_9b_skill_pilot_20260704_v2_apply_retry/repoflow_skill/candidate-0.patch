@@ -1,0 +1,60 @@
+diff --git a/astropy/modeling/separable.py b/astropy/modeling/separable.py
+index 8c5e3f1..a7b2d40 100644
+--- a/astropy/modeling/separable.py
++++ b/astropy/modeling/separable.py
+@@ -19,7 +19,7 @@ def is_separable(transform):
+         return is_separable
+ 
+ 
+-def separability_matrix(transform):
++def _separability_matrix(transform):
+     """
+     Compute the correlation between outputs and inputs.
+ 
+@@ -35,6 +35,20 @@ def separability_matrix(transform):
+       independent outputs, the diagonal elements are True and
+       off-diagonal elements are False.
+ 
++    Returns
++    -------
++    matrix : ndarray of dtype np.bool_
++        A boolean correlation matrix of shape (n_outputs, n_inputs).
++        Indicates the dependence of outputs on inputs. For completely
++        independent outputs, the diagonal elements are True and
++        off-diagonal elements are False.
++
+     Examples
+     --------
+     >>> from astropy.modeling.models import Shift, Scale, Rotation2D, Polynomial2D
+@@ -46,10 +60,7 @@ def separability_matrix(transform):
+       array([[ True,  True], [ True,  True]]...)
+ 
+     """
+-    if transform.n_inputs == 1 and transform.n_outputs > 1:
+-        return np.ones((transform.n_outputs, transform.n_inputs),
+-                       dtype=np.bool_)
++    matrix = _separability_matrix(transform)
++    separable_matrix = np.where(matrix != 0, True, False)
+     separable_matrix = _separable(transform)
+-    separable_matrix = np.where(separable_matrix != 0, True, False)
+     return separable_matrix
+ 
+ 
+@@ -138,7 +149,6 @@ def _cstack(left, right):
+         cright[-right.shape[0]:, -right.shape[1]:] = 1
+ 
+-    if left.n_inputs != right.n_inputs:
+-        raise ModelDefinitionError(
+-            "Unsupported operands for '&' operator; models must have the same n_inputs.")
+     return np.hstack([cleft, cright])
+ 
+ 
+@@ -203,7 +213,6 @@ def _separable(transform):
+         is_separable : ndarray of dtype np.bool
+             An array of shape (transform.n_outputs,) of boolean type
+             Each element represents the separablity of the corresponding output.
+-    """
++    Returns:
+     if (transform_matrix := transform._calculate_separability_matrix()) is not NotImplemented:
+         return transform_matrix
+     elif isinstance(transform, CompoundModel):

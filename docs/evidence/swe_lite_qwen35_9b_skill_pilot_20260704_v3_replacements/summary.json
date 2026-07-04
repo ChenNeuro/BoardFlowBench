@@ -1,0 +1,59 @@
+{
+  "docker_used": false,
+  "instance_id": "astropy__astropy-12907",
+  "model": "qwen3.5:9b",
+  "official_score": false,
+  "schema_version": 1,
+  "variants": [
+    {
+      "context_sha256": {
+        "astropy/modeling/separable.py": "cac38fe9744203c720d50d6c88dcdcb0d93a7b2326fe89911e83640ad5676b0f",
+        "astropy/modeling/tests/test_separable.py": "25e72c604c7c28afbb71afd4b5c65f8ab1f762e5f16fc96bab06b56a8cde83db"
+      },
+      "failure_category": "model_output_or_patch_format_failure",
+      "format_error": "Unterminated string starting at: line 4 column 12 (char 58)",
+      "patch_status": "format_failure",
+      "prompt_sha256": "7d2520b6cf367eb32f408104dbc97537c6007f19804f78db34a5a14bc06f5db1",
+      "response_attempts": [
+        {
+          "attempt": 0,
+          "error": "payload.edits must be a non-empty list",
+          "status": "rejected"
+        },
+        {
+          "attempt": 1,
+          "error": "Unterminated string starting at: line 4 column 12 (char 58)",
+          "status": "rejected"
+        }
+      ],
+      "skill_invocation_required": "none",
+      "validation_status": "not_run",
+      "variant": "plain"
+    },
+    {
+      "context_sha256": {
+        "astropy/modeling/separable.py": "cac38fe9744203c720d50d6c88dcdcb0d93a7b2326fe89911e83640ad5676b0f",
+        "astropy/modeling/tests/test_separable.py": "25e72c604c7c28afbb71afd4b5c65f8ab1f762e5f16fc96bab06b56a8cde83db"
+      },
+      "failure_category": "model_output_or_patch_format_failure",
+      "format_error": "payload.edits must be a non-empty list",
+      "patch_status": "format_failure",
+      "prompt_sha256": "9299e47349e84f15fe73aceac8d664139c507c3a85a05f431645054cf9511e5e",
+      "response_attempts": [
+        {
+          "attempt": 0,
+          "error": "payload.edits must be a non-empty list",
+          "status": "rejected"
+        },
+        {
+          "attempt": 1,
+          "error": "payload.edits must be a non-empty list",
+          "status": "rejected"
+        }
+      ],
+      "skill_invocation_required": "repoflow-task-agent",
+      "validation_status": "not_run",
+      "variant": "repoflow_skill"
+    }
+  ]
+}

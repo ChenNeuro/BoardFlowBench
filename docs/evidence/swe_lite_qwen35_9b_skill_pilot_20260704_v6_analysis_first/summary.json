@@ -1,0 +1,93 @@
+{
+  "analysis_first": true,
+  "docker_used": false,
+  "instance_id": "astropy__astropy-12907",
+  "model": "qwen3.5:9b",
+  "official_score": false,
+  "schema_version": 1,
+  "think": false,
+  "variants": [
+    {
+      "analysis": {
+        "prompt_sha256": "7aafa02e1beda139e8bc7ed1ee8801647b1ba5c0116a6e612df6e5813bea8c26",
+        "response_chars": 7252,
+        "response_sha256": "f70262464aedbb52744597be2fa2d7be5fbd2e3092c16db6bb4a01331d1eba48"
+      },
+      "base_prompt_sha256": "7d2520b6cf367eb32f408104dbc97537c6007f19804f78db34a5a14bc06f5db1",
+      "changed_files": [
+        "astropy/modeling/separable.py"
+      ],
+      "commands": [
+        {
+          "command": "C:\\Users\\chenyihao\\miniconda3\\python.exe -m py_compile astropy/modeling/separable.py",
+          "returncode": 0,
+          "stderr": "",
+          "stdout": ""
+        },
+        {
+          "command": "C:\\Users\\chenyihao\\miniconda3\\python.exe -m pytest astropy/modeling/tests/test_separable.py -q",
+          "returncode": 4,
+          "stderr": "ImportError while loading conftest 'C:\\Users\\CHENYI~1\\AppData\\Local\\Temp\\swe-lite-plain-k50a6t51\\workspace\\conftest.py'.\nconftest.py:9: in <module>\n    import hypothesis\nE   ModuleNotFoundError: No module named 'hypothesis'\n",
+          "stdout": ""
+        }
+      ],
+      "context_sha256": {
+        "astropy/modeling/separable.py": "5852f613d945289bd3d7bde10fc1630d3b9479d48f1a2c332423273573e362cb",
+        "astropy/modeling/tests/test_separable.py": "31c1d22bd9a17fccc28bc72888e9db96886a03b149ddae52b0ca8fcdc86f8752"
+      },
+      "evaluator_test_patch": "applied",
+      "failure_category": "dependency_or_environment_failure",
+      "patch_status": "applied",
+      "prompt_sha256": "355c6664eec2e0e2a991832aa1870004bb285b382ed6a1ebd369af7f19ce8535",
+      "response_attempts": [
+        {
+          "attempt": 0,
+          "status": "accepted"
+        }
+      ],
+      "skill_invocation_required": "none",
+      "validation_status": "dependency_environment_failure",
+      "variant": "plain"
+    },
+    {
+      "analysis": {
+        "prompt_sha256": "9113d6eeee611b6e465b4ddf4dcd0f15c79f45ce54b9dbba796a7557f7a40e01",
+        "response_chars": 7101,
+        "response_sha256": "53c84af990a6dd7183bbd89746a64ed22673a30def2de5a74098198d69265cc9"
+      },
+      "base_prompt_sha256": "baf2ca56df1d7516da885ef67ddb5b1ad2950708164fbf936028c981a8d01f96",
+      "changed_files": [],
+      "commands": [
+        {
+          "command": "C:\\Users\\chenyihao\\miniconda3\\python.exe -m py_compile astropy/modeling/separable.py",
+          "returncode": 0,
+          "stderr": "",
+          "stdout": ""
+        },
+        {
+          "command": "C:\\Users\\chenyihao\\miniconda3\\python.exe -m pytest astropy/modeling/tests/test_separable.py -q",
+          "returncode": 4,
+          "stderr": "ImportError while loading conftest 'C:\\Users\\CHENYI~1\\AppData\\Local\\Temp\\swe-lite-repoflow_skill-7uujuvdi\\workspace\\conftest.py'.\nconftest.py:9: in <module>\n    import hypothesis\nE   ModuleNotFoundError: No module named 'hypothesis'\n",
+          "stdout": ""
+        }
+      ],
+      "context_sha256": {
+        "astropy/modeling/separable.py": "5852f613d945289bd3d7bde10fc1630d3b9479d48f1a2c332423273573e362cb",
+        "astropy/modeling/tests/test_separable.py": "31c1d22bd9a17fccc28bc72888e9db96886a03b149ddae52b0ca8fcdc86f8752"
+      },
+      "evaluator_test_patch": "applied",
+      "failure_category": "dependency_or_environment_failure",
+      "patch_status": "applied",
+      "prompt_sha256": "71cbcd50e82f59be14171aa1c57974e3c946ccda3f91a019752df6f8ee3febf0",
+      "response_attempts": [
+        {
+          "attempt": 0,
+          "status": "accepted"
+        }
+      ],
+      "skill_invocation_required": "repoflow-task-agent",
+      "validation_status": "dependency_environment_failure",
+      "variant": "repoflow_skill"
+    }
+  ]
+}

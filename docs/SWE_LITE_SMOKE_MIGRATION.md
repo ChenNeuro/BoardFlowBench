@@ -79,6 +79,28 @@ docker --version
 docker run --rm hello-world
 ```
 
+Prepare a bounded plain-vs-skill local pilot after creating the workspace:
+
+```powershell
+python scripts\swe_lite_ollama_pilot.py `
+  --workspace $workspace `
+  --control-dir $control `
+  --results-dir docs\evidence\swe_lite_local_pilot `
+  --model qwen3.5:9b `
+  --analysis-first
+```
+
+The runner:
+
+- gives both variants the same task and source context;
+- permits edits only to explicitly listed source paths;
+- uses exact search/replace edits and rejects unsafe, non-unique, or no-op replacements;
+- keeps the evaluator test patch out of model context and applies it only after generation;
+- records model format, dependency/environment, repository test, and evaluator failures separately;
+- always reports `official_score: false`.
+
+The first Astropy pilot is documented in `docs/REPOFLOW_SWE_LITE_QWEN35_9B_PILOT_20260704.md`. It did not show a single-agent skill improvement. Docker and the official harness remain required before reporting a SWE-bench score.
+
 ## Next Step
 
-The next implementation step is a patch-oriented local runner that uses smaller outputs than the JSON full-file protocol from `scripts/ollama_repoflow_skill_pilot.py`. The Qwen 9B pilot showed that large JSON file payloads are a reliability bottleneck.
+Install the missing lightweight Astropy test dependency in an isolated environment, rerun the fixed protocol over several instances/seeds, and use Docker plus the official harness before treating results as benchmark scores.

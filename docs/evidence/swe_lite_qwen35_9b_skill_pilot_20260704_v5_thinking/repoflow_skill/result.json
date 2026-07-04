@@ -1,0 +1,25 @@
+{
+  "context_sha256": {
+    "astropy/modeling/separable.py": "5852f613d945289bd3d7bde10fc1630d3b9479d48f1a2c332423273573e362cb",
+    "astropy/modeling/tests/test_separable.py": "31c1d22bd9a17fccc28bc72888e9db96886a03b149ddae52b0ca8fcdc86f8752"
+  },
+  "failure_category": "model_output_or_patch_format_failure",
+  "format_error": "Expecting value: line 1 column 1 (char 0)",
+  "patch_status": "format_failure",
+  "prompt_sha256": "baf2ca56df1d7516da885ef67ddb5b1ad2950708164fbf936028c981a8d01f96",
+  "response_attempts": [
+    {
+      "attempt": 0,
+      "error": "Expecting value: line 1 column 1 (char 0)",
+      "status": "rejected"
+    },
+    {
+      "attempt": 1,
+      "error": "Expecting value: line 1 column 1 (char 0)",
+      "status": "rejected"
+    }
+  ],
+  "skill_invocation_required": "repoflow-task-agent",
+  "validation_status": "not_run",
+  "variant": "repoflow_skill"
+}
