@@ -1,0 +1,91 @@
+﻿{
+    "date":  "2026-07-04",
+    "model":  "qwen3.5:9b",
+    "ollama":  "0.31.1",
+    "source_repo":  "C:\\Users\\chenyihao\\Documents\\GitHub\\ExpenseLiteBenchDemo",
+    "seed_commit":  "30ce6f0",
+    "target_tasks":  [
+                         "B001",
+                         "B002"
+                     ],
+    "variants":  [
+                     "plain",
+                     "repoflow_skill"
+                 ],
+    "script":  "scripts/ollama_repoflow_skill_pilot.py",
+    "skill":  "skills/repoflow-task-agent/SKILL.md",
+    "commands":  [
+                     "python scripts\\ollama_repoflow_skill_pilot.py --tasks B001 B002 --max-repairs 2",
+                     "python scripts\\ollama_repoflow_skill_pilot.py --tasks B001 B002 --max-repairs 2 --max-format-retries 2",
+                     "python scripts\\ollama_repoflow_skill_pilot.py --tasks B001 B002 --variant repoflow_skill --max-repairs 2 --max-format-retries 2"
+                 ],
+    "batches":  [
+                    {
+                        "id":  "v1_prompt_skill_only",
+                        "label":  "Initial prompt-level skill, before hard whitelist/regeneration",
+                        "raw":  "C:\\Users\\CHENYI~1\\AppData\\Local\\Temp\\repoflow-skill-pilot-batch-20260704-114543.jsonl",
+                        "log":  "C:\\Users\\CHENYI~1\\AppData\\Local\\Temp\\repoflow-skill-pilot-batch-20260704-114543.log"
+                    },
+                    {
+                        "id":  "v2_hard_whitelist_regeneration",
+                        "label":  "Hard allowed-path whitelist plus format/path regeneration",
+                        "raw":  "C:\\Users\\CHENYI~1\\AppData\\Local\\Temp\\repoflow-skill-pilot-batch-v2-20260704-120411.jsonl",
+                        "log":  "C:\\Users\\CHENYI~1\\AppData\\Local\\Temp\\repoflow-skill-pilot-batch-v2-20260704-120411.log"
+                    },
+                    {
+                        "id":  "v3_overconstrained_repair_rule",
+                        "label":  "Added over-specific B002 repair rule; observed regression",
+                        "raw":  "C:\\Users\\CHENYI~1\\AppData\\Local\\Temp\\repoflow-skill-pilot-batch-v3-20260704-121236.jsonl",
+                        "log":  "C:\\Users\\CHENYI~1\\AppData\\Local\\Temp\\repoflow-skill-pilot-batch-v3-20260704-121236.log"
+                    }
+                ],
+    "aggregate_counts":  [
+                             {
+                                 "key":  "v1_prompt_skill_only, plain, passed, failed, empty_records",
+                                 "count":  4
+                             },
+                             {
+                                 "key":  "v1_prompt_skill_only, repoflow_skill, passed, failed, scope_violation",
+                                 "count":  5
+                             },
+                             {
+                                 "key":  "v1_prompt_skill_only, plain, passed, failed, invalid_json",
+                                 "count":  1
+                             },
+                             {
+                                 "key":  "v2_hard_whitelist_regeneration, plain, passed, failed, empty_records",
+                                 "count":  5
+                             },
+                             {
+                                 "key":  "v2_hard_whitelist_regeneration, repoflow_skill, passed, passed, passed",
+                                 "count":  4
+                             },
+                             {
+                                 "key":  "v2_hard_whitelist_regeneration, repoflow_skill, passed, failed, name_error",
+                                 "count":  1
+                             },
+                             {
+                                 "key":  "v3_overconstrained_repair_rule, plain, passed, failed, empty_records",
+                                 "count":  5
+                             },
+                             {
+                                 "key":  "v3_overconstrained_repair_rule, repoflow_skill, passed, failed, scope_violation",
+                                 "count":  1
+                             },
+                             {
+                                 "key":  "v3_overconstrained_repair_rule, repoflow_skill, passed, failed, circular_import",
+                                 "count":  3
+                             },
+                             {
+                                 "key":  "v3_overconstrained_repair_rule, repoflow_skill, passed, failed, amount_not_converted",
+                                 "count":  1
+                             }
+                         ],
+    "interpretation":  [
+                           "B001 was solved by both variants in all batch runs.",
+                           "Prompt-only skill did not improve B002 and initially produced stable scope violations.",
+                           "Hard allowed-path whitelist plus format/path regeneration improved B002 skill pass rate to 4/5 while plain remained 0/5.",
+                           "An over-specific B002 repair rule regressed skill performance to 0/5 by encouraging circular import / misplaced validation edits.",
+                           "Final current-skill sanity run failed before editing because Qwen returned invalid JSON for B002 after all format retries."
+                       ]
+}
