@@ -1,0 +1,22 @@
+{
+  "date": "2026-07-04",
+  "docker_desktop_version": "4.80.0",
+  "docker_engine_version": "29.6.1",
+  "docker_cli_version": "29.6.1",
+  "engine_status": "running",
+  "engine_mode": "desktop-linux",
+  "hello_world": "passed",
+  "wsl_version": "2.5.9.0",
+  "wsl_distribution": "Ubuntu-22.04",
+  "wsl_distribution_version": 2,
+  "windows_machine_path_contains_docker": true,
+  "existing_wsl_session_has_docker_command": false,
+  "existing_wsl_session_restart_deferred": "Active user shells and processes were present; the distribution was not terminated.",
+  "docker_hub_registry_network": "failed because local DNS resolved auth/registry endpoints to unreachable addresses",
+  "microsoft_container_registry": "passed",
+  "local_evaluator_image": "repoflow/astropy-12907-smoke:20260704",
+  "local_evaluator_image_id": "sha256:667f99e6283ec16cfadba49af9465cbbe9e82ca9d3ef0edbe5d306e36571e6df",
+  "official_swebench_harness_run": false,
+  "official_harness_reason": "Approximately 43 GB free, below the upstream Docker Desktop recommendation of approximately 120 GB.",
+  "secrets_recorded": false
+}

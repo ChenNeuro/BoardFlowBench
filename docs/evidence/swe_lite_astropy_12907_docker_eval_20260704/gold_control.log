@@ -1,0 +1,12 @@
+﻿docker.exe : <frozen importlib._bootstrap>:228: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompa
+tibility. Expected 80 from C header, got 96 from PyObject
+At line:2 char:1910
++ ... ash','-lc',$cmd); $started=Get-Date; $out=& docker @args 2>&1 | Out-S ...
++                                               ~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (<frozen importl...6 from PyObject:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Internet access disabled
+...............                                                          [100%]
+15 passed in 0.19s
+

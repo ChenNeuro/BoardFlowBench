@@ -87,7 +87,9 @@ python scripts\swe_lite_ollama_pilot.py `
   --control-dir $control `
   --results-dir docs\evidence\swe_lite_local_pilot `
   --model qwen3.5:9b `
-  --analysis-first
+  --analysis-first `
+  --temperature 0.2 `
+  --seed 23
 ```
 
 The runner:
@@ -100,6 +102,8 @@ The runner:
 - always reports `official_score: false`.
 
 The first Astropy pilot is documented in `docs/REPOFLOW_SWE_LITE_QWEN35_9B_PILOT_20260704.md`. It did not show a single-agent skill improvement. Docker and the official harness remain required before reporting a SWE-bench score.
+
+The follow-up multi-seed and Docker-isolated targeted evaluation is documented in `docs/REPOFLOW_SWE_LITE_QWEN35_9B_MULTISEED_DOCKER_20260704.md`. The skill improved patch applicability at nonzero temperature, but neither condition resolved the task.
 
 ## Next Step
 

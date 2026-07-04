@@ -1,0 +1,16 @@
+diff --git a/astropy/modeling/separable.py b/astropy/modeling/separable.py
+index a308e27..321941f 100644
+--- a/astropy/modeling/separable.py
++++ b/astropy/modeling/separable.py
+@@ -244,7 +244,10 @@ def _cstack(left, right):
+         cright = np.zeros((noutp, right.shape[1]))
+         cright[-right.shape[0]:, -right.shape[1]:] = 1
+ 
+-    return np.hstack([cleft, cright])
++    result = np.zeros((noutp, left.shape[1] + right.shape[1]))
++    result[:left.shape[0], :left.shape[1]] = cleft
++    result[-right.shape[0]:, -right.shape[1]:] = cright
++    return result
+ 
+ 
+ def _cdot(left, right):

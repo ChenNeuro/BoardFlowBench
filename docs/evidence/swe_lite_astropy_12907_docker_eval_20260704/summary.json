@@ -1,0 +1,78 @@
+﻿{
+    "schema_version":  1,
+    "date":  "2026-07-04",
+    "instance_id":  "astropy__astropy-12907",
+    "base_commit":  "d16bfe05a744909de4b27f5875fe0d4ed41ce607",
+    "image":  "repoflow/astropy-12907-smoke:20260704",
+    "image_id":  "sha256:667f99e6283ec16cfadba49af9465cbbe9e82ca9d3ef0edbe5d306e36571e6df",
+    "docker_desktop":  "4.80.0",
+    "docker_engine":  "29.6.1",
+    "official_score":  false,
+    "mode":  "docker_isolated_targeted_smoke",
+    "evaluator_material_exposed_to_model":  false,
+    "results":  [
+                    {
+                        "case":  "baseline",
+                        "kind":  "baseline",
+                        "model_patch_sha256":  null,
+                        "exit_code":  1,
+                        "status":  "tests_failed",
+                        "elapsed_seconds":  2.4,
+                        "log":  "baseline.log"
+                    },
+                    {
+                        "case":  "gold_control",
+                        "kind":  "gold_control",
+                        "model_patch_sha256":  "257306D988302F7157153DA508CB9008D4980503AB060EAF4CB04C8198EC5C0C",
+                        "exit_code":  0,
+                        "status":  "tests_passed",
+                        "elapsed_seconds":  1.939,
+                        "log":  "gold_control.log"
+                    },
+                    {
+                        "case":  "seed11_skill",
+                        "kind":  "model",
+                        "model_patch_sha256":  "2EA211BFB1AB68CBFEFAA2912F82B76C2D354F7377E745242637AE631625C565",
+                        "exit_code":  1,
+                        "status":  "tests_failed",
+                        "elapsed_seconds":  2.097,
+                        "log":  "seed11_skill.log"
+                    },
+                    {
+                        "case":  "seed23_plain",
+                        "kind":  "model",
+                        "model_patch_sha256":  "F582C3E0D7DCC4CDD3F66B685BDF5DA145BA6CC7C914E2AF2C4D108DC7A2D759",
+                        "exit_code":  1,
+                        "status":  "tests_failed",
+                        "elapsed_seconds":  1.853,
+                        "log":  "seed23_plain.log"
+                    },
+                    {
+                        "case":  "seed23_skill",
+                        "kind":  "model",
+                        "model_patch_sha256":  "F6D8DA7EE1EC0C5439C75487E3770C16C1C544809E9CDAC65BB5FF85781F9560",
+                        "exit_code":  1,
+                        "status":  "tests_failed",
+                        "elapsed_seconds":  2.001,
+                        "log":  "seed23_skill.log"
+                    },
+                    {
+                        "case":  "seed47_plain",
+                        "kind":  "model",
+                        "model_patch_sha256":  "DC2BA5159DFC4B1CBE3972AD2D940C50FBB98C9CC8141D03D36E7104A66897EC",
+                        "exit_code":  1,
+                        "status":  "tests_failed",
+                        "elapsed_seconds":  1.901,
+                        "log":  "seed47_plain.log"
+                    },
+                    {
+                        "case":  "seed47_skill",
+                        "kind":  "model",
+                        "model_patch_sha256":  "38C9B61760C5B0CEB558F84952D9474016F94305B91DFB9478D8AFE5235EC5BD",
+                        "exit_code":  1,
+                        "status":  "tests_failed",
+                        "elapsed_seconds":  2.025,
+                        "log":  "seed47_skill.log"
+                    }
+                ]
+}

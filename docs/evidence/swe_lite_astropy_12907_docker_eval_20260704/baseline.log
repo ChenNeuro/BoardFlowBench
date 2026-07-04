@@ -1,0 +1,76 @@
+﻿docker.exe : <frozen importlib._bootstrap>:228: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompa
+tibility. Expected 80 from C header, got 96 from PyObject
+At line:2 char:1910
++ ... ash','-lc',$cmd); $started=Get-Date; $out=& docker @args 2>&1 | Out-S ...
++                                               ~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (<frozen importl...6 from PyObject:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Internet access disabled
+..........F..F.                                                          [100%]
+=================================== FAILURES ===================================
+___________________ test_separable[compound_model6-result6] ____________________
+
+compound_model = <CompoundModel(angle_0=2., offset_1=1., offset_2=2.)>
+result = (array([False, False,  True,  True]), array([[ True,  True, False, False],
+       [ True,  True, False, False],
+       [False, False,  True, False],
+       [False, False, False,  True]]))
+
+    @pytest.mark.parametrize(('compound_model', 'result'), compound_models.values())
+    def test_separable(compound_model, result):
+>       assert_allclose(is_separable(compound_model), result[0])
+
+astropy/modeling/tests/test_separable.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<function assert_allclose.<locals>.compare at 0x7cd2741adee0>, array([False, False, False, False]), array([False, False,  True,  True]))
+kwds = {'equal_nan': True, 'err_msg': '', 'header': 'Not equal to tolerance rtol=1e-07, atol=0', 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+>           return func(*args, **kwds)
+E           AssertionError: 
+E           Not equal to tolerance rtol=1e-07, atol=0
+E           
+E           Mismatched elements: 2 / 4 (50%)
+E            x: array([False, False, False, False])
+E            y: array([False, False,  True,  True])
+
+/usr/local/lib/python3.9/contextlib.py:79: AssertionError
+___________________ test_separable[compound_model9-result9] ____________________
+
+compound_model = <CompoundModel(angle_0=2., offset_1=1., factor_2=1., factor_3=2.)>
+result = (array([False, False,  True,  True,  True]), array([[ True,  True, False, False, False],
+       [ True,  True, False, ... False,  True, False, False],
+       [False, False, False,  True, False],
+       [False, False, False, False,  True]]))
+
+    @pytest.mark.parametrize(('compound_model', 'result'), compound_models.values())
+    def test_separable(compound_model, result):
+>       assert_allclose(is_separable(compound_model), result[0])
+
+astropy/modeling/tests/test_separable.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<function assert_allclose.<locals>.compare at 0x7cd2b1afd3a0>, array([False, False,  True, False, False]), array([False, False,  True,  True,  True]))
+kwds = {'equal_nan': True, 'err_msg': '', 'header': 'Not equal to tolerance rtol=1e-07, atol=0', 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+>           return func(*args, **kwds)
+E           AssertionError: 
+E           Not equal to tolerance rtol=1e-07, atol=0
+E           
+E           Mismatched elements: 2 / 5 (40%)
+E            x: array([False, False,  True, False, False])
+E            y: array([False, False,  True,  True,  True])
+
+/usr/local/lib/python3.9/contextlib.py:79: AssertionError
+=========================== short test summary info ============================
+FAILED astropy/modeling/tests/test_separable.py::test_separable[compound_model6-result6]
+FAILED astropy/modeling/tests/test_separable.py::test_separable[compound_model9-result9]
+2 failed, 13 passed in 0.27s
+

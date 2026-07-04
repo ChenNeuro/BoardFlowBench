@@ -1,0 +1,31 @@
+{
+  "date": "2026-07-04",
+  "instance_id": "astropy__astropy-12907",
+  "model": "qwen3.5:9b",
+  "seeds": [11, 23, 47],
+  "conditions": ["plain", "repoflow_skill"],
+  "zero_temperature": {
+    "temperature": 0.0,
+    "plain_format_accepted": 0,
+    "skill_format_accepted": 0,
+    "runs_per_condition": 3,
+    "interpretation": "Deterministic replication; changing seed did not change output at temperature zero."
+  },
+  "stochastic": {
+    "temperature": 0.2,
+    "runs_per_condition": 3,
+    "plain_format_accepted": 2,
+    "plain_patch_applied": 2,
+    "skill_format_accepted": 3,
+    "skill_patch_applied": 3
+  },
+  "docker_targeted_evaluation": {
+    "baseline": "2 failed, 13 passed",
+    "gold_control": "15 passed",
+    "plain_resolved": 0,
+    "skill_resolved": 0,
+    "runs_per_condition": 3,
+    "official_score": false
+  },
+  "conclusion": "The skill improved patch applicability in the temperature 0.2 sample but did not improve task correctness."
+}

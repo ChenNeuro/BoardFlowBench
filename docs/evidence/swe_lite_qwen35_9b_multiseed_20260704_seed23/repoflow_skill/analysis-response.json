@@ -1,0 +1,14 @@
+{
+  "client_elapsed_seconds": 2.259,
+  "created_at": "2026-07-04T06:16:14.2627595Z",
+  "done": true,
+  "done_reason": "stop",
+  "eval_count": 143,
+  "eval_duration": 1451050000,
+  "load_duration": 227661500,
+  "model": "qwen3.5:9b",
+  "prompt_eval_count": 5157,
+  "prompt_eval_duration": 324001000,
+  "response": "ROOT_CAUSE: The `_coord_matrix` function incorrectly sets all entries to 1 for non-separable models instead of preserving the specific input-output mapping structure required by nested CompoundModels. OLD: `mat = np.zeros((noutp, model.n_inputs)); if pos == 'left': mat[:model.n_outputs, : model.n_inputs] = 1; else: mat[-model.n_outputs:, -model.n_inputs:] = 1`. NEW: `mat = np.ones((noutp, model.n_inputs))` (assuming non-separable models map all inputs to outputs uniformly in this context). FOCUSED_TEST: Run the failing nested composition case with Pix2Sky_TAN & cm.",
+  "total_duration": 2230078800
+}

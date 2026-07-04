@@ -1,0 +1,11 @@
+{
+  "edits": [
+    {
+      "new": "    if not model.separable:\n        # this does not work for more than 2 coordinates\n        mat = np.ones((noutp, model.n_inputs), dtype=bool)\n        if pos == 'left':\n            mat[:model.n_outputs, : model.n_inputs] = True\n        else:\n            mat[-model.n_outputs:, -model.n_inputs:] = True",
+      "old": "    if not model.separable:\n        # this does not work for more than 2 coordinates\n        mat = np.zeros((noutp, model.n_inputs))\n        if pos == 'left':\n            mat[:model.n_outputs, : model.n_inputs] = 1\n        else:\n            mat[-model.n_outputs:, -model.n_inputs:] = 1",
+      "path": "astropy/modeling/separable.py"
+    }
+  ],
+  "notes": "Fixed _coord_matrix to initialize non-separable models with ones (True) instead of zeros for both 'left' and 'right' positions, ensuring nested compound models correctly propagate separability information.",
+  "skill_invocation": "none"
+}

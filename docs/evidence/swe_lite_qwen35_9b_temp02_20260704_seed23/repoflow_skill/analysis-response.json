@@ -1,0 +1,14 @@
+{
+  "client_elapsed_seconds": 6.427,
+  "created_at": "2026-07-04T06:19:26.246663Z",
+  "done": true,
+  "done_reason": "stop",
+  "eval_count": 523,
+  "eval_duration": 5786700000,
+  "load_duration": 228077600,
+  "model": "qwen3.5:9b",
+  "prompt_eval_count": 5157,
+  "prompt_eval_duration": 278951000,
+  "response": "ROOT_CAUSE: In `_cstack`, when `right` is a CompoundModel (like the nested `cm`), it recursively calls `_coord_matrix(right, 'right', noutp)`. This function checks `model.separable`; for compound models this property might be incorrectly inherited or computed without respecting the internal structure of the right operand's separability matrix. Specifically, when nesting `(Pix2Sky_TAN() & cm)` where `cm` is already a CompoundModel with its own inputs/outputs mapped correctly in isolation, `_cstack` fails to properly compose because it treats the nested compound model as if all its outputs are coupled or misaligns them via `_coord_matrix`. The root cause lies in how `_coord_matrix` handles non-separable (or partially separable) CompoundModels by defaulting to a full coupling matrix when `model.separable` is False, which breaks for valid nested structures.\n\nOLD:\n```python\n    if not model.separable:\n        # this does not work for more than 2 coordinates\n        mat = np.zeros((noutp, model.n_inputs))\n        if pos == 'left':\n            mat[:model.n_outputs, : model.n_inputs] = 1\n        else:\n            mat[-model.n_outputs:, -model.n_inputs:] = 1\n```\n\nNEW:\n```python\n    if not isinstance(model, CompoundModel):\n        # For simple models or non-CompoundModels that are marked as non-separable\n        mat = np.zeros((noutp, model.n_inputs))\n        if pos == 'left':\n            mat[:model.n_outputs, : model.n_inputs] = 1\n        else:\n            mat[-model.n_outputs:, -model.n_inputs:] = 1\n    elif not model.separable:\n        # For CompoundModels that are non-separable (e.g., due to cross-coupling), handle appropriately\n        mat = np.zeros((noutp, model.n_inputs))\n        if pos == 'left':\n            mat[:model.n_outputs, : model.n_inputs] = 1\n        else:\n            mat[-model.n_outputs:, -model.n_inputs:] = 1\n    else:\n```\n\nFOCUSED_TEST: Run `separability_matrix(m.Pix2Sky_TAN() & m.Linear1D(10) & m.Linear1D(5))` and then wrap the result in another compound model with Pix2Sky_TAN to verify diagonal separability is preserved.",
+  "total_duration": 6417349300
+}

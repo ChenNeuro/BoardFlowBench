@@ -1,1 +1,2 @@
-docs/evidence/**/*.patch whitespace=-blank-at-eol
+docs/evidence/**/*.patch whitespace=-blank-at-eol,-blank-at-eof
+docs/evidence/**/*.log whitespace=-blank-at-eol,-blank-at-eof

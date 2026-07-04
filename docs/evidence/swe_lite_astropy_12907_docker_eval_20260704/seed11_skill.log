@@ -1,0 +1,363 @@
+﻿docker.exe : <frozen importlib._bootstrap>:228: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompa
+tibility. Expected 80 from C header, got 96 from PyObject
+At line:2 char:1910
++ ... ash','-lc',$cmd); $started=Get-Date; $out=& docker @args 2>&1 | Out-S ...
++                                               ~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (<frozen importl...6 from PyObject:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Internet access disabled
+FFF.FFFF.FFFFFF                                                          [100%]
+=================================== FAILURES ===================================
+______________________________ test_coord_matrix _______________________________
+
+    def test_coord_matrix():
+>       c = _coord_matrix(p2, 'left', 2)
+
+astropy/modeling/tests/test_separable.py:77: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+astropy/modeling/separable.py:204: in _coord_matrix
+    mat = _separable(model)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+astropy/modeling/separable.py:204: in _coord_matrix
+    mat = _separable(model)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+E   RecursionError: maximum recursion depth exceeded in comparison
+!!! Recursion detected (same locals & position)
+__________________________________ test_cdot ___________________________________
+
+    def test_cdot():
+        result = _cdot(sh1, scl1)
+        assert_allclose(result, np.array([[1]]))
+    
+>       result = _cdot(rot, p2)
+
+astropy/modeling/tests/test_separable.py:101: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+astropy/modeling/separable.py:277: in _cdot
+    cleft = _n_inputs_outputs(left, 'left')
+astropy/modeling/separable.py:272: in _n_inputs_outputs
+    coords = _coord_matrix(input, position, input.n_outputs)
+astropy/modeling/separable.py:204: in _coord_matrix
+    mat = _separable(model)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+astropy/modeling/separable.py:204: in _coord_matrix
+    mat = _separable(model)
+E   RecursionError: maximum recursion depth exceeded in comparison
+!!! Recursion detected (same locals & position)
+_________________________________ test_cstack __________________________________
+
+    def test_cstack():
+        result = _cstack(sh1, scl1)
+        assert_allclose(result, np.array([[1, 0], [0, 1]]))
+    
+>       result = _cstack(sh1, rot)
+
+astropy/modeling/tests/test_separable.py:119: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+astropy/modeling/separable.py:242: in _cstack
+    cright = _coord_matrix(right, 'right', noutp)
+astropy/modeling/separable.py:204: in _coord_matrix
+    mat = _separable(model)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+astropy/modeling/separable.py:204: in _coord_matrix
+    mat = _separable(model)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+E   RecursionError: maximum recursion depth exceeded in comparison
+!!! Recursion detected (same locals & position)
+___________________ test_separable[compound_model0-result0] ____________________
+
+compound_model = <CompoundModel(offset_1=1., angle_2=2., offset_3=1., offset_4=1., offset_5=2., offset_6=1.)>
+result = (array([False, False,  True]), array([[ True, False],
+       [ True, False],
+       [False,  True]]))
+
+    @pytest.mark.parametrize(('compound_model', 'result'), compound_models.values())
+    def test_separable(compound_model, result):
+>       assert_allclose(is_separable(compound_model), result[0])
+
+astropy/modeling/tests/test_separable.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+astropy/modeling/separable.py:60: in is_separable
+    separable_matrix = _separable(transform)
+astropy/modeling/separable.py:307: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:308: in _separable
+    sepright = _separable(transform.right)
+astropy/modeling/separable.py:307: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+astropy/modeling/separable.py:204: in _coord_matrix
+    mat = _separable(model)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+E   RecursionError: maximum recursion depth exceeded in comparison
+!!! Recursion detected (same locals & position)
+___________________ test_separable[compound_model1-result1] ____________________
+
+compound_model = <CompoundModel(offset_0=1., offset_1=2., angle_2=2., c0_0_4=0., c1_0_4=0., c0_1_4=0., c0_0_5=0., c1_0_5=0., c2_0_5=0., c0_1_5=0., c0_2_5=0., c1_1_5=0.)>
+result = (array([False, False]), array([[ True,  True],
+       [ True,  True]]))
+
+    @pytest.mark.parametrize(('compound_model', 'result'), compound_models.values())
+    def test_separable(compound_model, result):
+>       assert_allclose(is_separable(compound_model), result[0])
+
+astropy/modeling/tests/test_separable.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+astropy/modeling/separable.py:60: in is_separable
+    separable_matrix = _separable(transform)
+astropy/modeling/separable.py:307: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:307: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:308: in _separable
+    sepright = _separable(transform.right)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+astropy/modeling/separable.py:204: in _coord_matrix
+    mat = _separable(model)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+E   RecursionError: maximum recursion depth exceeded in comparison
+!!! Recursion detected (same locals & position)
+___________________ test_separable[compound_model2-result2] ____________________
+
+compound_model = <CompoundModel(angle_1=2., factor_2=1.)>
+result = (array([False, False,  True]), array([[ True, False],
+       [ True, False],
+       [False,  True]]))
+
+    @pytest.mark.parametrize(('compound_model', 'result'), compound_models.values())
+    def test_separable(compound_model, result):
+>       assert_allclose(is_separable(compound_model), result[0])
+
+astropy/modeling/tests/test_separable.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+astropy/modeling/separable.py:60: in is_separable
+    separable_matrix = _separable(transform)
+astropy/modeling/separable.py:308: in _separable
+    sepright = _separable(transform.right)
+astropy/modeling/separable.py:307: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+astropy/modeling/separable.py:204: in _coord_matrix
+    mat = _separable(model)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+E   RecursionError: maximum recursion depth exceeded in comparison
+!!! Recursion detected (same locals & position)
+___________________ test_separable[compound_model3-result3] ____________________
+
+compound_model = <CompoundModel(offset_0=1., offset_1=2., angle_3=2., factor_4=1.)>
+result = (array([False, False,  True]), array([[ True, False],
+       [ True, False],
+       [False,  True]]))
+
+    @pytest.mark.parametrize(('compound_model', 'result'), compound_models.values())
+    def test_separable(compound_model, result):
+>       assert_allclose(is_separable(compound_model), result[0])
+
+astropy/modeling/tests/test_separable.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+astropy/modeling/separable.py:60: in is_separable
+    separable_matrix = _separable(transform)
+astropy/modeling/separable.py:308: in _separable
+    sepright = _separable(transform.right)
+astropy/modeling/separable.py:307: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+astropy/modeling/separable.py:204: in _coord_matrix
+    mat = _separable(model)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+E   RecursionError: maximum recursion depth exceeded in comparison
+!!! Recursion detected (same locals & position)
+___________________ test_separable[compound_model5-result5] ____________________
+
+compound_model = <CompoundModel(c0_0_1=0., c1_0_1=0., c0_1_1=0., offset_2=1.)>
+result = (array([False,  True]), array([[ True, False],
+       [False,  True]]))
+
+    @pytest.mark.parametrize(('compound_model', 'result'), compound_models.values())
+    def test_separable(compound_model, result):
+>       assert_allclose(is_separable(compound_model), result[0])
+
+astropy/modeling/tests/test_separable.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+astropy/modeling/separable.py:60: in is_separable
+    separable_matrix = _separable(transform)
+astropy/modeling/separable.py:308: in _separable
+    sepright = _separable(transform.right)
+astropy/modeling/separable.py:307: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+astropy/modeling/separable.py:204: in _coord_matrix
+    mat = _separable(model)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+E   RecursionError: maximum recursion depth exceeded in comparison
+!!! Recursion detected (same locals & position)
+___________________ test_separable[compound_model6-result6] ____________________
+
+compound_model = <CompoundModel(angle_0=2., offset_1=1., offset_2=2.)>
+result = (array([False, False,  True,  True]), array([[ True,  True, False, False],
+       [ True,  True, False, False],
+       [False, False,  True, False],
+       [False, False, False,  True]]))
+
+    @pytest.mark.parametrize(('compound_model', 'result'), compound_models.values())
+    def test_separable(compound_model, result):
+>       assert_allclose(is_separable(compound_model), result[0])
+
+astropy/modeling/tests/test_separable.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+astropy/modeling/separable.py:60: in is_separable
+    separable_matrix = _separable(transform)
+astropy/modeling/separable.py:307: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+astropy/modeling/separable.py:204: in _coord_matrix
+    mat = _separable(model)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+E   RecursionError: maximum recursion depth exceeded in comparison
+!!! Recursion detected (same locals & position)
+___________________ test_separable[compound_model7-result7] ____________________
+
+compound_model = <CompoundModel(angle_0=2., offset_1=1., offset_2=2.)>
+result = (array([False, False,  True,  True]), array([[ True,  True, False, False],
+       [ True,  True, False, False],
+       [False, False,  True, False],
+       [False, False, False,  True]]))
+
+    @pytest.mark.parametrize(('compound_model', 'result'), compound_models.values())
+    def test_separable(compound_model, result):
+>       assert_allclose(is_separable(compound_model), result[0])
+
+astropy/modeling/tests/test_separable.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+astropy/modeling/separable.py:60: in is_separable
+    separable_matrix = _separable(transform)
+astropy/modeling/separable.py:307: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:307: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+astropy/modeling/separable.py:204: in _coord_matrix
+    mat = _separable(model)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+E   RecursionError: maximum recursion depth exceeded in comparison
+!!! Recursion detected (same locals & position)
+___________________ test_separable[compound_model8-result8] ____________________
+
+compound_model = <CompoundModel(angle_0=2., offset_1=1., offset_2=2.)>
+result = (array([False, False,  True,  True]), array([[ True,  True, False, False],
+       [ True,  True, False, False],
+       [False, False,  True, False],
+       [False, False, False,  True]]))
+
+    @pytest.mark.parametrize(('compound_model', 'result'), compound_models.values())
+    def test_separable(compound_model, result):
+>       assert_allclose(is_separable(compound_model), result[0])
+
+astropy/modeling/tests/test_separable.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+astropy/modeling/separable.py:60: in is_separable
+    separable_matrix = _separable(transform)
+astropy/modeling/separable.py:307: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:307: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+astropy/modeling/separable.py:204: in _coord_matrix
+    mat = _separable(model)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+E   RecursionError: maximum recursion depth exceeded in comparison
+!!! Recursion detected (same locals & position)
+___________________ test_separable[compound_model9-result9] ____________________
+
+compound_model = <CompoundModel(angle_0=2., offset_1=1., factor_2=1., factor_3=2.)>
+result = (array([False, False,  True,  True,  True]), array([[ True,  True, False, False, False],
+       [ True,  True, False, ... False,  True, False, False],
+       [False, False, False,  True, False],
+       [False, False, False, False,  True]]))
+
+    @pytest.mark.parametrize(('compound_model', 'result'), compound_models.values())
+    def test_separable(compound_model, result):
+>       assert_allclose(is_separable(compound_model), result[0])
+
+astropy/modeling/tests/test_separable.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+astropy/modeling/separable.py:60: in is_separable
+    separable_matrix = _separable(transform)
+astropy/modeling/separable.py:307: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:307: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+astropy/modeling/separable.py:204: in _coord_matrix
+    mat = _separable(model)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+E   RecursionError: maximum recursion depth exceeded in comparison
+!!! Recursion detected (same locals & position)
+_________________________ test_custom_model_separable __________________________
+
+    def test_custom_model_separable():
+        @custom_model
+        def model_a(x):
+            return x
+    
+        assert model_a().separable
+    
+        @custom_model
+        def model_c(x, y):
+            return x + y
+    
+        assert not model_c().separable
+>       assert np.all(separability_matrix(model_c()) == [True, True])
+
+astropy/modeling/tests/test_separable.py:167: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+astropy/modeling/separable.py:100: in separability_matrix
+    separable_matrix = _separable(transform)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+astropy/modeling/separable.py:204: in _coord_matrix
+    mat = _separable(model)
+astropy/modeling/separable.py:311: in _separable
+    return _coord_matrix(transform, 'left', transform.n_outputs)
+E   RecursionError: maximum recursion depth exceeded in comparison
+!!! Recursion detected (same locals & position)
+=========================== short test summary info ============================
+FAILED astropy/modeling/tests/test_separable.py::test_coord_matrix - Recursio...
+FAILED astropy/modeling/tests/test_separable.py::test_cdot - RecursionError: ...
+FAILED astropy/modeling/tests/test_separable.py::test_cstack - RecursionError...
+FAILED astropy/modeling/tests/test_separable.py::test_separable[compound_model0-result0]
+FAILED astropy/modeling/tests/test_separable.py::test_separable[compound_model1-result1]
+FAILED astropy/modeling/tests/test_separable.py::test_separable[compound_model2-result2]
+FAILED astropy/modeling/tests/test_separable.py::test_separable[compound_model3-result3]
+FAILED astropy/modeling/tests/test_separable.py::test_separable[compound_model5-result5]
+FAILED astropy/modeling/tests/test_separable.py::test_separable[compound_model6-result6]
+FAILED astropy/modeling/tests/test_separable.py::test_separable[compound_model7-result7]
+FAILED astropy/modeling/tests/test_separable.py::test_separable[compound_model8-result8]
+FAILED astropy/modeling/tests/test_separable.py::test_separable[compound_model9-result9]
+FAILED astropy/modeling/tests/test_separable.py::test_custom_model_separable
+13 failed, 2 passed in 0.35s
+

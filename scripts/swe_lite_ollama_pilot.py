@@ -41,6 +41,8 @@ def main() -> int:
     parser.add_argument("--editable-file", action="append", dest="editable_files")
     parser.add_argument("--max-format-retries", type=int, default=1)
     parser.add_argument("--timeout", type=int, default=600)
+    parser.add_argument("--seed", type=int, default=7)
+    parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--think", action="store_true", help="Enable model reasoning when supported by Ollama.")
     parser.add_argument("--analysis-first", action="store_true", help="Run a separate investigation pass before editing.")
     args = parser.parse_args()
@@ -70,6 +72,8 @@ def main() -> int:
                 args.timeout,
                 args.think,
                 args.analysis_first,
+                args.seed,
+                args.temperature,
             )
         )
 
@@ -81,6 +85,8 @@ def main() -> int:
         "docker_used": False,
         "think": args.think,
         "analysis_first": args.analysis_first,
+        "seed": args.seed,
+        "temperature": args.temperature,
         "variants": results,
     }
     write_json(results_dir / "summary.json", summary)
@@ -121,6 +127,8 @@ def run_variant(
     timeout: int,
     think: bool,
     analysis_first: bool,
+    seed: int,
+    temperature: float,
 ) -> dict[str, Any]:
     variant_dir = results_dir / variant
     variant_dir.mkdir(parents=True, exist_ok=True)
@@ -143,6 +151,8 @@ def run_variant(
                 json_format=False,
                 think=think,
                 num_predict=768,
+                seed=seed,
+                temperature=temperature,
             )
             write_json(variant_dir / "analysis-response.json", analysis_response)
             analysis_text = str(analysis_response.get("response") or analysis_response.get("thinking") or "")
@@ -160,7 +170,15 @@ def run_variant(
         format_error = None
         current_prompt = prompt
         for attempt in range(max_format_retries + 1):
-            response = ollama_generate(model, current_prompt, timeout, json_format=True, think=think)
+            response = ollama_generate(
+                model,
+                current_prompt,
+                timeout,
+                json_format=True,
+                think=think,
+                seed=seed,
+                temperature=temperature,
+            )
             write_json(variant_dir / f"response-{attempt}.json", response)
             response_text = str(response.get("response", ""))
             try:
@@ -414,6 +432,8 @@ def ollama_generate(
     json_format: bool = False,
     think: bool = False,
     num_predict: int = 4096,
+    seed: int = 7,
+    temperature: float = 0.0,
 ) -> dict[str, Any]:
     body = json.dumps(
         {
@@ -422,7 +442,12 @@ def ollama_generate(
             "stream": False,
             "think": think,
             **({"format": "json"} if json_format else {}),
-            "options": {"temperature": 0, "num_ctx": 16384, "num_predict": num_predict, "seed": 7},
+            "options": {
+                "temperature": temperature,
+                "num_ctx": 16384,
+                "num_predict": num_predict,
+                "seed": seed,
+            },
         }
     ).encode("utf-8")
     request = urllib.request.Request(

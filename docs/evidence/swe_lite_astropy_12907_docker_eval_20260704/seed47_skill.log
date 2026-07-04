@@ -1,0 +1,586 @@
+﻿docker.exe : <frozen importlib._bootstrap>:228: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompa
+tibility. Expected 80 from C header, got 96 from PyObject
+At line:2 char:1910
++ ... ash','-lc',$cmd); $started=Get-Date; $out=& docker @args 2>&1 | Out-S ...
++                                               ~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (<frozen importl...6 from PyObject:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Internet access disabled
+..F.FFFF.FFFFF.                                                          [100%]
+=================================== FAILURES ===================================
+_________________________________ test_cstack __________________________________
+
+    def test_cstack():
+>       result = _cstack(sh1, scl1)
+
+astropy/modeling/tests/test_separable.py:116: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+left = <Shift(offset=1., name='shift1')>
+right = <Scale(factor=1., name='scl1')>
+
+    def _cstack(left, right):
+        """
+        Function corresponding to '&' operation.
+    
+        Parameters
+        ----------
+        left, right : `astropy.modeling.Model` or ndarray
+            If input is of an array, it is the output of `coord_matrix`.
+    
+        Returns
+        -------
+        result : ndarray
+            Result from this operation.
+    
+        """
+        noutp = _compute_n_outputs(left, right)
+    
+        if isinstance(left, Model):
+            cleft = _coord_matrix(left, 'left', noutp)
+        else:
+            cleft = np.zeros((noutp, left.shape[1]))
+            cleft[: left.shape[0], : left.shape[1]] = left
+        if isinstance(right, Model):
+            cright = _coord_matrix(right, 'right', noutp)
+        else:
+            cright = np.zeros((noutp, right.shape[1]))
+            cright[-right.shape[0]:, -right.shape[1]:] = 1
+    
+>       result = np.zeros((noutp, left.shape[1] + right.shape[1]))
+E       AttributeError: 'Shift' object has no attribute 'shape'
+
+astropy/modeling/separable.py:247: AttributeError
+___________________ test_separable[compound_model0-result0] ____________________
+
+compound_model = <CompoundModel(offset_1=1., angle_2=2., offset_3=1., offset_4=1., offset_5=2., offset_6=1.)>
+result = (array([False, False,  True]), array([[ True, False],
+       [ True, False],
+       [False,  True]]))
+
+    @pytest.mark.parametrize(('compound_model', 'result'), compound_models.values())
+    def test_separable(compound_model, result):
+>       assert_allclose(is_separable(compound_model), result[0])
+
+astropy/modeling/tests/test_separable.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+astropy/modeling/separable.py:60: in is_separable
+    separable_matrix = _separable(transform)
+astropy/modeling/separable.py:310: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:310: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:312: in _separable
+    return _operators[transform.op](sepleft, sepright)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+left = array([[1.],
+       [1.]]), right = array([[1.]])
+
+    def _cstack(left, right):
+        """
+        Function corresponding to '&' operation.
+    
+        Parameters
+        ----------
+        left, right : `astropy.modeling.Model` or ndarray
+            If input is of an array, it is the output of `coord_matrix`.
+    
+        Returns
+        -------
+        result : ndarray
+            Result from this operation.
+    
+        """
+        noutp = _compute_n_outputs(left, right)
+    
+        if isinstance(left, Model):
+            cleft = _coord_matrix(left, 'left', noutp)
+        else:
+            cleft = np.zeros((noutp, left.shape[1]))
+            cleft[: left.shape[0], : left.shape[1]] = left
+        if isinstance(right, Model):
+            cright = _coord_matrix(right, 'right', noutp)
+        else:
+            cright = np.zeros((noutp, right.shape[1]))
+            cright[-right.shape[0]:, -right.shape[1]:] = 1
+    
+        result = np.zeros((noutp, left.shape[1] + right.shape[1]))
+>       result[:left.shape[0], :left.shape[1]] = cleft
+E       ValueError: could not broadcast input array from shape (3,1) into shape (2,1)
+
+astropy/modeling/separable.py:248: ValueError
+___________________ test_separable[compound_model1-result1] ____________________
+
+compound_model = <CompoundModel(offset_0=1., offset_1=2., angle_2=2., c0_0_4=0., c1_0_4=0., c0_1_4=0., c0_0_5=0., c1_0_5=0., c2_0_5=0., c0_1_5=0., c0_2_5=0., c1_1_5=0.)>
+result = (array([False, False]), array([[ True,  True],
+       [ True,  True]]))
+
+    @pytest.mark.parametrize(('compound_model', 'result'), compound_models.values())
+    def test_separable(compound_model, result):
+>       assert_allclose(is_separable(compound_model), result[0])
+
+astropy/modeling/tests/test_separable.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+astropy/modeling/separable.py:60: in is_separable
+    separable_matrix = _separable(transform)
+astropy/modeling/separable.py:310: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:310: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:310: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:312: in _separable
+    return _operators[transform.op](sepleft, sepright)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+left = array([[1.]]), right = array([[1.]])
+
+    def _cstack(left, right):
+        """
+        Function corresponding to '&' operation.
+    
+        Parameters
+        ----------
+        left, right : `astropy.modeling.Model` or ndarray
+            If input is of an array, it is the output of `coord_matrix`.
+    
+        Returns
+        -------
+        result : ndarray
+            Result from this operation.
+    
+        """
+        noutp = _compute_n_outputs(left, right)
+    
+        if isinstance(left, Model):
+            cleft = _coord_matrix(left, 'left', noutp)
+        else:
+            cleft = np.zeros((noutp, left.shape[1]))
+            cleft[: left.shape[0], : left.shape[1]] = left
+        if isinstance(right, Model):
+            cright = _coord_matrix(right, 'right', noutp)
+        else:
+            cright = np.zeros((noutp, right.shape[1]))
+            cright[-right.shape[0]:, -right.shape[1]:] = 1
+    
+        result = np.zeros((noutp, left.shape[1] + right.shape[1]))
+>       result[:left.shape[0], :left.shape[1]] = cleft
+E       ValueError: could not broadcast input array from shape (2,1) into shape (1,1)
+
+astropy/modeling/separable.py:248: ValueError
+___________________ test_separable[compound_model2-result2] ____________________
+
+compound_model = <CompoundModel(angle_1=2., factor_2=1.)>
+result = (array([False, False,  True]), array([[ True, False],
+       [ True, False],
+       [False,  True]]))
+
+    @pytest.mark.parametrize(('compound_model', 'result'), compound_models.values())
+    def test_separable(compound_model, result):
+>       assert_allclose(is_separable(compound_model), result[0])
+
+astropy/modeling/tests/test_separable.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+astropy/modeling/separable.py:60: in is_separable
+    separable_matrix = _separable(transform)
+astropy/modeling/separable.py:311: in _separable
+    sepright = _separable(transform.right)
+astropy/modeling/separable.py:312: in _separable
+    return _operators[transform.op](sepleft, sepright)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+left = array([[1., 1.],
+       [1., 1.]]), right = array([[1.]])
+
+    def _cstack(left, right):
+        """
+        Function corresponding to '&' operation.
+    
+        Parameters
+        ----------
+        left, right : `astropy.modeling.Model` or ndarray
+            If input is of an array, it is the output of `coord_matrix`.
+    
+        Returns
+        -------
+        result : ndarray
+            Result from this operation.
+    
+        """
+        noutp = _compute_n_outputs(left, right)
+    
+        if isinstance(left, Model):
+            cleft = _coord_matrix(left, 'left', noutp)
+        else:
+            cleft = np.zeros((noutp, left.shape[1]))
+            cleft[: left.shape[0], : left.shape[1]] = left
+        if isinstance(right, Model):
+            cright = _coord_matrix(right, 'right', noutp)
+        else:
+            cright = np.zeros((noutp, right.shape[1]))
+            cright[-right.shape[0]:, -right.shape[1]:] = 1
+    
+        result = np.zeros((noutp, left.shape[1] + right.shape[1]))
+>       result[:left.shape[0], :left.shape[1]] = cleft
+E       ValueError: could not broadcast input array from shape (3,2) into shape (2,2)
+
+astropy/modeling/separable.py:248: ValueError
+___________________ test_separable[compound_model3-result3] ____________________
+
+compound_model = <CompoundModel(offset_0=1., offset_1=2., angle_3=2., factor_4=1.)>
+result = (array([False, False,  True]), array([[ True, False],
+       [ True, False],
+       [False,  True]]))
+
+    @pytest.mark.parametrize(('compound_model', 'result'), compound_models.values())
+    def test_separable(compound_model, result):
+>       assert_allclose(is_separable(compound_model), result[0])
+
+astropy/modeling/tests/test_separable.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+astropy/modeling/separable.py:60: in is_separable
+    separable_matrix = _separable(transform)
+astropy/modeling/separable.py:310: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:310: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:312: in _separable
+    return _operators[transform.op](sepleft, sepright)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+left = array([[1.]]), right = array([[1.]])
+
+    def _cstack(left, right):
+        """
+        Function corresponding to '&' operation.
+    
+        Parameters
+        ----------
+        left, right : `astropy.modeling.Model` or ndarray
+            If input is of an array, it is the output of `coord_matrix`.
+    
+        Returns
+        -------
+        result : ndarray
+            Result from this operation.
+    
+        """
+        noutp = _compute_n_outputs(left, right)
+    
+        if isinstance(left, Model):
+            cleft = _coord_matrix(left, 'left', noutp)
+        else:
+            cleft = np.zeros((noutp, left.shape[1]))
+            cleft[: left.shape[0], : left.shape[1]] = left
+        if isinstance(right, Model):
+            cright = _coord_matrix(right, 'right', noutp)
+        else:
+            cright = np.zeros((noutp, right.shape[1]))
+            cright[-right.shape[0]:, -right.shape[1]:] = 1
+    
+        result = np.zeros((noutp, left.shape[1] + right.shape[1]))
+>       result[:left.shape[0], :left.shape[1]] = cleft
+E       ValueError: could not broadcast input array from shape (2,1) into shape (1,1)
+
+astropy/modeling/separable.py:248: ValueError
+___________________ test_separable[compound_model5-result5] ____________________
+
+compound_model = <CompoundModel(c0_0_1=0., c1_0_1=0., c0_1_1=0., offset_2=1.)>
+result = (array([False,  True]), array([[ True, False],
+       [False,  True]]))
+
+    @pytest.mark.parametrize(('compound_model', 'result'), compound_models.values())
+    def test_separable(compound_model, result):
+>       assert_allclose(is_separable(compound_model), result[0])
+
+astropy/modeling/tests/test_separable.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+astropy/modeling/separable.py:60: in is_separable
+    separable_matrix = _separable(transform)
+astropy/modeling/separable.py:311: in _separable
+    sepright = _separable(transform.right)
+astropy/modeling/separable.py:312: in _separable
+    return _operators[transform.op](sepleft, sepright)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+left = array([[1., 1.]]), right = array([[1.]])
+
+    def _cstack(left, right):
+        """
+        Function corresponding to '&' operation.
+    
+        Parameters
+        ----------
+        left, right : `astropy.modeling.Model` or ndarray
+            If input is of an array, it is the output of `coord_matrix`.
+    
+        Returns
+        -------
+        result : ndarray
+            Result from this operation.
+    
+        """
+        noutp = _compute_n_outputs(left, right)
+    
+        if isinstance(left, Model):
+            cleft = _coord_matrix(left, 'left', noutp)
+        else:
+            cleft = np.zeros((noutp, left.shape[1]))
+            cleft[: left.shape[0], : left.shape[1]] = left
+        if isinstance(right, Model):
+            cright = _coord_matrix(right, 'right', noutp)
+        else:
+            cright = np.zeros((noutp, right.shape[1]))
+            cright[-right.shape[0]:, -right.shape[1]:] = 1
+    
+        result = np.zeros((noutp, left.shape[1] + right.shape[1]))
+>       result[:left.shape[0], :left.shape[1]] = cleft
+E       ValueError: could not broadcast input array from shape (2,2) into shape (1,2)
+
+astropy/modeling/separable.py:248: ValueError
+___________________ test_separable[compound_model6-result6] ____________________
+
+compound_model = <CompoundModel(angle_0=2., offset_1=1., offset_2=2.)>
+result = (array([False, False,  True,  True]), array([[ True,  True, False, False],
+       [ True,  True, False, False],
+       [False, False,  True, False],
+       [False, False, False,  True]]))
+
+    @pytest.mark.parametrize(('compound_model', 'result'), compound_models.values())
+    def test_separable(compound_model, result):
+>       assert_allclose(is_separable(compound_model), result[0])
+
+astropy/modeling/tests/test_separable.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+astropy/modeling/separable.py:60: in is_separable
+    separable_matrix = _separable(transform)
+astropy/modeling/separable.py:311: in _separable
+    sepright = _separable(transform.right)
+astropy/modeling/separable.py:312: in _separable
+    return _operators[transform.op](sepleft, sepright)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+left = array([[1.]]), right = array([[1.]])
+
+    def _cstack(left, right):
+        """
+        Function corresponding to '&' operation.
+    
+        Parameters
+        ----------
+        left, right : `astropy.modeling.Model` or ndarray
+            If input is of an array, it is the output of `coord_matrix`.
+    
+        Returns
+        -------
+        result : ndarray
+            Result from this operation.
+    
+        """
+        noutp = _compute_n_outputs(left, right)
+    
+        if isinstance(left, Model):
+            cleft = _coord_matrix(left, 'left', noutp)
+        else:
+            cleft = np.zeros((noutp, left.shape[1]))
+            cleft[: left.shape[0], : left.shape[1]] = left
+        if isinstance(right, Model):
+            cright = _coord_matrix(right, 'right', noutp)
+        else:
+            cright = np.zeros((noutp, right.shape[1]))
+            cright[-right.shape[0]:, -right.shape[1]:] = 1
+    
+        result = np.zeros((noutp, left.shape[1] + right.shape[1]))
+>       result[:left.shape[0], :left.shape[1]] = cleft
+E       ValueError: could not broadcast input array from shape (2,1) into shape (1,1)
+
+astropy/modeling/separable.py:248: ValueError
+___________________ test_separable[compound_model7-result7] ____________________
+
+compound_model = <CompoundModel(angle_0=2., offset_1=1., offset_2=2.)>
+result = (array([False, False,  True,  True]), array([[ True,  True, False, False],
+       [ True,  True, False, False],
+       [False, False,  True, False],
+       [False, False, False,  True]]))
+
+    @pytest.mark.parametrize(('compound_model', 'result'), compound_models.values())
+    def test_separable(compound_model, result):
+>       assert_allclose(is_separable(compound_model), result[0])
+
+astropy/modeling/tests/test_separable.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+astropy/modeling/separable.py:60: in is_separable
+    separable_matrix = _separable(transform)
+astropy/modeling/separable.py:310: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:312: in _separable
+    return _operators[transform.op](sepleft, sepright)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+left = array([[1., 1.],
+       [1., 1.]]), right = array([[1.]])
+
+    def _cstack(left, right):
+        """
+        Function corresponding to '&' operation.
+    
+        Parameters
+        ----------
+        left, right : `astropy.modeling.Model` or ndarray
+            If input is of an array, it is the output of `coord_matrix`.
+    
+        Returns
+        -------
+        result : ndarray
+            Result from this operation.
+    
+        """
+        noutp = _compute_n_outputs(left, right)
+    
+        if isinstance(left, Model):
+            cleft = _coord_matrix(left, 'left', noutp)
+        else:
+            cleft = np.zeros((noutp, left.shape[1]))
+            cleft[: left.shape[0], : left.shape[1]] = left
+        if isinstance(right, Model):
+            cright = _coord_matrix(right, 'right', noutp)
+        else:
+            cright = np.zeros((noutp, right.shape[1]))
+            cright[-right.shape[0]:, -right.shape[1]:] = 1
+    
+        result = np.zeros((noutp, left.shape[1] + right.shape[1]))
+>       result[:left.shape[0], :left.shape[1]] = cleft
+E       ValueError: could not broadcast input array from shape (3,2) into shape (2,2)
+
+astropy/modeling/separable.py:248: ValueError
+___________________ test_separable[compound_model8-result8] ____________________
+
+compound_model = <CompoundModel(angle_0=2., offset_1=1., offset_2=2.)>
+result = (array([False, False,  True,  True]), array([[ True,  True, False, False],
+       [ True,  True, False, False],
+       [False, False,  True, False],
+       [False, False, False,  True]]))
+
+    @pytest.mark.parametrize(('compound_model', 'result'), compound_models.values())
+    def test_separable(compound_model, result):
+>       assert_allclose(is_separable(compound_model), result[0])
+
+astropy/modeling/tests/test_separable.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+astropy/modeling/separable.py:60: in is_separable
+    separable_matrix = _separable(transform)
+astropy/modeling/separable.py:310: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:312: in _separable
+    return _operators[transform.op](sepleft, sepright)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+left = array([[1., 1.],
+       [1., 1.]]), right = array([[1.]])
+
+    def _cstack(left, right):
+        """
+        Function corresponding to '&' operation.
+    
+        Parameters
+        ----------
+        left, right : `astropy.modeling.Model` or ndarray
+            If input is of an array, it is the output of `coord_matrix`.
+    
+        Returns
+        -------
+        result : ndarray
+            Result from this operation.
+    
+        """
+        noutp = _compute_n_outputs(left, right)
+    
+        if isinstance(left, Model):
+            cleft = _coord_matrix(left, 'left', noutp)
+        else:
+            cleft = np.zeros((noutp, left.shape[1]))
+            cleft[: left.shape[0], : left.shape[1]] = left
+        if isinstance(right, Model):
+            cright = _coord_matrix(right, 'right', noutp)
+        else:
+            cright = np.zeros((noutp, right.shape[1]))
+            cright[-right.shape[0]:, -right.shape[1]:] = 1
+    
+        result = np.zeros((noutp, left.shape[1] + right.shape[1]))
+>       result[:left.shape[0], :left.shape[1]] = cleft
+E       ValueError: could not broadcast input array from shape (3,2) into shape (2,2)
+
+astropy/modeling/separable.py:248: ValueError
+___________________ test_separable[compound_model9-result9] ____________________
+
+compound_model = <CompoundModel(angle_0=2., offset_1=1., factor_2=1., factor_3=2.)>
+result = (array([False, False,  True,  True,  True]), array([[ True,  True, False, False, False],
+       [ True,  True, False, ... False,  True, False, False],
+       [False, False, False,  True, False],
+       [False, False, False, False,  True]]))
+
+    @pytest.mark.parametrize(('compound_model', 'result'), compound_models.values())
+    def test_separable(compound_model, result):
+>       assert_allclose(is_separable(compound_model), result[0])
+
+astropy/modeling/tests/test_separable.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+astropy/modeling/separable.py:60: in is_separable
+    separable_matrix = _separable(transform)
+astropy/modeling/separable.py:310: in _separable
+    sepleft = _separable(transform.left)
+astropy/modeling/separable.py:312: in _separable
+    return _operators[transform.op](sepleft, sepright)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+left = array([[1., 1.],
+       [1., 1.]]), right = array([[1.]])
+
+    def _cstack(left, right):
+        """
+        Function corresponding to '&' operation.
+    
+        Parameters
+        ----------
+        left, right : `astropy.modeling.Model` or ndarray
+            If input is of an array, it is the output of `coord_matrix`.
+    
+        Returns
+        -------
+        result : ndarray
+            Result from this operation.
+    
+        """
+        noutp = _compute_n_outputs(left, right)
+    
+        if isinstance(left, Model):
+            cleft = _coord_matrix(left, 'left', noutp)
+        else:
+            cleft = np.zeros((noutp, left.shape[1]))
+            cleft[: left.shape[0], : left.shape[1]] = left
+        if isinstance(right, Model):
+            cright = _coord_matrix(right, 'right', noutp)
+        else:
+            cright = np.zeros((noutp, right.shape[1]))
+            cright[-right.shape[0]:, -right.shape[1]:] = 1
+    
+        result = np.zeros((noutp, left.shape[1] + right.shape[1]))
+>       result[:left.shape[0], :left.shape[1]] = cleft
+E       ValueError: could not broadcast input array from shape (3,2) into shape (2,2)
+
+astropy/modeling/separable.py:248: ValueError
+=========================== short test summary info ============================
+FAILED astropy/modeling/tests/test_separable.py::test_cstack - AttributeError...
+FAILED astropy/modeling/tests/test_separable.py::test_separable[compound_model0-result0]
+FAILED astropy/modeling/tests/test_separable.py::test_separable[compound_model1-result1]
+FAILED astropy/modeling/tests/test_separable.py::test_separable[compound_model2-result2]
+FAILED astropy/modeling/tests/test_separable.py::test_separable[compound_model3-result3]
+FAILED astropy/modeling/tests/test_separable.py::test_separable[compound_model5-result5]
+FAILED astropy/modeling/tests/test_separable.py::test_separable[compound_model6-result6]
+FAILED astropy/modeling/tests/test_separable.py::test_separable[compound_model7-result7]
+FAILED astropy/modeling/tests/test_separable.py::test_separable[compound_model8-result8]
+FAILED astropy/modeling/tests/test_separable.py::test_separable[compound_model9-result9]
+10 failed, 5 passed in 0.30s
+

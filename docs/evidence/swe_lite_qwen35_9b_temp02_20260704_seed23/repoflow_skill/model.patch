@@ -1,0 +1,32 @@
+diff --git a/astropy/modeling/separable.py b/astropy/modeling/separable.py
+index a308e27..8bcd7e0 100644
+--- a/astropy/modeling/separable.py
++++ b/astropy/modeling/separable.py
+@@ -199,16 +199,24 @@ def _coord_matrix(model, pos, noutp):
+         else:
+             mat[-model.n_outputs:, -model.n_inputs:] = m
+         return mat
++    # Handle CompoundModels by delegating to their internal separability matrix calculation.
++    # This ensures nested compound models retain correct input/output mappings instead of being flattened incorrectly.
++    if isinstance(model, CompoundModel):
++        from .separable import _operators as sep_operators  # Import here to avoid circular dependency issues
++        # Recursively compute the coordinate matrix for the compound model's internal structure
++        left_sep = _coord_matrix(model.left, 'left', noutp)
++        right_sep = _coord_matrix(model.right, 'right', noutp)
++        return sep_operators['&'](left_sep, right_sep) if hasattr(model, '_calculate_separability_matrix') else np.zeros((noutp, model.n_inputs))
++    
++    # For simple models or non-separable primitives
++    mat = np.zeros((noutp, model.n_inputs))
+     if not model.separable:
+         # this does not work for more than 2 coordinates
+-        mat = np.zeros((noutp, model.n_inputs))
+         if pos == 'left':
+             mat[:model.n_outputs, : model.n_inputs] = 1
+         else:
+             mat[-model.n_outputs:, -model.n_inputs:] = 1
+     else:
+-        mat = np.zeros((noutp, model.n_inputs))
+-
+         for i in range(model.n_inputs):
+             mat[i, i] = 1
+         if pos == 'right':
