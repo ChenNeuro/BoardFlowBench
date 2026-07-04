@@ -1,0 +1,11 @@
+{
+  "edits": [
+    {
+      "new": "    # For compound models that are separable (like Linear & Linear), we must decompose them properly.\n    if not isinstance(model, Model):  # Handle arrays (intermediate results) vs Models\n        mat = np.zeros((noutp, model.shape[1]))\n        if pos == 'left':\n            mat[:model.shape[0], :model.shape[1]] = model\n        else:\n            mat[-model.shape[0]:, -model.shape[1]:] = model\n    elif not model.separable:\n        # this does not work for more than 2 coordinates (simple non-separable models)\n        mat = np.zeros((noutp, model.n_inputs))\n        if pos == 'left':\n            mat[:model.n_outputs, : model.n_inputs] = 1\n        else:\n            mat[-model.n_outputs:, -model.n_inputs:] = 1",
+      "old": "    if not model.separable:\n        # this does not work for more than 2 coordinates\n        mat = np.zeros((noutp, model.n_inputs))\n        if pos == 'left':\n            mat[:model.n_outputs, : model.n_inputs] = 1\n        else:\n            mat[-model.n_outputs:, -model.n_inputs:] = 1",
+      "path": "astropy/modeling/separable.py"
+    }
+  ],
+  "notes": "Fixed _coord_matrix to handle nested CompoundModels correctly by checking if the input is an array (from recursive calls) rather than relying solely on model.separable, which can be misleading for compound models. This ensures separable compound models are treated as arrays of their internal structure.",
+  "skill_invocation": "none"
+}

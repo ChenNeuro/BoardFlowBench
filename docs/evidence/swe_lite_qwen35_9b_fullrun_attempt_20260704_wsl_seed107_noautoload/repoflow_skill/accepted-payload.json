@@ -1,0 +1,11 @@
+{
+  "edits": [
+    {
+      "new": "    if not model.separable:\n        # this does not work for more than 2 coordinates\n        raise ModelDefinitionError(\n            f\"Non-separable models with {noutp} outputs are unsupported in separability analysis\"\n        )\n        mat = np.zeros((noutp, model.n_inputs))",
+      "old": "    if not model.separable:\n        # this does not work for more than 2 coordinates\n        mat = np.zeros((noutp, model.n_inputs))\n        if pos == 'left':\n            mat[:model.n_outputs, : model.n_inputs] = 1\n        else:\n            mat[-model.n_outputs:, -model.n_inputs:] = 1",
+      "path": "astropy/modeling/separable.py"
+    }
+  ],
+  "notes": "The original code incorrectly filled the matrix with all-ones for non-separable models when nesting occurred. This caused false positives (indicating independence where there was coupling). The fix raises an error immediately if a non-separable model is encountered, preventing incorrect propagation of 'all ones' matrices that break separability logic in nested CompoundModels.",
+  "skill_invocation": "repoflow-task-agent"
+}

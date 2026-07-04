@@ -1,0 +1,11 @@
+{
+  "edits": [
+    {
+      "new": "        # Fill diagonal up to min(noutp, ninputs)\n        diag_len = min(model.n_inputs, model.n_outputs)\n        for i in range(diag_len):\n            mat[i, i] = 1\n        if pos == 'right':\n            mat = np.roll(mat, (noutp - model.n_outputs))",
+      "old": "        for i in range(model.n_inputs):\n            mat[i, i] = 1\n        if pos == 'right':\n            mat = np.roll(mat, (noutp - model.n_outputs))",
+      "path": "astropy/modeling/separable.py"
+    }
+  ],
+  "notes": "Fixed _coord_matrix to correctly handle separable models where n_inputs != n_outputs by limiting the diagonal fill to min(n_inputs, n_outputs), preventing incorrect zero rows in nested compound models.",
+  "skill_invocation": "none"
+}

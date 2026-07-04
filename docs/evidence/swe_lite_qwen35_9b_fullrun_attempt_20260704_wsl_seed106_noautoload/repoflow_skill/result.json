@@ -1,0 +1,41 @@
+{
+  "analysis": {
+    "prompt_sha256": "df397512fd4ae2a6f48c93efa122e9ada64c1c75f1e7974737724fcd64ad8b3c",
+    "response_chars": 562,
+    "response_sha256": "00e08cd027cc8b5990be20a01905d8a7f94833559309fc25675439586f5b0590"
+  },
+  "base_prompt_sha256": "af9cb4fe1c82bbb8e25f4a1ad1b326556ad3c7a97deedbb72ab7269579216fdb",
+  "context_sha256": {
+    "astropy/modeling/separable.py": "cac38fe9744203c720d50d6c88dcdcb0d93a7b2326fe89911e83640ad5676b0f",
+    "astropy/modeling/tests/test_separable.py": "25e72c604c7c28afbb71afd4b5c65f8ab1f762e5f16fc96bab06b56a8cde83db"
+  },
+  "failure_category": "model_output_or_patch_format_failure",
+  "format_error": "edit path is outside the allowed set: relative/source.py",
+  "patch_status": "format_failure",
+  "prompt_sha256": "ba70e631ca25a57a56d29a2c1bf321fd3afbc16d957068a7b13df615fdf23791",
+  "response_attempts": [
+    {
+      "attempt": 0,
+      "error": "Unterminated string starting at: line 10 column 12 (char 1954)",
+      "status": "rejected"
+    },
+    {
+      "attempt": 1,
+      "error": "edit path is outside the allowed set: relative/source.py",
+      "status": "rejected"
+    },
+    {
+      "attempt": 2,
+      "error": "edit path is outside the allowed set: relative/source.py",
+      "status": "rejected"
+    },
+    {
+      "attempt": 3,
+      "error": "edit path is outside the allowed set: relative/source.py",
+      "status": "rejected"
+    }
+  ],
+  "skill_invocation_required": "repoflow-task-agent",
+  "validation_status": "not_run",
+  "variant": "repoflow_skill"
+}

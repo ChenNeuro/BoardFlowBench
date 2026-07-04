@@ -1,0 +1,22 @@
+diff --git a/astropy/modeling/separable.py b/astropy/modeling/separable.py
+index a308e27..a2ebae0 100644
+--- a/astropy/modeling/separable.py
++++ b/astropy/modeling/separable.py
+@@ -199,8 +199,15 @@ def _coord_matrix(model, pos, noutp):
+         else:
+             mat[-model.n_outputs:, -model.n_inputs:] = m
+         return mat
+-    if not model.separable:
+-        # this does not work for more than 2 coordinates
++    # For compound models that are separable (like Linear & Linear), we must decompose them properly.
++    if not isinstance(model, Model):  # Handle arrays (intermediate results) vs Models
++        mat = np.zeros((noutp, model.shape[1]))
++        if pos == 'left':
++            mat[:model.shape[0], :model.shape[1]] = model
++        else:
++            mat[-model.shape[0]:, -model.shape[1]:] = model
++    elif not model.separable:
++        # this does not work for more than 2 coordinates (simple non-separable models)
+         mat = np.zeros((noutp, model.n_inputs))
+         if pos == 'left':
+             mat[:model.n_outputs, : model.n_inputs] = 1

@@ -1,0 +1,41 @@
+{
+  "analysis": {
+    "prompt_sha256": "beb388bb61851b21a27535ed875d6b147ba34ab557b953925267b2298d04cdf2",
+    "response_chars": 993,
+    "response_sha256": "e82c4cdbc9262c0ab414c631bf48144624ba5fb128151fa938f3381b3dd3b900"
+  },
+  "base_prompt_sha256": "829b1ddea0318dc56143da13853c48b5dbb84f74da7ea1d3ef2cbdf31928fd38",
+  "context_sha256": {
+    "astropy/modeling/separable.py": "cac38fe9744203c720d50d6c88dcdcb0d93a7b2326fe89911e83640ad5676b0f",
+    "astropy/modeling/tests/test_separable.py": "25e72c604c7c28afbb71afd4b5c65f8ab1f762e5f16fc96bab06b56a8cde83db"
+  },
+  "failure_category": "model_output_or_patch_format_failure",
+  "format_error": "edit path is outside the allowed set: relative/astropy/modeling/separable.py",
+  "patch_status": "format_failure",
+  "prompt_sha256": "6c5b4e2b06114b083f0a9125ffd5cae24a4b8aa2cc1dd3bff0d3b117ee727fa2",
+  "response_attempts": [
+    {
+      "attempt": 0,
+      "error": "Expecting ',' delimiter: line 4 column 4373 (char 4419)",
+      "status": "rejected"
+    },
+    {
+      "attempt": 1,
+      "error": "edit path is outside the allowed set: relative/astropy/modeling/separable.py",
+      "status": "rejected"
+    },
+    {
+      "attempt": 2,
+      "error": "edit path is outside the allowed set: relative/astropy/modeling/separable.py",
+      "status": "rejected"
+    },
+    {
+      "attempt": 3,
+      "error": "edit path is outside the allowed set: relative/astropy/modeling/separable.py",
+      "status": "rejected"
+    }
+  ],
+  "skill_invocation_required": "none",
+  "validation_status": "not_run",
+  "variant": "plain"
+}

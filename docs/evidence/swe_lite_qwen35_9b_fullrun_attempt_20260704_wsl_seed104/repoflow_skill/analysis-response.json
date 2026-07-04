@@ -1,0 +1,14 @@
+{
+  "client_elapsed_seconds": 3.703,
+  "created_at": "2026-07-04T09:53:46.07809Z",
+  "done": true,
+  "done_reason": "stop",
+  "eval_count": 170,
+  "eval_duration": 1930276000,
+  "load_duration": 346177200,
+  "model": "qwen3.5:9b",
+  "prompt_eval_count": 5157,
+  "prompt_eval_duration": 1295419000,
+  "response": "ROOT_CAUSE: In `_cstack`, when the right operand is a `CompoundModel` (like `cm = Linear1D(10) & Linear1D(5)`), it recursively calls `_separable` which returns an array of shape `(n_outputs, n_inputs)` instead of calling `_coord_matrix`. This causes `right.shape[1]` to access the wrong dimension index for a 2D matrix.\nOLD: cright[-right.shape[0]:, -right.shape[1]:] = 1\nNEW: if isinstance(right, Model): cright = _coord_matrix(right, 'right', noutp) else: cright = np.zeros((noutp, right.shape[1])); cright[-right.shape[0]:, -right.shape[1]:] = 1",
+  "total_duration": 3696438600
+}

@@ -1,0 +1,14 @@
+{
+  "client_elapsed_seconds": 2.972,
+  "created_at": "2026-07-04T09:55:47.7742642Z",
+  "done": true,
+  "done_reason": "stop",
+  "eval_count": 194,
+  "eval_duration": 1981339000,
+  "load_duration": 287699600,
+  "model": "qwen3.5:9b",
+  "prompt_eval_count": 4841,
+  "prompt_eval_duration": 381628000,
+  "response": "ROOT_CAUSE: The `_coord_matrix` function incorrectly handles separable models with `n_inputs != n_outputs` by only setting the diagonal up to `model.n_inputs`, leaving trailing rows as zeros instead of shifting them. OLD: ```python    else:        mat = np.zeros((noutp, model.n_inputs))\n\n        for i in range(model.n_inputs):\n            mat[i, i] = 1``` NEW: ```python    else:        mat = np.zeros((noutp, model.n_inputs))\n\n        # Fill diagonal up to min(noutp, ninputs) and shift if needed\n        diag_len = min(outs, ins)\n        for i in range(diag_len):\n            mat[i, i] = 1``` FOCUSED_TEST: `separability_matrix(m.Pix2Sky_TAN() & m.Linear1D(10) & m.Linear1D(5))`",
+  "total_duration": 2935861300
+}

@@ -1,0 +1,11 @@
+{
+  "edits": [
+    {
+      "new": "    if isinstance(right, Model):\n        cright = _coord_matrix(right, 'right', noutp)\n    else:\n        cright = np.zeros((noutp, right.shape[1]))\n        # Preserve existing coordinate mapping from nested compound model instead of defaulting to identity\n        cright[-right.shape[0]:, -right.shape[1]:] = right",
+      "old": "    if isinstance(right, Model):\n        cright = _coord_matrix(right, 'right', noutp)\n    else:\n        cright = np.zeros((noutp, right.shape[1]))\n        cright[-right.shape[0]:, -right.shape[1]:] = 1",
+      "path": "astropy/modeling/separable.py"
+    }
+  ],
+  "notes": "Fixes _cstack to correctly handle ndarray inputs (from nested CompoundModels) by copying their existing coordinate matrix values rather than initializing with ones.",
+  "skill_invocation": "none"
+}

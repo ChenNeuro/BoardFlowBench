@@ -1,0 +1,19 @@
+diff --git a/astropy/modeling/separable.py b/astropy/modeling/separable.py
+index a308e27..cd902b5 100644
+--- a/astropy/modeling/separable.py
++++ b/astropy/modeling/separable.py
+@@ -209,10 +209,13 @@ def _coord_matrix(model, pos, noutp):
+     else:
+         mat = np.zeros((noutp, model.n_inputs))
+ 
++        # For nested CompoundModels, the right child's matrix is placed at its relative offset within the total outputs.
+         for i in range(model.n_inputs):
+             mat[i, i] = 1
+         if pos == 'right':
+-            mat = np.roll(mat, (noutp - model.n_outputs))
++            start_row = noutp - model.n_outputs
++            end_row = noutp
++            mat[start_row:end_row, :] = 1
+     return mat
+ 
+ 

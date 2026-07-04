@@ -1,0 +1,14 @@
+diff --git a/astropy/modeling/separable.py b/astropy/modeling/separable.py
+index a308e27..6ae84d7 100644
+--- a/astropy/modeling/separable.py
++++ b/astropy/modeling/separable.py
+@@ -240,6 +240,9 @@ def _cstack(left, right):
+         cleft[: left.shape[0], : left.shape[1]] = left
+     if isinstance(right, Model):
+         cright = _coord_matrix(right, 'right', noutp)
++    elif not hasattr(right, 'shape'):
++        # Handle case where right is a 2D array from recursive call (e.g., CompoundModel separability matrix)
++        raise ValueError(f"Cannot handle non-model/non-matrix input for cstack: {type(right)}")
+     else:
+         cright = np.zeros((noutp, right.shape[1]))
+         cright[-right.shape[0]:, -right.shape[1]:] = 1

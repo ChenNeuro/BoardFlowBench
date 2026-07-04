@@ -1,0 +1,14 @@
+{
+  "client_elapsed_seconds": 3.303,
+  "created_at": "2026-07-04T09:48:52.1781126Z",
+  "done": true,
+  "done_reason": "stop",
+  "eval_count": 129,
+  "eval_duration": 1427407000,
+  "load_duration": 285970600,
+  "model": "qwen3.5:9b",
+  "prompt_eval_count": 5157,
+  "prompt_eval_duration": 1431768000,
+  "response": "ROOT_CAUSE: The `_cstack` function incorrectly initializes `cright` with all ones when the right operand is a compound model (ndarray), failing to preserve its specific input/output dependency structure. OLD: cright = np.zeros((noutp, right.shape[1])); cright[-right.shape[0]:, -right.shape[1]:] = 1; NEW: cright = _coord_matrix(right, 'right', noutp); FOCUSED_TEST: separability_matrix(m.Pix2Sky_TAN() & (m.Linear1D(10) & m.Linear1D(5)))",
+  "total_duration": 3276871000
+}

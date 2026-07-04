@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "date": "2026-07-04",
+  "instance_id": "astropy__astropy-12907",
+  "dataset": "princeton-nlp/SWE-bench_Lite",
+  "model": "qwen3.5:9b",
+  "ollama_version": "0.31.1",
+  "temperature": 0.2,
+  "seeds": [101, 102, 103, 104, 105, 106, 107],
+  "official_score": false,
+  "docker_used": false,
+  "docker_status": {
+    "available": false,
+    "blocking_reason": "Docker Desktop Linux engine pipe was missing and Docker Desktop status/restart/diagnose did not recover it.",
+    "disk_space_was_blocking": false,
+    "windows_free_gb_approx": 180,
+    "wsl_root_free_gb_approx": 817
+  },
+  "wsl_local_validation": {
+    "attempted": true,
+    "python": "3.10.12",
+    "result": "blocked",
+    "blocking_reason": "Astropy extension build required Python.h; WSL sudo required a password, so python3-dev was not installed."
+  },
+  "aggregate": {
+    "variant_runs": 14,
+    "patch_format_failures": 6,
+    "patches_applied": 8,
+    "passed_non_official": 0,
+    "passed_official_docker": 0
+  },
+  "runs": [
+    {
+      "evidence_dir": "docs/evidence/swe_lite_qwen35_9b_fullrun_attempt_20260704_seed101",
+      "seed": 101,
+      "plain": "format_failure/not_run/model_output_or_patch_format_failure",
+      "repoflow_skill": "format_failure/not_run/model_output_or_patch_format_failure"
+    },
+    {
+      "evidence_dir": "docs/evidence/swe_lite_qwen35_9b_fullrun_attempt_20260704_seed102",
+      "seed": 102,
+      "plain": "format_failure/not_run/model_output_or_patch_format_failure",
+      "repoflow_skill": "applied/dependency_environment_failure/dependency_or_environment_failure"
+    },
+    {
+      "evidence_dir": "docs/evidence/swe_lite_qwen35_9b_fullrun_attempt_20260704_seed103",
+      "seed": 103,
+      "plain": "applied/dependency_environment_failure/dependency_or_environment_failure",
+      "repoflow_skill": "applied/dependency_environment_failure/dependency_or_environment_failure"
+    },
+    {
+      "evidence_dir": "docs/evidence/swe_lite_qwen35_9b_fullrun_attempt_20260704_wsl_seed104",
+      "seed": 104,
+      "plain": "format_failure/not_run/model_output_or_patch_format_failure",
+      "repoflow_skill": "applied/dependency_environment_failure/dependency_or_environment_failure"
+    },
+    {
+      "evidence_dir": "docs/evidence/swe_lite_qwen35_9b_fullrun_attempt_20260704_wsl_seed105",
+      "seed": 105,
+      "plain": "applied/failed/local_source_build_environment_failure",
+      "repoflow_skill": "format_failure/not_run/model_output_or_patch_format_failure"
+    },
+    {
+      "evidence_dir": "docs/evidence/swe_lite_qwen35_9b_fullrun_attempt_20260704_wsl_seed106_noautoload",
+      "seed": 106,
+      "plain": "applied/failed/local_source_build_environment_failure",
+      "repoflow_skill": "format_failure/not_run/model_output_or_patch_format_failure"
+    },
+    {
+      "evidence_dir": "docs/evidence/swe_lite_qwen35_9b_fullrun_attempt_20260704_wsl_seed107_noautoload",
+      "seed": 107,
+      "plain": "applied/failed/local_source_build_environment_failure",
+      "repoflow_skill": "applied/failed/local_source_build_environment_failure"
+    }
+  ]
+}
