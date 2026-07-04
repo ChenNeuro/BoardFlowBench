@@ -1,6 +1,6 @@
 ---
 name: repoflow-task-agent
-description: Repository-local coding workflow for BoardFlowBench/RepoFlow task agents. Use when an agent must implement an assigned benchmark task, compare skill-vs-plain task execution, preserve task boundaries, produce handoff evidence, or run Expense Lite B-series pilot tasks with a local model.
+description: Repository-local coding workflow for BoardFlowBench/RepoFlow task agents. Use when an agent must implement an assigned benchmark task, compare skill-vs-plain task execution, preserve task boundaries, produce handoff evidence, run Expense Lite B-series pilot tasks, or prepare non-official SWE-bench Lite smoke tasks with a local model.
 ---
 
 # RepoFlow Task Agent
@@ -25,6 +25,15 @@ Apply this skill before editing a benchmark workspace.
 - B002 implementation checklist: initialize `records = []`; for each CSV row build a candidate record, validate it, append the validated record to `records`, and return `records` after the loop. Returned records must contain normalized date strings such as `2026-01-03`, not raw CSV date strings such as `2026/01/03`. Do not return raw CSV string values.
 - B002 repair checklist: `validator.py` already imports `normalize_date` from `parser.py`, so avoid module-level reverse imports that create circular imports. In `load_expenses_csv`, use a local import such as `from .validator import REQUIRED_FIELDS, validate_expense`, convert the CSV `amount` field to a number before validation, and then call `validate_expense(candidate)`. Do not copy `normalize_date` into `validator.py`, do not create a second date parser, and do not move validation logic into `parser.py`.
 - B002 test checklist: preserve existing tests and imports; append focused CSV tests to existing test files; use `tempfile.NamedTemporaryFile` or `TemporaryDirectory`; do not reference or create `tests/data/`, `data/*.csv`, or any new fixture directory; do not edit package `__init__.py` unless it appears in `allowed_paths`.
+
+## SWE Lite Smoke Rules
+
+- Treat SWE-bench Lite work as patch-generation smoke unless Docker and the official SWE-bench harness are available.
+- Do not show or use `gold_patch.diff`, `test_patch.diff`, oracle files, or hidden evaluator material while generating a patch.
+- Use the issue statement and checked-out base commit as the task source of truth.
+- Make the smallest source change that addresses the issue; avoid broad refactors, formatting churn, and repository-wide rewrites.
+- Run focused repository tests when dependencies are available. If tests cannot run locally, record the exact environment failure separately from model or harness failure.
+- Write handoff evidence under `.repoflow/handoffs/` for SWE Lite smoke workspaces.
 
 ## Handoff Minimum
 

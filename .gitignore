@@ -4,3 +4,5 @@ __pycache__/
 .env
 .env.*
 !.env.example
+swe_lite_smoke/
+swe_lite_workspaces/

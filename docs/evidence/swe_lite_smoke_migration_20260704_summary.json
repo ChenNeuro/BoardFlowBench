@@ -1,0 +1,27 @@
+{
+  "date": "2026-07-04",
+  "dataset": "princeton-nlp/SWE-bench_Lite",
+  "split": "test",
+  "instance_id": "astropy__astropy-12907",
+  "repo": "astropy/astropy",
+  "base_commit": "d16bfe05a744909de4b27f5875fe0d4ed41ce607",
+  "mode": "metadata_only",
+  "official_score": false,
+  "command": "python scripts\\prepare_swe_lite_smoke.py --instance-id astropy__astropy-12907 --metadata-only --control-dir %TEMP%\\swe-lite-astropy-12907-control-smoke --force",
+  "control_dir": "%TEMP%\\swe-lite-astropy-12907-control-smoke",
+  "control_files_created": [
+    "agent_task_packet.md",
+    "DO_NOT_SHOW_AGENT.txt",
+    "gold_patch.diff",
+    "instance_public.json",
+    "problem_statement.md",
+    "repoflow_skill_packet.md",
+    "test_patch.diff"
+  ],
+  "not_committed": [
+    "gold_patch.diff",
+    "test_patch.diff",
+    "full instance_public.json with evaluator test names"
+  ],
+  "result": "metadata fetched and RepoFlow smoke packet generated outside the repository"
+}
