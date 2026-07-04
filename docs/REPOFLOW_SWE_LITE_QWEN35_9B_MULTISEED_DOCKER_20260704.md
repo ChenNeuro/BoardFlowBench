@@ -14,6 +14,8 @@ Date: 2026-07-04
 
 Docker passed `hello-world`. The targeted evaluator image used Python 3.9 and the pinned Astropy dependencies from the official SWE-bench harness constants. Docker Hub authentication was unreachable through the local DNS path, so the image used the Microsoft Dev Containers Python 3.9 base from MCR.
 
+The Windows Docker CLI is operational. Direct Docker access inside `Ubuntu-22.04` still requires enabling that distribution in Docker Desktop under **Settings > Resources > WSL Integration**. The active WSL distribution was not forcibly terminated because user shells and processes were running.
+
 The official full harness was not started because the machine had about 43 GB free while the upstream Docker Desktop guidance recommends about 120 GB. The evaluation below is a Docker-isolated targeted smoke, not an official benchmark score.
 
 ## Design
